@@ -54,14 +54,20 @@ body {
 .topbar {
   position: sticky;
   top: 0;
-  min-height: 86px;
+  z-index: 99999;
+  min-height: 88px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px clamp(18px, 5vw, 72px);
-  background: rgba(5, 7, 11, 0.72);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(18px);
+  gap: 24px;
+  padding: 12px clamp(18px, 5vw, 72px);
+
+  background: #05070b;
+  border-bottom: 1px solid rgba(69, 228, 255, .35);
+
+  box-shadow:
+    0 14px 40px rgba(0,0,0,.95),
+    0 0 26px rgba(69,228,255,.18);
 }
 
 .brand img {
@@ -75,10 +81,12 @@ body {
 nav { display: flex; gap: 24px; }
 
 nav a {
-  color: var(--muted);
+  color: #ffffff;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 800;
   letter-spacing: .04em;
+  text-shadow: 0 2px 8px #000;
 }
 
 nav a:hover { color: var(--cyan); }
