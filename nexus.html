@@ -1,183 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEXUS Operation Platform | NOSMO</title>
-  <meta name="description" content="NEXUS Operation Platform by NOSMO connects people, documents and decisions into one operational layer for construction." />
-  <style>
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #f3f6ff;
-      background:
-        radial-gradient(circle at 18% 18%, rgba(45, 95, 255, .25), transparent 30rem),
-        radial-gradient(circle at 82% 28%, rgba(245, 196, 0, .12), transparent 28rem),
-        linear-gradient(135deg, #030407 0%, #07101a 55%, #030407 100%);
-      overflow-x: hidden;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: url("assets/NEXUS_watermark.png") center center / 62% no-repeat;
-      opacity: .04;
-      pointer-events: none;
-      z-index: 0;
-    }
-    header, main, footer { position: relative; z-index: 1; }
-    .topbar {
-      min-height: 86px;
-      padding: 12px clamp(18px, 5vw, 72px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      background: #000;
-      border-bottom: 1px solid rgba(245,196,0,.34);
-      box-shadow: 0 18px 46px rgba(0,0,0,.75);
-    }
-    .brand img { width: min(240px, 42vw); height: auto; display: block; object-fit: contain; }
-    nav { display: flex; flex-wrap: wrap; gap: 22px; justify-content: flex-end; }
-    nav a { color: #fff; text-decoration: none; font-weight: 800; font-size: 15px; letter-spacing: .035em; }
-    nav a:hover { color: #f5c400; }
-    .hero {
-      min-height: calc(100vh - 86px);
-      display: grid;
-      place-items: center;
-      padding: 76px clamp(18px, 5vw, 72px) 90px;
-      text-align: center;
-    }
-    .logo {
-      width: min(980px, 94vw);
-      height: auto;
-      display: block;
-      margin: 0 auto 44px;
-      object-fit: contain;
-      background: #000;
-      box-shadow: 0 24px 90px rgba(0,0,0,.55);
-    }
-    .label {
-      color: #f5c400;
-      text-transform: uppercase;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .24em;
-      margin-bottom: 16px;
-    }
-    h1 {
-      margin: 0 auto 24px;
-      max-width: 1000px;
-      font-size: clamp(42px, 6vw, 86px);
-      line-height: .95;
-      letter-spacing: -.05em;
-    }
-    p {
-      margin: 0 auto;
-      max-width: 860px;
-      color: #aeb8ca;
-      line-height: 1.7;
-      font-size: 19px;
-    }
-    .actions { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-    .button {
-      min-height: 52px;
-      padding: 0 22px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      font-weight: 900;
-      letter-spacing: .035em;
-      border: 1px solid rgba(245,196,0,.34);
-      color: #fff;
-    }
-    .button.primary { background: #f5c400; color: #05070b; border: 0; }
-    .section {
-      padding: 96px clamp(18px, 5vw, 72px);
-      border-top: 1px solid rgba(245,196,0,.18);
-    }
-    .center { max-width: 960px; margin: 0 auto 44px; text-align: center; }
-    h2 { margin: 0 0 22px; font-size: clamp(34px, 4.4vw, 64px); line-height: .96; letter-spacing: -.04em; }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-    .card {
-      min-height: 250px;
-      padding: 30px;
-      background: rgba(10,16,26,.84);
-      border: 1px solid rgba(245,196,0,.18);
-      box-shadow: 0 24px 80px rgba(0,0,0,.28);
-    }
-    .card h3 { margin: 0 0 12px; font-size: 24px; }
-    .card p { font-size: 16px; }
-    .flow { text-align: center; font-size: clamp(28px, 5vw, 58px); font-weight: 900; letter-spacing: -.04em; color: #fff; }
-    footer { padding: 30px clamp(18px, 5vw, 72px); border-top: 1px solid rgba(245,196,0,.18); background:#000; color:#aeb8ca; display:flex; justify-content:space-between; gap:20px; }
-    @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } footer { flex-direction: column; } nav { gap: 12px; } nav a { font-size: 13px; } }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NEXUS Operation Platform | NOSMO</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#030407;color:#f5f7fb;font-family:Arial,Helvetica,sans-serif}body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 15%,rgba(245,196,0,.16),transparent 30rem),radial-gradient(circle at 80% 20%,rgba(70,180,255,.14),transparent 30rem),linear-gradient(135deg,#030407,#07101b 55%,#030407);z-index:-2}.topbar{min-height:86px;padding:14px 6vw;display:flex;justify-content:space-between;align-items:center;background:#000;border-bottom:1px solid rgba(245,196,0,.35)}.topbar img{width:min(245px,42vw);height:auto;display:block}nav{display:flex;gap:22px;flex-wrap:wrap}nav a{color:#fff;text-decoration:none;font-weight:900;text-transform:uppercase;font-size:14px}nav a:hover{color:#f5c400}.hero{min-height:calc(100vh - 86px);padding:70px 6vw;text-align:center;display:grid;place-items:center}.logo{width:min(1000px,94vw);height:auto;background:#000;box-shadow:0 30px 95px rgba(0,0,0,.76);margin-bottom:38px}.label{color:#f5c400;text-transform:uppercase;font-size:12px;font-weight:900;letter-spacing:.24em;margin-bottom:16px}h1{font-size:clamp(46px,7vw,104px);line-height:.88;letter-spacing:-.06em;margin:0 0 24px}h2{font-size:clamp(34px,5vw,72px);line-height:.92;letter-spacing:-.05em;margin:0 0 22px}p{color:#aeb8ca;font-size:18px;line-height:1.7;max-width:900px;margin:0 auto}.hero p{font-size:clamp(18px,2vw,24px);color:#c9d1dd}.section{padding:96px 6vw;border-top:1px solid rgba(245,196,0,.16)}.center{text-align:center;max-width:980px;margin:0 auto 48px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{padding:32px;background:rgba(10,15,24,.84);border:1px solid rgba(245,196,0,.22);min-height:230px;box-shadow:0 28px 90px rgba(0,0,0,.30)}.card h3{font-size:26px;margin:0 0 14px}.goldbox{max-width:1160px;margin:0 auto;padding:54px;background:#000;border:1px solid rgba(245,196,0,.30);text-align:center}.goldbox strong{color:#f5c400}.button{display:inline-flex;align-items:center;justify-content:center;margin:28px 7px 0;min-height:54px;padding:0 24px;text-decoration:none;font-weight:900;color:#05070b;background:#f5c400}.button.dark{background:transparent;color:#fff;border:1px solid rgba(245,196,0,.38)}footer{padding:30px 6vw;color:#aeb8ca;background:#000;border-top:1px solid rgba(245,196,0,.20);display:flex;justify-content:space-between}@media(max-width:900px){.grid{grid-template-columns:1fr}.topbar{flex-direction:column;align-items:flex-start}footer{flex-direction:column}}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="index.html"><img src="assets/NOSMO_LOGO_LONG.jpeg" alt="NOSMO Technology Limited"></a>
-    <nav>
-      <a href="index.html">NOSMO</a>
-      <a href="team.html">Team</a>
-      <a href="mailto:hello@nosmo.tech">Contact</a>
-    </nav>
-  </header>
-
-  <main>
-    <section class="hero">
-      <div>
-        <img class="logo" src="assets/NEXUS_Logo.png" alt="NEXUS Operation Platform by NOSMO">
-        <div class="label">Construction intelligence platform</div>
-        <h1>Stop searching. Start operating.</h1>
-        <p>NEXUS connects people, documents, decisions and site workflows into one operational layer for construction teams.</p>
-        <div class="actions">
-          <a class="button primary" href="#problem">View the concept</a>
-          <a class="button" href="index.html">Back to NOSMO</a>
-        </div>
-      </div>
-    </section>
-
-    <section id="problem" class="section">
-      <div class="center">
-        <div class="label">Problem</div>
-        <h2>Construction information is fragmented.</h2>
-        <p>Projects run across emails, spreadsheets, drawings, photos, messages and disconnected tools. Decisions get buried. Accountability becomes unclear. Execution slows down.</p>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="center">
-        <div class="label">Solution</div>
-        <h2>A real operational layer.</h2>
-        <p>NEXUS is designed to connect existing information sources and turn them into project context: people, documents, tasks, decisions, progress and next actions.</p>
-      </div>
-      <div class="grid">
-        <div class="card"><h3>People</h3><p>Person-centric project memory: roles, responsibilities, channels and decisions.</p></div>
-        <div class="card"><h3>Documents</h3><p>Drawings, schedules, photos, emails and files structured into usable project context.</p></div>
-        <div class="card"><h3>Execution</h3><p>Clear workflows, status, next actions and accountable project movement.</p></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="flow">Connect → Understand → Act</div>
-    </section>
-
-    <section class="section">
-      <div class="center">
-        <div class="label">Built for partnership</div>
-        <h2>NOSMO + industrial AR / visual work instructions.</h2>
-        <p>NEXUS can provide the project memory and operational context layer. Partners such as FabStation can connect visual guidance, AR workflows and field execution interfaces on top of that context.</p>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <span>© 2026 NOSMO Technology Limited</span>
-    <span>NEXUS Operation Platform</span>
-  </footer>
+<header class="topbar"><a href="index.html"><img src="assets/NOSMO_LOGO_LONG.jpeg" alt="NOSMO"></a><nav><a href="index.html">NOSMO</a><a href="#system">System</a><a href="team.html">Team</a></nav></header>
+<main>
+<section class="hero"><div><img class="logo" src="assets/NEXUS_Logo.png" alt="NEXUS"><div class="label">Construction intelligence platform</div><h1>Stop searching.<br>Start operating.</h1><p>NEXUS connects people, documents, drawings, schedules and decisions into one live project memory.</p><a class="button" href="#system">See the system</a><a class="button dark" href="index.html">Back to NOSMO</a></div></section>
+<section id="system" class="section"><div class="center"><div class="label">The gap</div><h2>Construction has tools. It does not have one memory.</h2><p>Information is split across files, drawings, messages, photos and decisions. NEXUS turns that noise into context and next actions.</p></div><div class="grid"><article class="card"><h3>Connect</h3><p>Bring project information into one place.</p></article><article class="card"><h3>Understand</h3><p>Structure information around people, documents, locations and tasks.</p></article><article class="card"><h3>Act</h3><p>Show status, missing information and next steps.</p></article></div></section>
+<section class="section"><div class="goldbox"><div class="label">NEXUS position</div><h2>Not another app. <strong>The layer between existing apps.</strong></h2><p>NEXUS is designed to sit above existing construction workflows and make fragmented information usable.</p></div></section>
+<section class="section"><div class="center"><div class="label">First wedge</div><h2>DoorFlow / fit-out intelligence.</h2><p>Connect PDF plans, Excel door schedules, photos and installation status into one live project layer. The same logic can extend into other trades.</p></div></section>
+<section class="section"><div class="center"><div class="label">Partnership angle</div><h2>Project memory for guided site work.</h2><p>Visual systems need clean project context. NEXUS can provide task, location, component, status and required action.</p><a class="button" href="team.html">Meet the team</a></div></section>
+</main>
+<footer><span>© 2026 NOSMO Technology Limited</span><span>NEXUS Operation Platform</span></footer>
 </body>
 </html>
