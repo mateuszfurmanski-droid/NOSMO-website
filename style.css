@@ -50,7 +50,15 @@ body {
 .orb-b { width: 22rem; height: 22rem; background: var(--cyan); right: -8rem; top: 24rem; }
 
 .topbar, main, footer { position: relative; z-index: 2; }
+.topbar {
+  background: #000;
+  border-bottom: 1px solid rgba(0,255,255,0.2);
+}
 
+.logo-long {
+  height: 55px;
+  width: auto;
+}
 .topbar {
   position: sticky;
   top: 0;
