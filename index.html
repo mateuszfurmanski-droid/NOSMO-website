@@ -2,248 +2,307 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>NOSMO Technology Limited</title>
 
-  <link rel="stylesheet" href="style.css"/>
+  <meta name="description" content="NOSMO Technology Limited develops AI, robotics and industrial automation systems for construction, infrastructure and real-world engineering." />
+
+  <link rel="stylesheet" href="style.css" />
 
   <style>
-    /* ===== GLOBAL ===== */
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0a0f1a;
-      color: #fff;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ===== WATERMARK ===== */
     .nosmo-watermark {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 70%;
-      max-width: 900px;
-      height: 70%;
-      background: url("assets/nosmo-logo_WATERMARK.png") no-repeat center;
-      background-size: contain;
-      opacity: 0.035;
+      inset: 0;
+      background-image: url("assets/nosmo-logo_WATERMARK.png");
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 58%;
+      opacity: 0.045;
       pointer-events: none;
       z-index: 0;
     }
 
-    /* ===== HEADER ===== */
     .topbar {
-      background: #000;
-      padding: 15px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(0,255,255,0.2);
+      background: rgba(0, 0, 0, 0.92) !important;
+      border-bottom: 1px solid rgba(0, 210, 255, 0.35) !important;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 50;
     }
 
-    .logo-long {
-      height: 55px;
+    .brand {
+      display: flex;
+      align-items: center;
     }
 
-    nav a {
-      margin-left: 25px;
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
+    .brand img.logo-long {
+      height: 64px !important;
+      width: auto !important;
+      max-height: none !important;
+      object-fit: contain !important;
+      display: block;
     }
 
-    nav a:hover {
-      color: #00ffff;
+    main,
+    footer,
+    header {
+      position: relative;
     }
 
-    /* ===== HERO ===== */
-    .hero {
-      padding: 120px 40px 80px;
-      max-width: 1200px;
-    }
-
-    .hero h1 {
-      font-size: 56px;
-      line-height: 1.1;
-      margin-bottom: 20px;
-    }
-
-    .hero p {
-      font-size: 18px;
-      opacity: 0.8;
-    }
-
-    /* ===== SECTIONS ===== */
-    section {
-      padding: 80px 40px;
-      max-width: 1200px;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    /* ===== GRID ===== */
-    .ecosystem-grid,
-    .concept-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-    }
-
-    .feature-card,
-    .concept-grid div {
-      background: rgba(255,255,255,0.03);
-      padding: 20px;
-      border-radius: 12px;
-    }
-
-    .feature-card img,
-    .concept-grid img {
-      width: 100%;
-      height: auto;
-      object-fit: contain;
-      margin-bottom: 15px;
+    main,
+    footer {
+      z-index: 1;
     }
 
     .feature-card a {
       text-decoration: none;
       color: inherit;
       display: block;
+      height: 100%;
     }
 
-    /* ===== FOOTER ===== */
-    footer {
-      padding: 30px;
-      text-align: center;
-      background: #000;
-      border-top: 1px solid rgba(0,255,255,0.2);
+    .unicon-card img {
+      width: 100%;
+      max-width: 520px;
+      height: auto !important;
+      object-fit: contain !important;
+      display: block;
+      margin: 0 auto 24px auto;
     }
 
-    /* ===== MOBILE ===== */
-    @media(max-width: 900px) {
-      .ecosystem-grid,
-      .concept-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero h1 {
-        font-size: 36px;
-      }
+    .concept img {
+      width: 100%;
+      height: auto !important;
+      object-fit: contain !important;
+      display: block;
     }
-
   </style>
 </head>
 
 <body>
+  <div class="nosmo-watermark"></div>
 
-<!-- 🔥 WATERMARK -->
-<div class="nosmo-watermark"></div>
+  <div class="noise"></div>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
 
-<!-- ===== HEADER ===== -->
-<header class="topbar">
-  <a href="/">
-    <img class="logo-long" src="assets/NOSMO_LOGO_LONG.jpeg" alt="NOSMO"/>
-  </a>
+  <header class="topbar">
+    <a class="brand" href="#home">
+      <img src="assets/NOSMO_LOGO_LONG.jpeg" alt="NOSMO Technology Limited logo" class="logo-long" />
+    </a>
 
-  <nav>
-    <a href="#about">About</a>
-    <a href="#ecosystem">Ecosystem</a>
-    <a href="#rd">R&D</a>
-    <a href="#portfolio">Concepts</a>
-    <a href="/team/">Team</a>
-    <a href="#contact">Contact</a>
-  </nav>
-</header>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#rd">R&amp;D</a>
+      <a href="#portfolio">Concepts</a>
+      <a href="team.html">Team</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
 
-<main>
+  <main id="home">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="tag">UK Technology Company • AI • Robotics • Construction Systems</div>
 
-<!-- HERO -->
-<section class="hero">
-  <h1>Building intelligent systems for the real world.</h1>
-  <p>
-    NOSMO Technology Limited develops software, artificial intelligence and robotic technologies
-    for construction, infrastructure and industrial automation.
-  </p>
-</section>
+        <h1>Building intelligent systems for the real world.</h1>
 
-<!-- ABOUT -->
-<section id="about">
-  <h2>Practical innovation with industrial direction.</h2>
-  <p>
-    NOSMO Technology Limited is a UK-based technology company focused on practical innovation.
-  </p>
-</section>
-
-<!-- ECOSYSTEM -->
-<section id="ecosystem">
-
-  <h2>Technology Ecosystem</h2>
-
-  <div class="ecosystem-grid">
-
-    <div class="feature-card">
-      <h3>NOSMO Core AI</h3>
-      <p>Shared intelligence platform for future systems.</p>
-    </div>
-
-    <div class="feature-card">
-      <a href="/nexus/">
-        <img src="assets/NEXUS_logo.png" alt="NEXUS"/>
-        <h3>NEXUS Operation Platform</h3>
         <p>
-          Construction intelligence platform focused on measurement,
-          site visualization and digital workflows.
+          NOSMO Technology Limited develops software, artificial intelligence and robotic technologies
+          for construction, infrastructure and industrial automation.
         </p>
-      </a>
-    </div>
 
-  </div>
-</section>
+        <div class="actions">
+          <a class="button primary" href="nexus.html">Explore NEXUS</a>
+          <a class="button ghost" href="#contact">Contact NOSMO</a>
+        </div>
+      </div>
 
-<!-- R&D -->
-<section id="rd">
-  <h2>Research & Development</h2>
-  <p>Industrial robotics, AI, automation and real-world engineering systems.</p>
-</section>
+      <div class="hero-visual">
+        <div class="glass-card">
+          <div class="card-top"><span></span><span></span><span></span></div>
 
-<!-- CONCEPTS -->
-<section id="portfolio">
+          <img src="assets/nosmo-logo.png" alt="NOSMO logo" />
 
-  <h2>Concepts</h2>
+          <div class="system-lines"><i></i><i></i><i></i><i></i></div>
 
-  <div class="concept-grid">
+          <p>NOSMO Core AI</p>
 
-    <div>
-      <img src="assets/steelwalker-concept.png"/>
-      <h3>Steel Walker</h3>
-    </div>
+          <small>Shared intelligence layer for future software and robotic systems.</small>
+        </div>
+      </div>
+    </section>
 
-    <div>
-      <img src="assets/streetcutter-concept.png"/>
-      <h3>Street Cutter</h3>
-    </div>
+    <section id="about" class="section split">
+      <div>
+        <div class="label">About NOSMO</div>
+        <h2>Practical innovation with industrial direction.</h2>
+      </div>
 
-  </div>
-</section>
+      <div>
+        <p>
+          NOSMO Technology Limited is a UK-based technology company focused on practical innovation.
+          The company’s goal is to combine artificial intelligence, automation, robotics and real-world
+          engineering experience into scalable industrial solutions.
+        </p>
 
-<!-- CONTACT -->
-<section id="contact">
-  <h2>Contact</h2>
-  <a href="mailto:hello@nosmo.tech">hello@nosmo.tech</a>
-</section>
+        <p>
+          The business is being developed around a shared technology foundation: one software and intelligence
+          layer capable of supporting different machines, interfaces and field applications.
+        </p>
+      </div>
+    </section>
 
-</main>
+    <section id="ecosystem" class="section">
+      <div class="center">
+        <div class="label">Technology Ecosystem</div>
 
-<footer>
-  <p>© 2026 NOSMO Technology Limited</p>
-</footer>
+        <h2>One core platform. Multiple applications.</h2>
 
+        <p>
+          NOSMO is structured around reusable software, sensor intelligence and machine-control logic
+          that can be adapted across construction, robotics and infrastructure systems.
+        </p>
+      </div>
+
+      <div class="ecosystem-grid">
+        <article class="feature-card core">
+          <div class="icon-ring">AI</div>
+
+          <h3>NOSMO Core AI</h3>
+
+          <p>
+            Shared intelligence platform designed to power future software, robotic systems and operator interfaces.
+          </p>
+
+          <ul>
+            <li>Computer vision</li>
+            <li>Sensor fusion</li>
+            <li>Task logic</li>
+            <li>Robotic control</li>
+          </ul>
+        </article>
+
+        <article class="feature-card unicon-card">
+          <a href="nexus.html">
+            <img src="assets/NEXUS_Logo.png" alt="NEXUS Operation Platform logo" />
+
+            <h3>NEXUS Operation Platform</h3>
+
+            <p>
+              Construction intelligence platform focused on measurement, site visualization,
+              digital workflows and future robotics integration.
+            </p>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <section id="rd" class="section dark-panel">
+      <div class="label">Research &amp; Development</div>
+
+      <h2>Current development areas</h2>
+
+      <div class="rd-grid">
+        <article>
+          <span>01</span>
+          <h3>Industrial Climbing Robotics</h3>
+          <p>Research into autonomous systems capable of operating on steel structures and industrial environments.</p>
+        </article>
+
+        <article>
+          <span>02</span>
+          <h3>Surface Processing Robotics</h3>
+          <p>Research into robotic platforms for precision infrastructure maintenance and automated surface processing.</p>
+        </article>
+
+        <article>
+          <span>03</span>
+          <h3>Computer Vision &amp; AI</h3>
+          <p>Development of perception systems capable of understanding and interacting with real-world environments.</p>
+        </article>
+
+        <article>
+          <span>04</span>
+          <h3>Human-Machine Interfaces</h3>
+          <p>Operator-facing systems for visualisation, measurement, digital task control and remote assistance.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="portfolio" class="section portfolio">
+      <div class="center">
+        <div class="label">Concept Portfolio</div>
+
+        <h2>Future development directions</h2>
+
+        <p>
+          The following visuals represent early concept directions under research and evaluation.
+          They are not presented as finished commercial products.
+        </p>
+      </div>
+
+      <div class="concept-grid">
+        <article class="concept">
+          <img src="assets/steelwalker-concept.png" alt="Steel Walker concept visualization" />
+
+          <div>
+            <h3>Steel Walker</h3>
+            <p>Industrial climbing robotics concept for inspection, maintenance and tool operations on steel structures.</p>
+          </div>
+        </article>
+
+        <article class="concept">
+          <img src="assets/streetcutter-concept.png" alt="Street Cutter concept visualization" />
+
+          <div>
+            <h3>Street Cutter</h3>
+            <p>Mobile surface-processing robotics concept for controlled cutting, marking and infrastructure work.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section proof">
+      <div>
+        <div class="label">Company Development</div>
+
+        <h2>Built from practical engineering experience.</h2>
+
+        <p>
+          Founded by Mateusz Furmański, NOSMO combines construction experience, manufacturing knowledge,
+          CNC development, 3D printing and software innovation into one industrial technology direction.
+        </p>
+      </div>
+
+      <div class="proof-list">
+        <span>Artificial Intelligence</span>
+        <span>Robotics</span>
+        <span>Construction Technology</span>
+        <span>Computer Vision</span>
+        <span>Industrial Automation</span>
+        <span>Human-Machine Interfaces</span>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact">
+      <div class="contact-box">
+        <div class="label">Contact</div>
+
+        <h2>NOSMO Technology Limited</h2>
+
+        <p>For collaboration, investment or development enquiries:</p>
+
+        <a href="mailto:hello@nosmo.tech">hello@nosmo.tech</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 NOSMO Technology Limited</span>
+    <span>AI • Robotics • Construction Technology • Industrial Automation</span>
+  </footer>
 </body>
 </html>
