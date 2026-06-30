@@ -74,40 +74,19 @@
     .brand {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
       color: #fff;
       text-decoration: none;
       flex: 0 0 auto;
     }
 
-    .brand-mark {
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      background: radial-gradient(circle at 35% 30%, #65f0ff, #4f6dff 58%, #16214a 100%);
-      color: #02050a;
-      font-weight: 950;
-      font-size: 22px;
-      box-shadow: 0 0 24px rgba(67,228,255,.34);
-    }
-
-    .brand-word {
-      display: grid;
-      line-height: 1;
-      font-size: 33px;
-      font-weight: 950;
-      letter-spacing: .08em;
-      text-shadow: 0 0 18px rgba(67,228,255,.20);
-    }
-
-    .brand-word small {
-      margin-top: 6px;
-      color: var(--cyan);
-      font-size: 8px;
-      font-weight: 900;
-      letter-spacing: .34em;
+    .logo-long {
+      display: block;
+      height: 64px;
+      width: auto;
+      max-width: min(330px, 52vw);
+      object-fit: contain;
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 0 18px rgba(67,228,255,.18));
     }
 
     nav {
@@ -432,9 +411,7 @@
       .hero { padding-top: 62px; }
       nav { gap: 13px; }
       nav a { font-size: 13px; }
-      .brand-word { font-size: 28px; }
-      .brand-word small { font-size: 7px; }
-      .brand-mark { width: 38px; height: 38px; font-size: 19px; }
+      .logo-long { height: 56px; max-width: min(290px, 52vw); }
       footer { flex-direction: column; }
     }
   </style>
@@ -443,8 +420,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="index.html" aria-label="NOSMO Technology Limited home">
-      <span class="brand-mark">N</span>
-      <span class="brand-word">NOSMO<small>TECHNOLOGY LIMITED</small></span>
+      <img src="assets/NOSMO_LOGO_LONG.jpeg" alt="NOSMO Technology Limited logo" class="logo-long" />
     </a>
 
     <nav>
