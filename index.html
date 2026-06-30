@@ -11,7 +11,6 @@
     html { scroll-behavior: smooth; }
 
     :root {
-      --bg: #05070b;
       --panel: rgba(10, 16, 26, 0.82);
       --panel2: rgba(8, 13, 22, 0.92);
       --line: rgba(68, 218, 255, 0.22);
@@ -19,7 +18,6 @@
       --muted: #aab8ca;
       --cyan: #43e4ff;
       --blue: #5b76ff;
-      --gold: #f5c400;
     }
 
     body {
@@ -63,7 +61,7 @@
       top: 0;
       z-index: 20;
       min-height: 86px;
-      padding: 12px clamp(18px, 5vw, 72px);
+      padding: 14px clamp(18px, 5vw, 72px);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -74,18 +72,42 @@
     }
 
     .brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
+      gap: 12px;
+      color: #fff;
       text-decoration: none;
       flex: 0 0 auto;
     }
 
-    .brand img {
-      display: block;
-      width: min(240px, 40vw);
-      height: auto;
-      object-fit: contain;
-      filter: drop-shadow(0 0 18px rgba(67,228,255,.18));
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: radial-gradient(circle at 35% 30%, #65f0ff, #4f6dff 58%, #16214a 100%);
+      color: #02050a;
+      font-weight: 950;
+      font-size: 22px;
+      box-shadow: 0 0 24px rgba(67,228,255,.34);
+    }
+
+    .brand-word {
+      display: grid;
+      line-height: 1;
+      font-size: 33px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-shadow: 0 0 18px rgba(67,228,255,.20);
+    }
+
+    .brand-word small {
+      margin-top: 6px;
+      color: var(--cyan);
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .34em;
     }
 
     nav {
@@ -312,7 +334,10 @@
       object-fit: contain;
       display: block;
       margin: 0 auto 28px;
-      background: #000;
+      background: transparent;
+      box-shadow: none;
+      mix-blend-mode: screen;
+      filter: drop-shadow(0 20px 44px rgba(0,0,0,.44));
     }
 
     .rd-grid {
@@ -407,7 +432,9 @@
       .hero { padding-top: 62px; }
       nav { gap: 13px; }
       nav a { font-size: 13px; }
-      .brand img { width: min(220px, 48vw); }
+      .brand-word { font-size: 28px; }
+      .brand-word small { font-size: 7px; }
+      .brand-mark { width: 38px; height: 38px; font-size: 19px; }
       footer { flex-direction: column; }
     }
   </style>
@@ -415,8 +442,9 @@
 
 <body>
   <header class="topbar">
-    <a class="brand" href="index.html">
-      <img src="assets/NOSMO_LOGO_LONG.jpeg" alt="NOSMO Technology Limited logo" />
+    <a class="brand" href="index.html" aria-label="NOSMO Technology Limited home">
+      <span class="brand-mark">N</span>
+      <span class="brand-word">NOSMO<small>TECHNOLOGY LIMITED</small></span>
     </a>
 
     <nav>
