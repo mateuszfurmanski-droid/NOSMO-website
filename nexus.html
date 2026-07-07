@@ -78,10 +78,16 @@
       top: 0;
       z-index: 10;
     }
+    .topbar a {
+      display: inline-flex;
+    }
     .topbar img {
       width: min(245px, 42vw);
       height: auto;
       display: block;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
     }
     nav {
       display: flex;
@@ -114,6 +120,9 @@
       margin-bottom: 38px;
       mix-blend-mode: screen;
       filter: drop-shadow(0 30px 55px rgba(0,0,0,.55)) drop-shadow(0 0 38px rgba(245,196,0,.10));
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
     }
     .label {
       color: #f5c400;
