@@ -46,24 +46,24 @@ const groups=[
 {id:'ecosystem',label:'Digital Ecosystem',eyebrow:'BIM and Integrations',description:'BIM, partnerzy technologiczni i rejestr zewnetrznych polaczen.'}
 ];
 const modules=[
-{id:'workspace',group:'core',label:'Workspace',icon:'workspace',status:'live',description:'Jedno miejsce laczace projekty, ludzi, zadania, dokumenty i historie operacyjna.',href:'nexus.html'},
-{id:'projects',group:'core',label:'Projects',icon:'projects',status:'live',description:'Portfolio projektow i kontekst operacyjny kazdego projektu.',href:'nexus.html#system'},
-{id:'tasks',group:'core',label:'Tasks',icon:'tasks',status:'live',description:'Zadania, priorytety, przypisania, gotowosc i postep wykonania.',href:'nexus-module-wall.html'},
-{id:'documents',group:'core',label:'Documents',icon:'documents',status:'live',description:'Plany, dokumenty, wiedza i historia wersji projektu.',href:'nexus.html#bim'},
-{id:'timeline',group:'core',label:'Timeline',icon:'timeline',status:'live',description:'Chronologia zdarzen, zmian i pamiec projektu.',href:'nexus-module-wall.html'},
+{id:'workspace',group:'core',label:'Workspace',icon:'workspace',status:'live',description:'Jedno miejsce laczace projekty, ludzi, zadania, dokumenty i historie operacyjna.',href:'apps/nexus/?module=workspace'},
+{id:'projects',group:'core',label:'Projects',icon:'projects',status:'live',description:'Portfolio projektow i kontekst operacyjny kazdego projektu.',href:'apps/nexus/?module=projects'},
+{id:'tasks',group:'core',label:'Tasks',icon:'tasks',status:'live',description:'Zadania, priorytety, przypisania, gotowosc i postep wykonania.',href:'apps/nexus/?module=tasks'},
+{id:'documents',group:'core',label:'Documents',icon:'documents',status:'live',description:'Plany, dokumenty, wiedza i historia wersji projektu.',href:'apps/nexus/?module=documents'},
+{id:'timeline',group:'core',label:'Timeline',icon:'timeline',status:'live',description:'Chronologia zdarzen, zmian i pamiec projektu.',href:'apps/nexus/?module=timeline'},
 {id:'decisions',group:'core',label:'Decisions',icon:'decisions',status:'plan',description:'Decyzje, zatwierdzenia i odpowiedzialnosc czlowieka.',href:'nexus-module-wall.html'},
-{id:'people',group:'people',label:'People',icon:'people',status:'live',description:'Person Cards, role, firmy, przypisania i dostepnosc.',href:'nexus.html#system'},
-{id:'cards',group:'people',label:'Card Maker',icon:'cards',status:'live',description:'Tworzenie i wzbogacanie kart osob z kontrolowanym AI Prefill.',href:'nexus-module-wall.html'},
+{id:'people',group:'people',label:'People',icon:'people',status:'live',description:'Person Cards, role, firmy, przypisania i dostepnosc.',href:'apps/nexus/?module=people'},
+{id:'cards',group:'people',label:'Card Maker',icon:'cards',status:'live',description:'Tworzenie i wzbogacanie kart osob z kontrolowanym AI Prefill.',href:'apps/nexus/?module=cards'},
 {id:'communication',group:'people',label:'Communication',icon:'communication',status:'demo',description:'Telefon, SMS, WhatsApp i e-mail z kontekstem zadania lub obiektu.',href:'communication-hub-demo.html'},
 {id:'company',group:'people',label:'Companies',icon:'company',status:'plan',description:'Company Cards, relacje, projekty i historia wspolpracy.',href:'nexus-module-wall.html'},
 {id:'training',group:'people',label:'Training',icon:'training',status:'plan',description:'Micro-learning, kompetencje, dowody, certyfikaty i odnowienia.',href:'nexus-module-wall.html'},
-{id:'doorflow',group:'field',label:'DoorFlow',icon:'doorflow',status:'live',description:'Plany drzwi, Door Schedule, Door Cards i proces Fire Door.',href:'doorflow.html'},
-{id:'electrical',group:'field',label:'Electrical',icon:'electrical',status:'demo',description:'Commissioning, testy, certyfikaty i snagi instalacji elektrycznych.',href:'nexus-module-wall.html'},
-{id:'safety',group:'field',label:'Safety',icon:'safety',status:'demo',description:'Work Wallet Safety Connector i status gotowosci pracownika lub zadania.',href:'nexus-module-wall.html'},
+{id:'doorflow',group:'field',label:'DoorFlow',icon:'doorflow',status:'live',description:'Plany drzwi, Door Schedule, Door Cards i proces Fire Door.',href:'apps/nexus/?module=doorflow'},
+{id:'electrical',group:'field',label:'Electrical',icon:'electrical',status:'demo',description:'Commissioning, testy, certyfikaty i snagi instalacji elektrycznych.',href:'apps/nexus/electrical-commissioning/'},
+{id:'safety',group:'field',label:'Safety',icon:'safety',status:'demo',description:'Work Wallet Safety Connector i status gotowosci pracownika lub zadania.',href:'apps/nexus/?module=safety'},
 {id:'procurement',group:'field',label:'Supplies',icon:'procurement',status:'plan',description:'Materialy, narzedzia, wynajem, zakupy i gotowosc zadania.',href:'nexus-module-wall.html'},
 {id:'field',group:'field',label:'Field Layer',icon:'field',status:'plan',description:'Wspolna warstwa dowodow, postepu instalacji i as-built dla wielu branz.',href:'nexus.html#fabstation-module'},
 {id:'bim',group:'ecosystem',label:'BIM',icon:'bim',status:'demo',description:'Model jako kontekst dla zadan, osob, dokumentow, instalacji i dowodow.',href:'nexus.html#bim'},
-{id:'integrations',group:'ecosystem',label:'Integrations',icon:'integrations',status:'demo',description:'Native NOSMO Modules, external connectors i partner field layers.',href:'nexus.html#modules'}
+{id:'integrations',group:'ecosystem',label:'Integrations',icon:'integrations',status:'demo',description:'Native NOSMO Modules, external connectors i partner field layers.',href:'apps/nexus/?module=integrations'}
 ];
 let currentGroup='core';let currentModule='workspace';
 const statusText={live:'ACTIVE',demo:'DEMO / CONNECTED',plan:'PLANNED'};
