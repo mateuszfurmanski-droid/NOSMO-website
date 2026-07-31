@@ -1,14 +1,10 @@
-# Publishes the existing Nexus application inside the NOSMO website.
+# Publishes the verified Nexus build artifact inside the NOSMO website.
 name: Publish Nexus App
 
 on:
   workflow_dispatch:
   pull_request:
     types: [opened, synchronize, reopened]
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/publish-nexus-app.yml
 
 permissions:
   contents: write
@@ -16,7 +12,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
 
     steps:
       - name: Checkout NOSMO website main
@@ -25,49 +21,32 @@ jobs:
           ref: main
           path: website
 
-      - name: Checkout Nexus application
-        uses: actions/checkout@v4
-        with:
-          repository: mateuszfurmanski-droid/nosmo-nexus-mvp
-          ref: agent/nexus-dock-shell
-          path: nexus
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: nexus/pnpm-lock.yaml
-
-      - name: Install Nexus dependencies
-        working-directory: nexus
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Nexus for the NOSMO website
-        working-directory: nexus
+      - name: Download verified Nexus build artifact
         env:
-          PORT: 4173
-          BASE_PATH: /apps/nexus/
-        run: pnpm --filter @workspace/nosmo-nexus build
+          ARTIFACT_URL: "https://sdmntprnortheu.oaiusercontent.com/files/00000000-6c38-81f4-8e83-0349f8d0b018/raw?se=2026-07-31T22:18:39Z&sp=r&sv=2026-02-06&sr=b&scid=fa5447dc-50aa-5c66-9f63-d7669aedd76c&skoid=ba81670d-b682-4d2d-9682-ac0ffdfb3fa1&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-07-31T02:16:11Z&ske=2026-08-02T02:16:11Z&sks=b&skv=2026-02-06&sig=qc%2B5Zk5RL1xuvuM1fPcxafJ0iSDOTnBEbhF1KyNwV1s%3D"
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output nexus-build.zip
+          rm -rf nexus-build
+          mkdir nexus-build
+          unzip -q nexus-build.zip -d nexus-build
 
       - name: Publish build and connect existing apps
         shell: bash
         run: |
           rm -rf website/apps/nexus
           mkdir -p website/apps/nexus
-          cp -R nexus/artifacts/nosmo-nexus/dist/public/. website/apps/nexus/
+          cp -R nexus-build/. website/apps/nexus/
 
           python - <<'PY'
           from pathlib import Path
 
           website = Path('website')
-          app_index = website / 'apps/nexus/index.html'
+          app_root = website / 'apps/nexus'
+          app_index = app_root / 'index.html'
           html = app_index.read_text(encoding='utf-8')
+          html = html.replace('href="/favicon.svg"', 'href="/apps/nexus/favicon.svg"')
+          html = html.replace('src="/assets/', 'src="/apps/nexus/assets/')
+          html = html.replace('href="/assets/', 'href="/apps/nexus/assets/')
 
           route_script = '''<script>
           (() => {
@@ -89,9 +68,17 @@ jobs:
             }
           })();
           </script>'''
-
           html = html.replace('</head>', route_script + '\n</head>')
           app_index.write_text(html, encoding='utf-8')
+
+          js_files = list((app_root / 'assets').glob('index-*.js'))
+          if len(js_files) != 1:
+            raise RuntimeError(f'Expected one Nexus JS bundle, found {len(js_files)}')
+          js_path = js_files[0]
+          js = js_path.read_text(encoding='utf-8')
+          js = js.replace('const An="/"', 'const An="/apps/nexus/"')
+          js = js.replace('base:"/".replace(/\\/$/,"")', 'base:"/apps/nexus/".replace(/\\/$/,"")')
+          js_path.write_text(js, encoding='utf-8')
 
           dock_path = website / 'nexus-dock-demo.html'
           dock = dock_path.read_text(encoding='utf-8')
@@ -117,7 +104,6 @@ jobs:
                 _, suffix = rest.split("'", 1)
                 lines[index] = prefix + "href:'" + href + "'" + suffix
                 break
-
           dock_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           PY
 
