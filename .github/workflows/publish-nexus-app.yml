@@ -1,0 +1,137 @@
+name: Publish Nexus App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-nexus-app.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout NOSMO website
+        uses: actions/checkout@v4
+        with:
+          path: website
+
+      - name: Checkout Nexus application
+        uses: actions/checkout@v4
+        with:
+          repository: mateuszfurmanski-droid/nosmo-nexus-mvp
+          ref: agent/nexus-dock-shell
+          path: nexus
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: nexus/pnpm-lock.yaml
+
+      - name: Install Nexus dependencies
+        working-directory: nexus
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Nexus for the NOSMO website
+        working-directory: nexus
+        env:
+          PORT: 4173
+          BASE_PATH: /apps/nexus/
+        run: pnpm --filter @workspace/nosmo-nexus build
+
+      - name: Publish build and connect existing apps
+        shell: bash
+        run: |
+          rm -rf website/apps/nexus
+          mkdir -p website/apps/nexus
+          cp -R nexus/artifacts/nosmo-nexus/dist/public/. website/apps/nexus/
+
+          python - <<'PY'
+          from pathlib import Path
+
+          website = Path('website')
+          app_index = website / 'apps/nexus/index.html'
+          html = app_index.read_text(encoding='utf-8')
+
+          route_script = '''<script>
+          (() => {
+            const module = new URLSearchParams(window.location.search).get("module");
+            const routes = {
+              workspace: "workspace",
+              projects: "projects",
+              tasks: "tasks",
+              documents: "knowledge",
+              timeline: "timeline",
+              people: "people",
+              cards: "card-maker",
+              doorflow: "plan-review",
+              safety: "safety-connector",
+              integrations: "integrations"
+            };
+            if (module && routes[module]) {
+              history.replaceState(null, "", `/apps/nexus/${routes[module]}`);
+            }
+          })();
+          </script>'''
+
+          html = html.replace('</head>', route_script + '\n</head>')
+          app_index.write_text(html, encoding='utf-8')
+
+          dock_path = website / 'nexus-dock-demo.html'
+          dock = dock_path.read_text(encoding='utf-8')
+          replacements = {
+            "href:'nexus.html'": "href:'apps/nexus/?module=workspace'",
+            "href:'nexus.html#system'": "href:'apps/nexus/?module=projects'",
+            "href:'nexus-module-wall.html'},\n{id:'tasks'": "href:'nexus-module-wall.html'},\n{id:'tasks'",
+          }
+
+          exact_links = {
+            "id:'workspace'": "apps/nexus/?module=workspace",
+            "id:'projects'": "apps/nexus/?module=projects",
+            "id:'tasks'": "apps/nexus/?module=tasks",
+            "id:'documents'": "apps/nexus/?module=documents",
+            "id:'timeline'": "apps/nexus/?module=timeline",
+            "id:'people'": "apps/nexus/?module=people",
+            "id:'cards'": "apps/nexus/?module=cards",
+            "id:'doorflow'": "apps/nexus/?module=doorflow",
+            "id:'electrical'": "apps/nexus/electrical-commissioning/",
+            "id:'safety'": "apps/nexus/?module=safety",
+            "id:'integrations'": "apps/nexus/?module=integrations",
+          }
+
+          lines = dock.splitlines()
+          for index, line in enumerate(lines):
+            for marker, href in exact_links.items():
+              if marker in line and "href:'" in line:
+                prefix, rest = line.split("href:'", 1)
+                _, suffix = rest.split("'", 1)
+                lines[index] = prefix + "href:'" + href + "'" + suffix
+                break
+
+          dock_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+
+      - name: Commit published Nexus application
+        working-directory: website
+        run: |
+          git config user.name "NOSMO Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add apps/nexus nexus-dock-demo.html
+          if git diff --cached --quiet; then
+            echo "No Nexus publishing changes detected."
+            exit 0
+          fi
+          git commit -m "Publish Nexus apps and connect Dock"
+          git push
