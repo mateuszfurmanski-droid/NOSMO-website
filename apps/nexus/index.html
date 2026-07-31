@@ -4,41 +4,50 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>NOSMO Nexus™</title>
-    <meta name="description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta name="description" content="NOSMO Nexus connects people, projects, tasks, plans, specialist modules and operational memory." />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="NOSMO Nexus™" />
-    <meta property="og:description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta property="og:description" content="Connected construction operations, specialist modules and project memory." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="NOSMO Nexus™" />
-    <meta name="twitter:description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:description" content="Connected construction operations, specialist modules and project memory." />
     <link rel="icon" type="image/svg+xml" href="/apps/nexus/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/apps/nexus/assets/index-C9Os-fK1.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus/assets/index-CTFbKw52.css">
-  <script>
-(() => {
-  const module = new URLSearchParams(window.location.search).get("module");
-  const routes = {
-    workspace: "workspace",
-    projects: "projects",
-    tasks: "tasks",
-    documents: "knowledge",
-    timeline: "timeline",
-    people: "people",
-    cards: "card-maker",
-    doorflow: "plan-review",
-    safety: "safety-connector",
-    integrations: "integrations"
-  };
-  if (module && routes[module]) {
-    history.replaceState(null, "", `/apps/nexus/${routes[module]}`);
-  }
-})();
-</script>
-</head>
+    <script>
+      (() => {
+        const params = new URLSearchParams(window.location.search);
+        const moduleName = params.get("module");
+        const restoredRoute = params.get("route");
+        const routes = {
+          workspace: "workspace",
+          projects: "projects",
+          tasks: "tasks",
+          documents: "knowledge",
+          timeline: "timeline",
+          people: "people",
+          cards: "card-maker",
+          doorflow: "plan-review",
+          safety: "safety-connector",
+          integrations: "integrations"
+        };
+
+        const requestedRoute = restoredRoute || (moduleName ? routes[moduleName] : "");
+        const safeRoute = requestedRoute && /^[a-z0-9/_-]+$/i.test(requestedRoute)
+          ? requestedRoute.replace(/^\/+|\/+$/g, "")
+          : "";
+
+        if (safeRoute) {
+          const suffix = window.location.hash || "";
+          window.history.replaceState(null, "", `/apps/nexus/${safeRoute}${suffix}`);
+        }
+      })();
+    </script>
+  </head>
   <body>
     <div id="root"></div>
   </body>
