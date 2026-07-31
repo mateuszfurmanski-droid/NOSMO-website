@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOSMO Nexus - Module Wall</title>
+<meta name="description" content="Aktualna sciana modulow, demonstratorow, pakietow i funkcji NOSMO Nexus.">
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}:root{--bg:#05090e;--panel:#0d1821;--panel2:#122431;--line:#284351;--text:#f2f7fa;--muted:#9fb1ba;--green:#65dfb5;--cyan:#51d9ff;--yellow:#f1cb69;--red:#ff9292;--purple:#bca6ff}body{margin:0;background:radial-gradient(circle at 12% 5%,rgba(81,217,255,.13),transparent 30rem),radial-gradient(circle at 90% 18%,rgba(101,223,181,.10),transparent 32rem),linear-gradient(145deg,#04080c,#09141b 55%,#05090e);color:var(--text);font-family:Arial,Helvetica,sans-serif}.wrap{max-width:1440px;margin:auto;padding:22px}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}.top h1{margin:0;font-size:clamp(27px,5vw,54px);letter-spacing:-.04em}.top p{max-width:790px;margin:9px 0 0;color:var(--muted);line-height:1.55}.back{display:inline-flex;flex:none;color:var(--green);text-decoration:none;border:1px solid var(--line);padding:10px 13px;border-radius:11px}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:18px 0 24px}.stat{background:rgba(13,24,33,.92);border:1px solid var(--line);border-radius:15px;padding:15px}.stat strong{display:block;font-size:30px}.stat span{display:block;color:var(--muted);font-size:11px;margin-top:5px;text-transform:uppercase;letter-spacing:.08em}.note{border:1px solid rgba(241,203,105,.35);background:rgba(241,203,105,.07);color:#d7c797;border-radius:13px;padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:25px}.section{margin:28px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:12px}.section h2{margin:0;font-size:22px}.section-head p{margin:0;color:var(--muted);font-size:12px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.card{position:relative;min-height:190px;background:linear-gradient(155deg,rgba(19,39,51,.98),rgba(10,21,29,.98));border:1px solid var(--line);border-radius:16px;padding:15px;display:flex;flex-direction:column}.card h3{margin:10px 0 7px;font-size:17px;line-height:1.12}.card p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.status{align-self:flex-start;border:1px solid var(--line);border-radius:999px;padding:5px 8px;font-size:9px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}.live{color:var(--green);border-color:rgba(101,223,181,.45);background:rgba(101,223,181,.08)}.review{color:var(--yellow);border-color:rgba(241,203,105,.44);background:rgba(241,203,105,.07)}.spec{color:var(--cyan);border-color:rgba(81,217,255,.42);background:rgba(81,217,255,.07)}.queue{color:var(--purple);border-color:rgba(188,166,255,.4);background:rgba(188,166,255,.07)}.blocked{color:var(--red);border-color:rgba(255,146,146,.4);background:rgba(255,146,146,.07)}.legacy{color:#bdc5ca}.meta{margin-top:auto;padding-top:13px;color:#728792;font-size:10px}.launch{display:inline-flex;align-items:center;justify-content:center;margin-top:11px;min-height:36px;border-radius:9px;background:var(--green);color:#062018;text-decoration:none;font-size:11px;font-weight:900}.feature-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}.feature{border:1px solid var(--line);border-radius:13px;padding:12px;background:rgba(12,25,33,.86);min-height:105px}.feature strong{display:block;font-size:13px}.feature span{display:block;color:var(--muted);font-size:10px;line-height:1.4;margin-top:6px}.legend{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}.footer{margin-top:30px;padding:17px 0;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}@media(max-width:1050px){.grid{grid-template-columns:repeat(3,1fr)}.feature-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.wrap{padding:14px}.top{display:block}.back{margin-top:13px}.summary{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr 1fr}.feature-grid{grid-template-columns:1fr 1fr}.card{min-height:175px}}@media(max-width:480px){.grid,.feature-grid{grid-template-columns:1fr}.summary{grid-template-columns:1fr 1fr}.section-head{display:block}.section-head p{margin-top:6px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <div><h1>NOSMO Nexus - wszystkie elementy</h1><p>Jedna sciana pokazujaca aplikacje, demonstratory, obszary Spark, pakiety architektoniczne i elementy czekajace w kolejce. Statusy sa rozdzielone, zeby nie nazywac specyfikacji gotowa aplikacja.</p></div>
+    <a class="back" href="index.html">NOSMO Home</a>
+  </div>
+
+  <div class="summary">
+    <div class="stat"><strong>21</strong><span>pozycji w Module Matrix</span></div>
+    <div class="stat"><strong>5</strong><span>aplikacji i dzialajacych dem</span></div>
+    <div class="stat"><strong>5</strong><span>pakietow spec-ready</span></div>
+    <div class="stat"><strong>6</strong><span>modulow w kolejce / blokadzie</span></div>
+  </div>
+
+  <div class="note"><b>Wazne:</b> 21 pozycji nie oznacza 21 gotowych aplikacji. Czesc to dzialajace moduly, czesc to obszary obecnego MVP, a czesc to gotowe kontrakty implementacyjne lub kolejka przyszlych prac.</div>
+
+  <section class="section">
+    <div class="section-head"><h2>Aplikacje i demonstratory</h2><p>Rzeczy, ktore maja juz kod, interfejs albo samodzielne demo.</p></div>
+    <div class="grid">
+      <article class="card"><span class="status live">Dziala / rozwijany</span><h3>NOSMO Nexus MVP</h3><p>Glowna aplikacja z radialnym workspace, projektami, osobami, zadaniami, dokumentami i relacjami.</p><div class="meta">Repo: nosmo-nexus-mvp</div></article>
+      <article class="card"><span class="status review">Aplikacja + review</span><h3>NOSMO DoorFlow</h3><p>Plany PDF, Door Schedule, Door Cards, statusy, zdjecia i sektorowy Fire Door Process.</p><div class="meta">Repo: nosmo-doorflow / PR Fire Door</div></article>
+      <article class="card"><span class="status live">Integrated complete</span><h3>Electrical Commissioning</h3><p>Zanonimizowany modul instalacji, testow, certyfikatow, blokow i snagow elektrycznych.</p><div class="meta">Wlaczony do main Nexus MVP</div></article>
+      <article class="card"><span class="status live">Integrated demo</span><h3>Work Wallet Safety Connector</h3><p>Stany READY, WARNING, BLOCKED i UNKNOWN, event simulator, gateway i integration log.</p><div class="meta">Demo bez twierdzenia o live API</div></article>
+      <article class="card"><span class="status live">Publiczne demo</span><h3>Person Card Communication Hub</h3><p>Telefon, SMS, WhatsApp, e-mail oraz wiadomosc z kontekstem zadania lub obiektu.</p><a class="launch" href="communication-hub-demo.html">Otworz demo</a></article>
+      <article class="card"><span class="status legacy">Legacy prototype</span><h3>Work Availability / Worker Card</h3><p>Starsza karta pracownika z dostepnoscia, profilem i szybkim kontaktem. Material do ponownego wykorzystania.</p><div class="meta">Publiczne repo: work-availability</div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Thin Spark Core - chroniony zakres Joanny</h2><p>Siedem pozycji: shell i szesc glownych obszarow.</p></div>
+    <div class="grid">
+      <article class="card"><span class="status review">Pending implementation</span><h3>Thin Spark Shell</h3><p>Nowa lekka trasa /spark, drzewo nawigacji i wspolny ekran startowy.</p><div class="meta">Chroniony zakres Joanny</div></article>
+      <article class="card"><span class="status review">Keep / adapt</span><h3>Projects</h3><p>Projects, Project Detail i Interactive Workspace wykorzystane w cienkiej warstwie Spark.</p><div class="meta">Istniejace assety MVP</div></article>
+      <article class="card"><span class="status review">Keep</span><h3>People</h3><p>People, Person View i przyszle polaczenie z Person Card contracts.</p><div class="meta">Istniejace assety MVP</div></article>
+      <article class="card"><span class="status review">Adapt</span><h3>Documents</h3><p>Knowledge i Plans uporzadkowane jako dokumenty projektu.</p><div class="meta">Istniejace assety MVP</div></article>
+      <article class="card"><span class="status review">Keep</span><h3>Tasks</h3><p>Kanban, Task Cards i obecny Task Readiness / Supply Check jako proof of concept.</p><div class="meta">Istniejace assety MVP</div></article>
+      <article class="card"><span class="status review">Add minimal</span><h3>Decisions</h3><p>Minimalne statyczne Decision Cards przed budowa pelnego workflow decyzji i zatwierdzen.</p><div class="meta">Pelny engine pozniej</div></article>
+      <article class="card"><span class="status review">Add minimal</span><h3>Modules & Integrations</h3><p>Native NOSMO Modules, External Connections oraz Partner / Field Layers.</p><div class="meta">Ma zachowac DoorFlow, Electrical i Work Wallet</div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Pakiety gotowe do implementacji</h2><p>Kontrakty sa przygotowane; kodowanie Core czeka na checkpoint Spark.</p></div>
+    <div class="grid">
+      <article class="card"><span class="status spec">PKG-001 spec-ready</span><h3>Canonical Object Graph</h3><p>Wspolny model Person, Project, Task, Document, Door, Room, Company i ich relacji.</p><div class="meta">Fundament danych</div></article>
+      <article class="card"><span class="status spec">PKG-002 spec-ready</span><h3>Timeline, Provenance & Audit</h3><p>Zrodlo informacji, historia zmian, zdarzenia, aktor i kontrola wiarygodnosci.</p><div class="meta">Zalezy od PKG-001</div></article>
+      <article class="card"><span class="status spec">PKG-003 spec-ready</span><h3>Person Card Communication</h3><p>Produkcyjny kontrakt Communication Hub: launch-only najpierw, OAuth i konektory pozniej.</p><div class="meta">Demo istnieje; integracja Core zablokowana checkpointem</div></article>
+      <article class="card"><span class="status spec">PKG-004 spec-ready</span><h3>Connector Registry</h3><p>Rejestr systemow zewnetrznych, source-of-record, uprawnienia, provenance i stan polaczenia.</p><div class="meta">Obejmuje Work Wallet i przyszle konektory</div></article>
+      <article class="card"><span class="status spec">PKG-005 spec-ready</span><h3>Readiness, Confidence & Human Decision</h3><p>READY / WARNING / BLOCKED / UNKNOWN, poziom pewnosci AI i wymagana decyzja czlowieka.</p><div class="meta">Rozwija obecny Task Readiness proof</div></article>
+      <article class="card"><span class="status review">PKG-006 implementation</span><h3>DoorFlow Fire Door Lifecycle</h3><p>Inspekcja istniejacych drzwi, montaz nowych, wymiana i sektorowe zapisywanie procesu.</p><div class="meta">Kod w oddzielnym repo DoorFlow</div></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Kolejka dalszych modulow</h2><p>Ustalony zakres, ale jeszcze nie gotowe aplikacje.</p></div>
+    <div class="grid">
+      <article class="card"><span class="status queue">PKG-007 queued</span><h3>Company Registry & Relationships</h3><p>Company Cards, automatyczne przechwytywanie firm, osob, projektow i historii relacji.</p></article>
+      <article class="card"><span class="status queue">PKG-008 queued</span><h3>Training & Certification</h3><p>Micro-learning, kompetencje, dowody, podpis kierownika, CPD, egzaminy i odnowienia.</p></article>
+      <article class="card"><span class="status queue">PKG-009 queued</span><h3>Procurement & Resource Readiness</h3><p>Materialy, narzedzia, wynajem, zakupy, braki i gotowosc zadania do wykonania.</p></article>
+      <article class="card"><span class="status queue">PKG-010 queued</span><h3>Integration Suggester</h3><p>Podpowiadanie, jaki program lub konektor podlaczyc i jak go bezpiecznie wykorzystac.</p></article>
+      <article class="card"><span class="status blocked">PKG-011 partner validation</span><h3>External BIM Partner Layer</h3><p>Kontrolowana wspolpraca z zewnetrznymi firmami BIM i koordynacja produkcji modeli.</p></article>
+      <article class="card"><span class="status blocked">PKG-012 partner validation</span><h3>Multi-Trade Installation Layer</h3><p>Vendor-neutral warstwa instalacyjna dla FabStation/BIM, wykonawcow, dowodow i as-built.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><h2>Funkcje, ktore juz sa w starym Nexus MVP</h2><p>Nie sa oddzielnymi aplikacjami, ale sa realnym kodem do zachowania i adaptacji.</p></div>
+    <div class="feature-grid">
+      <div class="feature"><strong>Radial Hub</strong><span>Centralna nawigacja i wejscia do obszarow.</span></div>
+      <div class="feature"><strong>Interactive Workspace</strong><span>Graf osob, firm, projektow, zadan i dokumentow.</span></div>
+      <div class="feature"><strong>Focus Mode</strong><span>Otwieranie obiektow glebiej bez opuszczania workspace.</span></div>
+      <div class="feature"><strong>Card Maker</strong><span>Karta osoby i AI Prefill z Accept/Edit/Reject/Private.</span></div>
+      <div class="feature"><strong>Company View</strong><span>Firma jako obiekt powiazany z ludzmi i projektami.</span></div>
+      <div class="feature"><strong>Projects</strong><span>Lista projektow, szczegoly i relacje.</span></div>
+      <div class="feature"><strong>People / Person View</strong><span>Profile osob i ich kontekst roboczy.</span></div>
+      <div class="feature"><strong>Tasks / Kanban</strong><span>Statusy, przypisania, NOW/NEXT/LATER i execution gate.</span></div>
+      <div class="feature"><strong>Plan Review</strong><span>Plan, drzwi, statusy, zdjecia, zadania i problemy.</span></div>
+      <div class="feature"><strong>Tool & Route Planning</strong><span>Grupowanie prac po narzedziach i kolejnosc trasy.</span></div>
+      <div class="feature"><strong>Availability</strong><span>Available, Busy, Unavailable, Unknown i manager override.</span></div>
+      <div class="feature"><strong>Knowledge / Documents</strong><span>Dokumenty, notatki, plany i wyszukiwanie kontekstu.</span></div>
+      <div class="feature"><strong>Timeline</strong><span>Aktywnosc osob, projektow i obiektow.</span></div>
+      <div class="feature"><strong>Integrations Page</strong><span>Miejsce na natywne moduly i polaczenia zewnetrzne.</span></div>
+      <div class="feature"><strong>File Upload & Processing</strong><span>Przesylanie i przetwarzanie PDF oraz Excel.</span></div>
+    </div>
+  </section>
+
+  <div class="footer">Stan kontrolny: 31 July 2026. Zrodlo: aktualne repozytoria NOSMO, Nexus Build Control Module Matrix oraz biezace branche i commity.</div>
+</main>
+</body>
+</html>
