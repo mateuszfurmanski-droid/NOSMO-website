@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOSMO Nexus - Communication Hub Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#05090e,#0b1820);color:#f4f7fa;font-family:Arial,Helvetica,sans-serif}.wrap{max-width:980px;margin:auto;padding:20px}.top{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:16px}.top h1{margin:0;font-size:24px}.top p{margin:5px 0 0;color:#9eafba;font-size:13px}.badge{border:1px solid #79642d;color:#f4ca68;padding:7px 10px;border-radius:999px;font-size:11px}.notice,.panel{border:1px solid #29434e;background:rgba(13,28,36,.94);border-radius:16px}.notice{padding:12px 14px;color:#aab9c1;font-size:12px;margin-bottom:15px}.grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:15px}.panel{overflow:hidden}.head{padding:15px;border-bottom:1px solid #29434e}.head h2{margin:0;font-size:16px}.head p{margin:5px 0 0;color:#9eafba;font-size:11px}.body{padding:15px}.person{display:flex;gap:12px;align-items:center}.avatar{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;background:#1b3540;font-weight:800}.person h3{margin:0}.person p{margin:5px 0 0;color:#9eafba;font-size:12px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0}.chip{padding:5px 8px;border:1px solid #29434e;border-radius:999px;color:#9eafba;font-size:10px}.chip.ok{color:#70dfbb;border-color:#347761}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}label{font-size:10px;text-transform:uppercase;color:#9eafba;font-weight:700}label.full{grid-column:1/-1}input,select,textarea{width:100%;margin-top:5px;border:1px solid #29434e;background:#071217;color:#fff;border-radius:10px;padding:10px;font:inherit}textarea{min-height:145px;resize:vertical}.channels{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}.action{display:block;text-decoration:none;color:#fff;background:#162f39;border:1px solid #29434e;border-radius:12px;padding:12px}.action strong{display:block;font-size:12px}.action small{display:block;color:#9eafba;font-size:10px;margin-top:4px}.action.disabled{opacity:.42;pointer-events:none}.buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}button{border:0;border-radius:10px;padding:10px 13px;font-weight:800;cursor:pointer}.primary{background:#70dfbb;color:#082019}.secondary{background:#1b3540;color:#fff;border:1px solid #29434e}.timeline{margin-top:15px}.event{border-top:1px solid #213942;padding:10px 0;font-size:11px}.event b{display:block}.event span{color:#9eafba}.status{margin-top:10px;color:#f4ca68;font-size:11px}.back{color:#70dfbb;text-decoration:none;font-size:12px}@media(max-width:760px){.grid,.fields,.channels{grid-template-columns:1fr}.top{align-items:flex-start}.wrap{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div><a class="back" href="index.html">&larr; NOSMO website</a><h1>NOSMO Nexus - Communication Hub</h1><p>Hosted Person Card demonstrator</p></div><span class="badge">DEMO / NO REAL DATA</span></div>
+<div class="notice">Enter any test number and email below. Phone, SMS, WhatsApp and email use normal device links. Opening an app is recorded as <b>ACTION_OPENED</b>, never as a confirmed sent message.</div>
+<div class="grid">
+<section class="panel"><div class="head"><h2>Person Card</h2><p>Contact endpoints and availability</p></div><div class="body">
+<div class="person"><div class="avatar">PC</div><div><h3>Demo User</h3><p>Project Coordinator</p></div></div>
+<div class="chips"><span class="chip ok">Available</span><span class="chip">Work profile</span><span class="chip">Synthetic data</span></div>
+<div class="fields">
+<label class="full">Test phone number<input id="phone" inputmode="tel" placeholder="Example: +447700900000"></label>
+<label class="full">Test email<input id="email" inputmode="email" placeholder="Example: name@example.com"></label>
+</div>
+<div class="channels">
+<a id="callLink" class="action disabled" href="#"><strong>Phone</strong><small>Open dialler</small></a>
+<a id="smsLink" class="action disabled" href="#"><strong>SMS</strong><small>Open messages</small></a>
+<a id="waLink" class="action" href="https://wa.me/?text=NOSMO%20Nexus%20Communication%20Hub%20test"><strong>WhatsApp</strong><small>Open WhatsApp with message</small></a>
+<a id="mailLink" class="action" href="mailto:?subject=NOSMO%20Nexus%20test"><strong>Email</strong><small>Open email composer</small></a>
+</div>
+<div id="endpointStatus" class="status">Enter a number to enable Phone and SMS.</div>
+</div></section>
+<section class="panel"><div class="head"><h2>Contact from Object Card</h2><p>Create editable project context</p></div><div class="body">
+<div class="fields">
+<label>Project<input id="project" value="Halifax / Lloyds Bank"></label>
+<label>Object type<select id="type"><option>Door Card</option><option>Task Card</option><option>Issue Card</option></select></label>
+<label>Object ID<input id="objectId" value="ID.0.5.27"></label>
+<label>Priority<select id="priority"><option>Normal</option><option selected>High</option><option>Urgent</option></select></label>
+<label class="full">Requested action<input id="request" value="Please confirm the correct closer specification before installation."></label>
+<label class="full">Editable message<textarea id="message"></textarea></label>
+</div>
+<div class="buttons"><button id="generate" class="secondary">Generate context</button><button id="whatsapp" class="primary">Open WhatsApp</button><button id="emailButton" class="secondary">Open email</button><button id="copy" class="secondary">Copy</button></div>
+<div class="timeline"><h3 style="font-size:13px">Session timeline</h3><div id="events"><div class="event"><span>No actions recorded.</span></div></div></div>
+</div></section>
+</div></div>
+<script>
+const phone=document.getElementById('phone'),email=document.getElementById('email'),message=document.getElementById('message'),events=document.getElementById('events');
+function cleanPhone(v){return v.replace(/[^+0-9]/g,'')}
+function build(){return `NOSMO Nexus\nProject: ${document.getElementById('project').value}\nObject: ${document.getElementById('type').value} / ${document.getElementById('objectId').value}\nPriority: ${document.getElementById('priority').value}\nRequested action: ${document.getElementById('request').value}\n\nPlease reply when checked.`}
+function log(channel){if(events.textContent.includes('No actions'))events.innerHTML='';const e=document.createElement('div');e.className='event';e.innerHTML=`<b>ACTION_OPENED - ${channel}</b><span>${new Date().toLocaleString()}</span>`;events.prepend(e)}
+function updateLinks(){const p=cleanPhone(phone.value);const e=email.value.trim();const text=encodeURIComponent(message.value||build());const call=document.getElementById('callLink'),sms=document.getElementById('smsLink');if(p){call.href='tel:'+p;sms.href='sms:'+p+'?body='+text;call.classList.remove('disabled');sms.classList.remove('disabled');document.getElementById('endpointStatus').textContent='Phone and SMS enabled.'}else{call.href='#';sms.href='#';call.classList.add('disabled');sms.classList.add('disabled');document.getElementById('endpointStatus').textContent='Enter a number to enable Phone and SMS.'}document.getElementById('waLink').href='https://wa.me/?text='+text;document.getElementById('mailLink').href='mailto:'+encodeURIComponent(e)+'?subject='+encodeURIComponent('NOSMO Nexus project contact')+'&body='+text}
+phone.addEventListener('input',updateLinks);email.addEventListener('input',updateLinks);message.addEventListener('input',updateLinks);
+document.getElementById('generate').onclick=()=>{message.value=build();updateLinks()};
+document.getElementById('whatsapp').onclick=()=>{log('WHATSAPP');location.href='https://wa.me/?text='+encodeURIComponent(message.value||build())};
+document.getElementById('emailButton').onclick=()=>{log('EMAIL');location.href='mailto:'+encodeURIComponent(email.value.trim())+'?subject='+encodeURIComponent('NOSMO Nexus project contact')+'&body='+encodeURIComponent(message.value||build())};
+document.getElementById('copy').onclick=async()=>{const text=message.value||build();try{await navigator.clipboard.writeText(text)}catch(e){message.select();document.execCommand('copy')}};
+document.querySelectorAll('.action').forEach(a=>a.addEventListener('click',()=>{if(!a.classList.contains('disabled'))log(a.querySelector('strong').textContent.toUpperCase())}));
+message.value=build();updateLinks();
+</script>
+</body></html>
