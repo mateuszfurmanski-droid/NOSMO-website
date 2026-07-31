@@ -3,6 +3,8 @@ name: Publish Nexus App
 
 on:
   workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches: [main]
     paths:
@@ -17,9 +19,10 @@ jobs:
     timeout-minutes: 25
 
     steps:
-      - name: Checkout NOSMO website
+      - name: Checkout NOSMO website main
         uses: actions/checkout@v4
         with:
+          ref: main
           path: website
 
       - name: Checkout Nexus application
@@ -103,7 +106,7 @@ jobs:
             "id:'doorflow'": "apps/nexus/?module=doorflow",
             "id:'electrical'": "apps/nexus/electrical-commissioning/",
             "id:'safety'": "apps/nexus/?module=safety",
-            "id:'integrations'": "apps/nexus/?module=integrations",
+            "id:'integrations'": "apps/nexus/?module=integrations"
           }
 
           lines = dock.splitlines()
@@ -118,7 +121,7 @@ jobs:
           dock_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
           PY
 
-      - name: Commit published Nexus application
+      - name: Commit published Nexus application to main
         working-directory: website
         run: |
           git config user.name "NOSMO Build Bot"
@@ -129,4 +132,4 @@ jobs:
             exit 0
           fi
           git commit -m "Publish Nexus apps and connect Dock"
-          git push
+          git push origin HEAD:main
