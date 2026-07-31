@@ -3,90 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>NOSMO Nexus - Module Dock</title>
-<meta name="description" content="Jednoekranowy demonstrator paska modulow NOSMO Nexus.">
+<title>NOSMO Nexus - wszystkie moduly w Docku</title>
+<meta name="description" content="Jednoekranowy demonstrator 18 ekranow i modulow NOSMO Nexus.">
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:Arial,Helvetica,sans-serif;color:#f3f7fa;background:#04080d}.app{position:relative;width:100%;height:100%;background:radial-gradient(circle at 18% 12%,rgba(47,195,255,.13),transparent 29rem),radial-gradient(circle at 82% 28%,rgba(86,232,180,.10),transparent 27rem),linear-gradient(145deg,#04080d,#07131a 58%,#04080d)}.topbar{height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(123,177,196,.18);background:rgba(2,7,11,.76);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-mark{width:30px;height:30px;border:1px solid rgba(90,225,188,.42);border-radius:9px;display:grid;place-items:center;color:#67e0b8;font-size:10px;font-weight:900;letter-spacing:.04em}.brand-text{min-width:0}.brand-text strong{display:block;font-size:13px;letter-spacing:.08em}.brand-text span{display:block;color:#8197a2;font-size:9px;margin-top:2px}.top-actions{display:flex;gap:8px}.top-btn{width:32px;height:32px;border:1px solid rgba(123,177,196,.20);background:rgba(255,255,255,.025);color:#dce8ed;border-radius:9px;display:grid;place-items:center;cursor:pointer}.workspace{position:absolute;inset:54px 0 78px;display:grid;place-items:center;padding:16px}.focus{width:min(860px,100%);min-height:min(460px,70vh);display:grid;grid-template-columns:1.1fr .9fr;border:1px solid rgba(123,177,196,.20);border-radius:22px;background:linear-gradient(145deg,rgba(17,37,47,.82),rgba(7,18,25,.88));box-shadow:0 30px 90px rgba(0,0,0,.34);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);overflow:hidden}.focus-main{padding:clamp(22px,5vw,48px);display:flex;flex-direction:column;justify-content:center}.eyebrow{color:#67e0b8;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.focus h1{font-size:clamp(34px,7vw,76px);line-height:.9;letter-spacing:-.065em;margin:12px 0 17px}.focus p{margin:0;color:#98adb7;line-height:1.6;font-size:clamp(13px,2vw,16px);max-width:560px}.status-line{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.status{border:1px solid rgba(123,177,196,.24);border-radius:999px;padding:6px 9px;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.status.live{color:#67e0b8;border-color:rgba(103,224,184,.40);background:rgba(103,224,184,.07)}.status.review{color:#efc867;border-color:rgba(239,200,103,.38);background:rgba(239,200,103,.07)}.status.spec{color:#55d8ff;border-color:rgba(85,216,255,.38);background:rgba(85,216,255,.07)}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}.primary,.secondary{min-height:39px;border-radius:10px;padding:0 14px;font-size:11px;font-weight:900;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.primary{border:0;background:#67e0b8;color:#062018}.secondary{border:1px solid rgba(123,177,196,.25);background:rgba(255,255,255,.03);color:#e8f1f4}.focus-side{border-left:1px solid rgba(123,177,196,.16);padding:24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,rgba(42,83,97,.12),rgba(0,0,0,.08))}.big-icon{width:min(220px,58vw);aspect-ratio:1;border-radius:42px;border:1px solid rgba(103,224,184,.25);background:radial-gradient(circle at 30% 25%,rgba(103,224,184,.20),rgba(85,216,255,.06) 45%,rgba(0,0,0,.10));display:grid;place-items:center;color:#67e0b8;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 24px 70px rgba(0,0,0,.28)}.big-icon svg{width:45%;height:45%;stroke:currentColor;fill:none;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}.dock-wrap{position:absolute;left:0;right:0;bottom:0;height:78px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));display:flex;justify-content:center;background:linear-gradient(to top,rgba(2,7,11,.98),rgba(2,7,11,.77));border-top:1px solid rgba(123,177,196,.16);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}.dock{height:58px;max-width:100%;display:flex;align-items:center;gap:5px;padding:5px;border:1px solid rgba(123,177,196,.20);background:rgba(10,24,31,.82);border-radius:18px;overflow-x:auto;scrollbar-width:none;box-shadow:0 16px 50px rgba(0,0,0,.32)}.dock::-webkit-scrollbar{display:none}.dock-btn{position:relative;flex:0 0 45px;width:45px;height:45px;border:0;border-radius:13px;background:transparent;color:#80969f;display:grid;place-items:center;cursor:pointer;transition:.16s ease}.dock-btn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.dock-btn:hover,.dock-btn.active{color:#67e0b8;background:rgba(103,224,184,.10)}.dock-btn.active{transform:translateY(-3px);box-shadow:0 9px 22px rgba(0,0,0,.26)}.dock-btn::after{content:attr(data-label);position:absolute;left:50%;bottom:54px;transform:translateX(-50%) translateY(5px);padding:6px 8px;border-radius:7px;background:#0d2028;border:1px solid rgba(123,177,196,.22);color:#eaf2f5;font-size:9px;white-space:nowrap;opacity:0;pointer-events:none;transition:.14s}.dock-btn:hover::after,.dock-btn:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0)}.dot{position:absolute;right:7px;top:7px;width:5px;height:5px;border-radius:50%;background:#67e0b8;box-shadow:0 0 10px rgba(103,224,184,.8)}.dot.review{background:#efc867}.dot.spec{background:#55d8ff}.home-link{color:#7f98a3;text-decoration:none;font-size:10px;font-weight:800}.mobile-label{display:none;color:#8fa4ad;font-size:10px;text-align:center;margin-top:7px}
-@media(max-width:720px){.topbar{height:48px;padding:0 11px}.workspace{inset:48px 0 76px;padding:10px;align-items:stretch}.focus{min-height:0;height:100%;grid-template-columns:1fr;border-radius:18px}.focus-main{padding:23px;justify-content:flex-end}.focus-side{position:absolute;right:24px;top:28px;width:92px;height:92px;padding:0;border:0;background:none}.big-icon{width:92px;border-radius:25px}.focus h1{font-size:clamp(37px,13vw,62px);max-width:72%;margin-top:10px}.focus p{font-size:13px;max-width:100%}.dock-wrap{height:76px;padding-left:7px;padding-right:7px;justify-content:flex-start}.dock{width:100%;border-radius:16px}.dock-btn{flex-basis:44px;width:44px}.dock-btn::after{display:none}.mobile-label{display:block}.brand-text span{display:none}.top-actions .top-btn:first-child{display:none}}
-@media(max-height:620px){.focus-main{padding:18px}.focus h1{font-size:38px}.focus p{line-height:1.4}.status-line,.actions{margin-top:13px}.focus-side{display:none}}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font-family:Arial,Helvetica,sans-serif;color:#eef5f7;background:#03070b}.app{position:relative;width:100%;height:100%;background:radial-gradient(circle at 16% 10%,rgba(65,210,255,.12),transparent 28rem),radial-gradient(circle at 84% 24%,rgba(88,229,181,.09),transparent 30rem),linear-gradient(145deg,#03070b,#08141b 58%,#04080c)}.topbar{height:50px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(131,181,199,.18);background:rgba(2,7,11,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}.brand{display:flex;align-items:center;gap:9px;min-width:0}.mark{width:29px;height:29px;border:1px solid rgba(103,224,184,.38);border-radius:9px;display:grid;place-items:center;color:#67e0b8;font-size:10px;font-weight:900}.brand strong{display:block;font-size:12px;letter-spacing:.08em}.brand span{display:block;color:#7f949e;font-size:8px;margin-top:2px}.actions{display:flex;gap:7px}.topbtn{height:31px;min-width:31px;padding:0 10px;border:1px solid rgba(131,181,199,.20);border-radius:9px;background:rgba(255,255,255,.025);color:#dce8ec;font-size:9px;font-weight:900;cursor:pointer}.topbtn.active{color:#67e0b8;border-color:rgba(103,224,184,.4);background:rgba(103,224,184,.08)}.workspace{position:absolute;inset:50px 0 72px;padding:12px;display:grid;place-items:center}.focus{width:min(920px,100%);height:min(560px,100%);display:grid;grid-template-columns:1.15fr .85fr;border:1px solid rgba(131,181,199,.20);border-radius:22px;background:linear-gradient(145deg,rgba(17,37,47,.86),rgba(7,18,25,.91));box-shadow:0 30px 90px rgba(0,0,0,.34);overflow:hidden}.focus-main{padding:clamp(24px,5vw,52px);display:flex;flex-direction:column;justify-content:center}.eyebrow{color:#67e0b8;font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.focus h1{font-size:clamp(38px,7vw,78px);line-height:.9;letter-spacing:-.065em;margin:12px 0 17px}.focus p{margin:0;color:#98adb7;line-height:1.6;font-size:clamp(13px,2vw,16px);max-width:570px}.statusline{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}.status{border:1px solid rgba(131,181,199,.24);border-radius:999px;padding:5px 8px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.active-status{color:#67e0b8;border-color:rgba(103,224,184,.4);background:rgba(103,224,184,.07)}.demo-status{color:#55d8ff;border-color:rgba(85,216,255,.38);background:rgba(85,216,255,.07)}.planned-status{color:#efc867;border-color:rgba(239,200,103,.38);background:rgba(239,200,103,.07)}.focus-side{border-left:1px solid rgba(131,181,199,.16);display:grid;place-items:center;padding:24px;background:linear-gradient(160deg,rgba(42,83,97,.13),rgba(0,0,0,.08))}.bigicon{width:min(220px,55vw);aspect-ratio:1;border-radius:42px;border:1px solid rgba(103,224,184,.25);background:radial-gradient(circle at 30% 25%,rgba(103,224,184,.20),rgba(85,216,255,.06) 45%,rgba(0,0,0,.10));display:grid;place-items:center;color:#67e0b8;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 24px 70px rgba(0,0,0,.28)}.bigicon svg{width:44%;height:44%;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.openlink{display:inline-flex;margin-top:20px;min-height:38px;padding:0 14px;border-radius:10px;align-items:center;justify-content:center;background:#67e0b8;color:#062018;text-decoration:none;font-size:10px;font-weight:900;align-self:flex-start}.allpanel{position:absolute;inset:50px 0 72px;padding:12px;overflow:auto;background:rgba(3,8,12,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:20}.allhead{max-width:1180px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:end;gap:12px}.allhead h1{margin:0;font-size:clamp(23px,5vw,40px);letter-spacing:-.04em}.allhead p{margin:5px 0 0;color:#879da7;font-size:11px}.count{color:#67e0b8;font-size:11px;font-weight:900}.allgrid{max-width:1180px;margin:auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;padding-bottom:12px}.allcard{min-height:128px;border:1px solid rgba(131,181,199,.18);border-radius:15px;background:linear-gradient(150deg,rgba(18,39,49,.92),rgba(8,19,26,.94));color:#eaf2f5;padding:12px;text-align:left;cursor:pointer;display:flex;flex-direction:column;transition:.15s}.allcard:hover{transform:translateY(-1px);border-color:rgba(103,224,184,.4)}.allicon{width:35px;height:35px;border-radius:10px;display:grid;place-items:center;background:rgba(103,224,184,.08);color:#67e0b8}.allicon svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.allcard strong{display:block;font-size:11px;margin-top:10px;line-height:1.15}.allcard small{display:block;color:#8197a1;font-size:8px;margin-top:auto;padding-top:8px;text-transform:uppercase;font-weight:900}.dockwrap{position:absolute;left:0;right:0;bottom:0;height:72px;padding:7px 7px calc(7px + env(safe-area-inset-bottom));display:flex;justify-content:center;background:linear-gradient(to top,rgba(2,7,11,.99),rgba(2,7,11,.82));border-top:1px solid rgba(131,181,199,.16);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);z-index:30}.dock{height:56px;max-width:100%;display:flex;align-items:center;gap:4px;padding:5px;border:1px solid rgba(131,181,199,.20);background:rgba(10,24,31,.88);border-radius:17px;overflow-x:auto;scrollbar-width:none;box-shadow:0 16px 50px rgba(0,0,0,.32)}.dock::-webkit-scrollbar{display:none}.dockbtn{position:relative;flex:0 0 44px;width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#80969f;display:grid;place-items:center;cursor:pointer;transition:.16s}.dockbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.dockbtn:hover,.dockbtn.selected{color:#67e0b8;background:rgba(103,224,184,.10)}.dockbtn.selected{transform:translateY(-2px)}.dot{position:absolute;right:7px;top:7px;width:5px;height:5px;border-radius:50%;background:#67e0b8}.dot.demo{background:#55d8ff}.dot.planned{background:#efc867}.dockbtn::after{content:attr(data-label);position:absolute;left:50%;bottom:51px;transform:translateX(-50%);padding:5px 7px;border-radius:7px;background:#0d2028;border:1px solid rgba(131,181,199,.22);color:#eaf2f5;font-size:8px;white-space:nowrap;opacity:0;pointer-events:none}.dockbtn:hover::after,.dockbtn:focus-visible::after{opacity:1}.hidden{display:none!important}
+@media(max-width:1000px){.allgrid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:720px){.topbar{height:47px;padding:0 9px}.brand span{display:none}.workspace,.allpanel{inset:47px 0 70px}.workspace{padding:8px;align-items:stretch}.focus{height:100%;grid-template-columns:1fr;border-radius:17px}.focus-main{padding:22px;justify-content:flex-end}.focus-side{position:absolute;right:25px;top:26px;width:92px;height:92px;padding:0;border:0;background:none}.bigicon{width:92px;border-radius:24px}.focus h1{font-size:clamp(38px,13vw,62px);max-width:74%;margin-top:9px}.focus p{font-size:12px}.allpanel{padding:10px}.allgrid{grid-template-columns:repeat(3,1fr);gap:7px}.allcard{min-height:105px;padding:10px}.allcard strong{font-size:10px}.allicon{width:31px;height:31px}.dockwrap{height:70px;justify-content:flex-start}.dock{width:100%;border-radius:15px}.dockbtn{flex-basis:43px;width:43px}.dockbtn::after{display:none}}
+@media(max-width:430px){.allgrid{grid-template-columns:repeat(3,1fr)}.allhead p{display:none}.allcard{min-height:98px}.allcard small{font-size:7px}}
+@media(max-height:620px){.focus-main{padding:17px}.focus h1{font-size:37px}.focus p{line-height:1.35}.statusline{margin-top:12px}.focus-side{display:none}.allcard{min-height:92px}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="topbar">
-    <div class="brand"><div class="brand-mark">N</div><div class="brand-text"><strong>NOSMO NEXUS</strong><span>Stop Searching. Start Asking.</span></div></div>
-    <div class="top-actions"><button class="top-btn" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></button><a class="top-btn" href="nexus-module-wall.html" aria-label="Module wall"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg></a></div>
-  </header>
-
-  <main class="workspace">
-    <section class="focus">
-      <div class="focus-main">
-        <div id="eyebrow" class="eyebrow">NOSMO Nexus Core</div>
-        <h1 id="title">Workspace</h1>
-        <p id="description">Wszystkie moduly sa schowane w malym pasku. Klikasz ikone i ten sam ekran zmienia kontekst bez otwierania wielkiego menu.</p>
-        <div id="statuses" class="status-line"><span class="status live">Active concept</span><span class="status spec">Single screen</span></div>
-        <div class="actions"><a id="primaryAction" class="primary" href="nexus-module-wall.html">Pelna lista</a><button id="secondaryAction" class="secondary" type="button">Pin to dock</button></div>
-        <div id="mobileLabel" class="mobile-label">Workspace</div>
-      </div>
-      <div class="focus-side"><div id="bigIcon" class="big-icon"></div></div>
-    </section>
-  </main>
-
-  <div class="dock-wrap">
-    <nav id="dock" class="dock" aria-label="Nexus modules"></nav>
-  </div>
+<header class="topbar">
+  <div class="brand"><div class="mark">N</div><div><strong>NOSMO NEXUS</strong><span>18 ekranow i modulow</span></div></div>
+  <div class="actions"><button id="allToggle" class="topbtn active" type="button">WSZYSTKIE 18</button><a class="topbtn" href="nexus-module-wall.html" style="display:grid;place-items:center;text-decoration:none">STATUS</a></div>
+</header>
+<main class="workspace">
+  <section class="focus">
+    <div class="focus-main">
+      <div id="eyebrow" class="eyebrow"></div>
+      <h1 id="title"></h1>
+      <p id="description"></p>
+      <div id="statusline" class="statusline"></div>
+      <a id="openlink" class="openlink hidden" href="#">OTWORZ DEMO</a>
+    </div>
+    <div class="focus-side"><div id="bigicon" class="bigicon"></div></div>
+  </section>
+</main>
+<section id="allpanel" class="allpanel">
+  <div class="allhead"><div><h1>Wszystkie elementy Docka</h1><p>Kliknij dowolny modul, aby otworzyc jego ekran.</p></div><div class="count">18 POZYCJI</div></div>
+  <div id="allgrid" class="allgrid"></div>
+</section>
+<div class="dockwrap"><nav id="dock" class="dock" aria-label="Nexus modules"></nav></div>
 </div>
-
 <script>
-const icons={
- workspace:'<svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"></path><path d="M8 9h8M8 13h5"></path></svg>',
- projects:'<svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"></path></svg>',
- people:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"></circle><path d="M3 19c.8-4 3-6 6-6s5.2 2 6 6M16 6c2.2.2 3.5 1.5 3.5 3.5S18.2 12.8 16 13"></path></svg>',
- documents:'<svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"></path><path d="M14 3v4h4M9 12h6M9 16h6"></path></svg>',
- tasks:'<svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"></path></svg>',
- decisions:'<svg viewBox="0 0 24 24"><path d="M12 3v18M12 6h6l-2 3 2 3h-6M12 12H6l2 3-2 3h6"></path></svg>',
- doorflow:'<svg viewBox="0 0 24 24"><path d="M5 3h13v18H5z"></path><path d="M9 7h5v14H9z"></path><circle cx="12" cy="14" r=".6"></circle></svg>',
- electrical:'<svg viewBox="0 0 24 24"><path d="m13 2-7 12h6l-1 8 7-12h-6z"></path></svg>',
- safety:'<svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.2 8.3 8 10 4.8-1.7 8-5 8-10V6z"></path><path d="m8.5 12 2.2 2.2 4.8-5"></path></svg>',
- communication:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"></path><path d="M8 9h8M8 12h5"></path></svg>',
- company:'<svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14"></path><path d="M8 10h2M14 10h2M8 14h2M14 14h2M10 21v-4h4v4"></path></svg>',
- training:'<svg viewBox="0 0 24 24"><path d="m3 10 9-5 9 5-9 5z"></path><path d="M7 13v4c3 2 7 2 10 0v-4M21 10v6"></path></svg>',
- procurement:'<svg viewBox="0 0 24 24"><path d="M3 5h2l2 11h10l3-7H7"></path><circle cx="9" cy="20" r="1"></circle><circle cx="17" cy="20" r="1"></circle></svg>',
- bim:'<svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"></path><path d="m4 7.5 8 4.5 8-4.5M12 12v9"></path></svg>',
- integrations:'<svg viewBox="0 0 24 24"><path d="M8 12a4 4 0 0 1 4-4h3M16 12a4 4 0 0 1-4 4H9"></path><path d="m14 5 3 3-3 3M10 19l-3-3 3-3"></path></svg>'
+const I={
+workspace:'<svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"></path><path d="M8 9h8M8 13h5"></path></svg>',
+projects:'<svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"></path></svg>',
+people:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"></circle><path d="M3 19c.8-4 3-6 6-6s5.2 2 6 6M16 6c2.2.2 3.5 1.5 3.5 3.5S18.2 12.8 16 13"></path></svg>',
+cards:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M6.5 16c.5-2 1.5-3 2.5-3s2 1 2.5 3M14 9h3M14 13h3"></path></svg>',
+tasks:'<svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"></path></svg>',
+plans:'<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"></path><path d="M8 4v6h5v5h7M4 14h5v6"></path></svg>',
+docs:'<svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"></path><path d="M14 3v4h4M9 12h6M9 16h6"></path></svg>',
+timeline:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>',
+doorflow:'<svg viewBox="0 0 24 24"><path d="M5 3h13v18H5z"></path><path d="M9 7h5v14H9z"></path><circle cx="12" cy="14" r=".6"></circle></svg>',
+electrical:'<svg viewBox="0 0 24 24"><path d="m13 2-7 12h6l-1 8 7-12h-6z"></path></svg>',
+safety:'<svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.2 8.3 8 10 4.8-1.7 8-5 8-10V6z"></path><path d="m8.5 12 2.2 2.2 4.8-5"></path></svg>',
+contact:'<svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4z"></path><path d="M8 9h8M8 12h5"></path></svg>',
+modules:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>',
+companies:'<svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14"></path><path d="M8 10h2M14 10h2M8 14h2M14 14h2M10 21v-4h4v4"></path></svg>',
+training:'<svg viewBox="0 0 24 24"><path d="m3 10 9-5 9 5-9 5z"></path><path d="M7 13v4c3 2 7 2 10 0v-4M21 10v6"></path></svg>',
+supplies:'<svg viewBox="0 0 24 24"><path d="M3 5h2l2 11h10l3-7H7"></path><circle cx="9" cy="20" r="1"></circle><circle cx="17" cy="20" r="1"></circle></svg>',
+bim:'<svg viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"></path><path d="m4 7.5 8 4.5 8-4.5M12 12v9"></path></svg>',
+field:'<svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11"></path><path d="M8 20v-6h8v6M8 10h8"></path></svg>'
 };
-const modules=[
-{id:'workspace',label:'Workspace',eyebrow:'NOSMO Nexus Core',title:'Workspace',description:'Wszystkie moduly sa schowane w malym pasku. Klikasz ikone i ten sam ekran zmienia kontekst bez otwierania wielkiego menu.',status:['live:Active concept','spec:Single screen'],href:'nexus-module-wall.html',action:'Pelna lista'},
-{id:'projects',label:'Projects',eyebrow:'Thin Spark Core',title:'Projects',description:'Projekty, Project Cards, zespoly, dokumenty, zadania i relacje widoczne w jednym kontekste.',status:['review:Keep / adapt'],action:'Otworz obszar'},
-{id:'people',label:'People',eyebrow:'Person-centric layer',title:'People',description:'Person Cards, role, dostepnosc, kompetencje, przypisane zadania i szybki kontakt.',status:['review:Keep','spec:PKG-003 later'],action:'Otworz osoby'},
-{id:'documents',label:'Documents',eyebrow:'Project knowledge',title:'Documents',description:'Plany, PDF, Excel, zdjecia, rewizje, dowody i wiedza projektowa bez szukania po folderach.',status:['review:Adapt'],action:'Otworz dokumenty'},
-{id:'tasks',label:'Tasks',eyebrow:'Execution layer',title:'Tasks',description:'Kanban, priorytety NOW / NEXT / LATER, gotowosc, osoby, narzedzia i problemy.',status:['live:MVP asset','review:Spark keep'],action:'Otworz zadania'},
-{id:'decisions',label:'Decisions',eyebrow:'Human control',title:'Decisions',description:'Decyzje, zatwierdzenia, poziom pewnosci i moment, w ktorym AI musi oddac sterowanie czlowiekowi.',status:['review:Add minimal','spec:PKG-005'],action:'Otworz decyzje'},
-{id:'doorflow',label:'DoorFlow',eyebrow:'Native NOSMO Module',title:'DoorFlow',description:'Plany drzwi, Door Cards, schedule, statusy, zdjecia oraz Fire Door Inspection / Installation / Replacement.',status:['live:Application','review:Fire Door PR'],action:'Otworz DoorFlow'},
-{id:'electrical',label:'Electrical',eyebrow:'Native NOSMO Module',title:'Electrical',description:'Zanonimizowany modul commissioning: bloki, mieszkania, testy, certyfikaty, kable i snagi.',status:['live:Integrated complete'],action:'Otworz modul'},
-{id:'safety',label:'Safety',eyebrow:'External Connection Demo',title:'Safety',description:'Work Wallet Safety Connector z READY, WARNING, BLOCKED i UNKNOWN oraz historia zdarzen integracyjnych.',status:['live:Integrated demo','spec:No live API claim'],action:'Otworz Safety'},
-{id:'communication',label:'Contact',eyebrow:'Person Card Layer',title:'Contact',description:'Telefon, SMS, WhatsApp, e-mail i wiadomosc przygotowana automatycznie z kontekstem zadania.',status:['live:Public demo','spec:PKG-003'],href:'communication-hub-demo.html',action:'Otworz demo'},
-{id:'company',label:'Companies',eyebrow:'Relationship intelligence',title:'Companies',description:'Company Cards, osoby, projekty, historia wspolpracy i automatyczne przechwytywanie relacji.',status:['spec:PKG-007 queued'],action:'Zobacz zakres'},
-{id:'training',label:'Training',eyebrow:'Growth layer',title:'Training',description:'Micro-learning, certyfikaty, evidence, CPD, supervisor sign-off i gotowosc do egzaminu.',status:['spec:PKG-008 queued'],action:'Zobacz zakres'},
-{id:'procurement',label:'Supplies',eyebrow:'Resource readiness',title:'Supplies',description:'Materialy, zakupy, narzedzia, wynajem i sprawdzenie czy zadanie moze naprawde ruszyc.',status:['spec:PKG-009 queued'],action:'Zobacz zakres'},
-{id:'bim',label:'BIM',eyebrow:'Partner / Field Layer',title:'BIM',description:'BIM partner, modele zewnetrzne, koordynacja instalacji, field execution i as-built evidence.',status:['review:Partner validation'],action:'Zobacz zakres'},
-{id:'integrations',label:'Integrations',eyebrow:'Connector Registry',title:'Integrations',description:'Work Wallet, Gmail, Outlook, Teams, Slack, FabStation i kolejne polaczenia kontrolowane przez source-of-record.',status:['spec:PKG-004'],action:'Otworz rejestr'}
+const M=[
+{id:'workspace',name:'Nexus Workspace',short:'Workspace',type:'ACTIVE',family:'Nexus Core',desc:'Glowny person-centred workspace laczacy ludzi, projekty, zadania, dokumenty i relacje.'},
+{id:'projects',name:'Projects',short:'Projects',type:'ACTIVE',family:'Project Control',desc:'Portfel projektow i kontekst operacyjny kazdego projektu.'},
+{id:'people',name:'People / Person Cards',short:'People',type:'ACTIVE',family:'People',desc:'Osoby, role, firmy, dostepnosc, przydzialy i karta operacyjna.'},
+{id:'cards',name:'Card Maker',short:'Cards',type:'ACTIVE',family:'People',desc:'Tworzenie i uzupelnianie Person Cards z kontrolowanym AI Prefill.'},
+{id:'tasks',name:'Tasks',short:'Tasks',type:'ACTIVE',family:'Project Control',desc:'Priorytety, przydzialy, gotowosc i status wykonania zadan.'},
+{id:'plans',name:'Plans',short:'Plans',type:'ACTIVE',family:'Information',desc:'Rysunki, plany PDF i procesy uruchamiane z planu.'},
+{id:'docs',name:'Documents / Knowledge',short:'Docs',type:'ACTIVE',family:'Information',desc:'Dokumenty projektu, wiedza i pamiec operacyjna.'},
+{id:'timeline',name:'Timeline / Audit',short:'Timeline',type:'ACTIVE',family:'Audit & Memory',desc:'Historia zdarzen, zmian, decyzji i aktywnosci projektu.'},
+{id:'doorflow',name:'NOSMO DoorFlow',short:'DoorFlow',type:'ACTIVE',family:'Field Delivery',desc:'Plany drzwi, harmonogram, Door Cards, statusy, zdjecia i Fire Door Process.'},
+{id:'electrical',name:'Electrical Commissioning',short:'Electrical',type:'DEMO',family:'Commissioning',desc:'Zanonimizowany modul testow, certyfikatow, postepu i snagow elektrycznych.'},
+{id:'safety',name:'Work Wallet Safety Connector',short:'Safety',type:'DEMO',family:'Safety & Compliance',desc:'Readiness, compliance, event simulator i gateway demonstracyjny.'},
+{id:'contact',name:'Communication Hub',short:'Contact',type:'DEMO',family:'Person Card',desc:'Telefon, SMS, WhatsApp i e-mail z kontekstem zadania lub obiektu.',link:'communication-hub-demo.html'},
+{id:'modules',name:'Modules & Integrations',short:'Modules',type:'ACTIVE',family:'Platform',desc:'Native NOSMO Modules, external connections oraz partner field layers.',link:'nexus-module-wall.html'},
+{id:'companies',name:'Company Registry',short:'Companies',type:'PLANNED',family:'Business Memory',desc:'Company Cards, automatyczne przechwytywanie firm i inteligencja relacji.'},
+{id:'training',name:'Training & Certification',short:'Training',type:'PLANNED',family:'Person Card',desc:'Micro-learning, dowody, kompetencje, egzaminy, CPD i odnowienia.'},
+{id:'supplies',name:'Supplies & Resource Readiness',short:'Supplies',type:'PLANNED',family:'Procurement',desc:'Materialy, narzedzia, wynajem, zakupy i gotowosc zadania.'},
+{id:'bim',name:'BIM & Multi-Trade Installation',short:'BIM',type:'PLANNED',family:'Partner Layer',desc:'Warstwa BIM, FabStation i koordynacja instalacji wielu branż.'},
+{id:'field',name:'Field Delivery Layer',short:'Field',type:'PLANNED',family:'Field Operations',desc:'Wspolny postep, dowody, as-built i handover dla wykonawcow.'}
 ];
-const dock=document.getElementById('dock');
-const title=document.getElementById('title');
-const eyebrow=document.getElementById('eyebrow');
-const description=document.getElementById('description');
-const statuses=document.getElementById('statuses');
-const primary=document.getElementById('primaryAction');
-const secondary=document.getElementById('secondaryAction');
-const bigIcon=document.getElementById('bigIcon');
-const mobileLabel=document.getElementById('mobileLabel');
-let active='workspace';
-function statusMarkup(items){return items.map(item=>{const parts=item.split(':');return `<span class="status ${parts[0]}">${parts.slice(1).join(':')}</span>`}).join('')}
-function selectModule(id){const m=modules.find(x=>x.id===id);if(!m)return;active=id;title.textContent=m.title;eyebrow.textContent=m.eyebrow;description.textContent=m.description;statuses.innerHTML=statusMarkup(m.status);bigIcon.innerHTML=icons[m.id];mobileLabel.textContent=m.label;primary.textContent=m.action||'Otworz';primary.href=m.href||'#';primary.onclick=m.href?null:(e=>e.preventDefault());document.querySelectorAll('.dock-btn').forEach(b=>b.classList.toggle('active',b.dataset.id===id));}
-modules.forEach((m,i)=>{const b=document.createElement('button');b.className='dock-btn'+(m.id===active?' active':'');b.dataset.id=m.id;b.dataset.label=m.label;b.setAttribute('aria-label',m.label);b.innerHTML=icons[m.id]+`<span class="dot ${m.status[0].startsWith('review')?'review':m.status[0].startsWith('spec')?'spec':''}"></span>`;b.addEventListener('click',()=>selectModule(m.id));dock.appendChild(b)});
-secondary.addEventListener('click',()=>{secondary.textContent=secondary.textContent==='Pinned'?'Pin to dock':'Pinned';});
-selectModule('workspace');
+const dock=document.getElementById('dock'),grid=document.getElementById('allgrid'),panel=document.getElementById('allpanel'),toggle=document.getElementById('allToggle');
+function statusClass(t){return t==='ACTIVE'?'active-status':t==='DEMO'?'demo-status':'planned-status'}
+function dotClass(t){return t==='DEMO'?'demo':t==='PLANNED'?'planned':''}
+function select(m){
+ document.getElementById('eyebrow').textContent=m.family;
+ document.getElementById('title').textContent=m.name;
+ document.getElementById('description').textContent=m.desc;
+ document.getElementById('bigicon').innerHTML=I[m.id];
+ document.getElementById('statusline').innerHTML=`<span class="status ${statusClass(m.type)}">${m.type}</span><span class="status">DOCK MODULE ${M.indexOf(m)+1}/18</span>`;
+ const link=document.getElementById('openlink');
+ if(m.link){link.href=m.link;link.classList.remove('hidden')}else{link.classList.add('hidden')}
+ document.querySelectorAll('.dockbtn').forEach(b=>b.classList.toggle('selected',b.dataset.id===m.id));
+ panel.classList.add('hidden');toggle.classList.remove('active');
+}
+M.forEach(m=>{
+ const b=document.createElement('button');b.className='dockbtn';b.dataset.id=m.id;b.dataset.label=m.short;b.innerHTML=I[m.id]+`<span class="dot ${dotClass(m.type)}"></span>`;b.onclick=()=>select(m);dock.appendChild(b);
+ const c=document.createElement('button');c.className='allcard';c.innerHTML=`<span class="allicon">${I[m.id]}</span><strong>${m.name}</strong><small>${m.type}</small>`;c.onclick=()=>select(m);grid.appendChild(c);
+});
+toggle.onclick=()=>{panel.classList.toggle('hidden');toggle.classList.toggle('active',!panel.classList.contains('hidden'))};
+select(M[0]);panel.classList.remove('hidden');toggle.classList.add('active');
 </script>
 </body>
 </html>
