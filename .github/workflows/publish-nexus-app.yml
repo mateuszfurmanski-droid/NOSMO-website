@@ -1,3 +1,4 @@
+# Publishes the existing Nexus application inside the NOSMO website.
 name: Publish Nexus App
 
 on:
@@ -91,12 +92,6 @@ jobs:
 
           dock_path = website / 'nexus-dock-demo.html'
           dock = dock_path.read_text(encoding='utf-8')
-          replacements = {
-            "href:'nexus.html'": "href:'apps/nexus/?module=workspace'",
-            "href:'nexus.html#system'": "href:'apps/nexus/?module=projects'",
-            "href:'nexus-module-wall.html'},\n{id:'tasks'": "href:'nexus-module-wall.html'},\n{id:'tasks'",
-          }
-
           exact_links = {
             "id:'workspace'": "apps/nexus/?module=workspace",
             "id:'projects'": "apps/nexus/?module=projects",
