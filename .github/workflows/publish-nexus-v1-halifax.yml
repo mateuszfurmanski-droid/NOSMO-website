@@ -1,0 +1,102 @@
+name: Publish Nexus v1 Halifax Preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-nexus-v1-halifax.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-cbf4-81f4-bf7e-1be34e64fd9f/raw?se=2026-08-02T22:04:51Z&sp=r&sv=2026-02-06&sr=b&scid=a7915a2d-122d-546d-9c35-7a18d78e0a73&skoid=8981e47a-681f-4a6a-b86c-73d6347614b7&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-02T21:59:07Z&ske=2026-08-03T21:59:07Z&sks=b&skv=2026-02-06&sig=Czat/0xhGrR9zRtzVQUnigTc%2B4Vj5lOacrMsFnRmnBg%3D'
+    steps:
+      - name: Check out public website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download validated Nexus v1 artifact
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-v1.zip
+          rm -rf /tmp/nexus-v1-build
+          mkdir -p /tmp/nexus-v1-build
+          unzip -q /tmp/nexus-v1.zip -d /tmp/nexus-v1-build
+          test -f /tmp/nexus-v1-build/index.html
+          test -f /tmp/nexus-v1-build/assets/index-DObI1CEW.js
+          test -f /tmp/nexus-v1-build/assets/index-BxXTyUNe.css
+
+      - name: Prepare public base path
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/nexus-v1-build')
+          index = root / 'index.html'
+          html = index.read_text()
+          html = html.replace('href="/favicon.svg"', 'href="/apps/nexus-v1-preview/favicon.svg"')
+          html = html.replace('src="/assets/index-DObI1CEW.js"', 'src="/apps/nexus-v1-preview/assets/index-DObI1CEW.js"')
+          html = html.replace('href="/assets/index-BxXTyUNe.css"', 'href="/apps/nexus-v1-preview/assets/index-BxXTyUNe.css"')
+          restore = '''    <script>\n      (() => {\n        const params = new URLSearchParams(window.location.search);\n        const route = params.get("route");\n        const safe = route && /^[a-z0-9/_-]+$/i.test(route) ? route.replace(/^\\/+|\\/+$/g, "") : "";\n        if (safe) window.history.replaceState(null, "", `/apps/nexus-v1-preview/${safe}${window.location.hash || ""}`);\n      })();\n    </script>\n'''
+          marker = '    <script type="module" crossorigin src="/apps/nexus-v1-preview/assets/index-DObI1CEW.js"></script>'
+          if marker not in html:
+              raise SystemExit('Public asset marker not found')
+          html = html.replace(marker, restore + marker, 1)
+          index.write_text(html)
+
+          js_path = root / 'assets/index-DObI1CEW.js'
+          js = js_path.read_text()
+          js = js.replace('const tu="/",Nw=[', 'const tu="/apps/nexus-v1-preview/",Nw=[', 1)
+          js = js.replace('base:"/".replace(/\\/$/,"")', 'base:"/apps/nexus-v1-preview/".replace(/\\/$/,"")', 1)
+          if 'const tu="/apps/nexus-v1-preview/",Nw=[' not in js:
+              raise SystemExit('Static application base was not patched')
+          if 'base:"/apps/nexus-v1-preview/".replace' not in js:
+              raise SystemExit('Router base was not patched')
+          js_path.write_text(js)
+          PY
+
+      - name: Replace Nexus v1 preview
+        run: |
+          rm -rf apps/nexus-v1-preview
+          mkdir -p apps/nexus-v1-preview
+          cp -a /tmp/nexus-v1-build/. apps/nexus-v1-preview/
+          cat > nexus-v1-preview.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <meta name="theme-color" content="#05070b">
+          <title>NOSMO Nexus v1 Preview</title>
+          <meta http-equiv="refresh" content="0; url=/apps/nexus-v1-preview/">
+          <link rel="canonical" href="https://nosmotechnology.co.uk/apps/nexus-v1-preview/">
+          <script>window.location.replace('/apps/nexus-v1-preview/'+window.location.search+window.location.hash);</script>
+          </head>
+          <body>Opening NOSMO Nexus v1 Preview…</body>
+          </html>
+          HTML
+
+      - name: Verify Halifax preview package
+        run: |
+          node --check apps/nexus-v1-preview/assets/index-DObI1CEW.js
+          grep -q '/apps/nexus-v1-preview/assets/index-DObI1CEW.js' apps/nexus-v1-preview/index.html
+          grep -q 'base:"/apps/nexus-v1-preview/".replace' apps/nexus-v1-preview/assets/index-DObI1CEW.js
+          grep -q 'Halifax Head Office' apps/nexus-v1-preview/assets/index-DObI1CEW.js
+          grep -q '62 doors' apps/nexus-v1-preview/assets/index-DObI1CEW.js
+          grep -q 'ID.03.04' apps/nexus-v1-preview/assets/index-DObI1CEW.js
+          test -f apps/nexus-v1-preview/fire-door-register-demo/app.html
+
+      - name: Commit preview and remove one-time workflow
+        run: |
+          rm .github/workflows/publish-nexus-v1-halifax.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/nexus-v1-preview nexus-v1-preview.html .github/workflows/publish-nexus-v1-halifax.yml
+          git commit -m "Publish Halifax project in Nexus v1 preview"
+          git push origin HEAD:main
