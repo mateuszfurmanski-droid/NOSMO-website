@@ -1,0 +1,117 @@
+name: Publish Nexus Grant Mobile Fix
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-nexus-grant-mobile-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_URL: 'https://sdmntpritalynorth.oaiusercontent.com/files/00000000-3d00-8246-b12f-f278e6b9b6fc/raw?se=2026-08-03T10:47:28Z&sp=r&sv=2026-02-06&sr=b&scid=05c7ef61-b347-5f60-9ea8-3a0ec6bf5a4b&skoid=8981e47a-681f-4a6a-b86c-73d6347614b7&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-03T06:01:30Z&ske=2026-08-04T06:01:30Z&sks=b&skv=2026-02-06&sig=zQ0o7JWN/DPFV26wEdmIn/M82RPokHr3soj%2BtTWoUI4%3D'
+    steps:
+      - name: Check out public website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download validated mobile-fixed build
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-grant-fix.zip
+          rm -rf /tmp/nexus-grant-fix
+          mkdir -p /tmp/nexus-grant-fix
+          unzip -q /tmp/nexus-grant-fix.zip -d /tmp/nexus-grant-fix
+          test -f /tmp/nexus-grant-fix/index.html
+          test -f /tmp/nexus-grant-fix/assets/index-B5lvPHeY.js
+          test -f /tmp/nexus-grant-fix/assets/index-BwbB2obq.css
+
+      - name: Prepare isolated public base path
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/nexus-grant-fix')
+          index = root / 'index.html'
+          html = index.read_text()
+
+          replacements = {
+              'href="/favicon.svg"': 'href="/apps/nexus-grant-preview/favicon.svg"',
+              'src="/assets/index-B5lvPHeY.js"': 'src="/apps/nexus-grant-preview/assets/index-B5lvPHeY.js"',
+              'href="/assets/index-BwbB2obq.css"': 'href="/apps/nexus-grant-preview/assets/index-BwbB2obq.css"',
+          }
+          for old, new in replacements.items():
+              if old not in html:
+                  raise SystemExit(f'Missing index marker: {old}')
+              html = html.replace(old, new, 1)
+
+          restore = '''    <script>\n      (() => {\n        const params = new URLSearchParams(window.location.search);\n        const restoredRoute = params.get("route");\n        const safeRoute = restoredRoute && /^[a-z0-9/_-]+$/i.test(restoredRoute)\n          ? restoredRoute.replace(/^\\/+|\\/+$/g, "")\n          : "";\n        if (safeRoute) {\n          window.history.replaceState(null, "", `/apps/nexus-grant-preview/${safeRoute}${window.location.hash || ""}`);\n        }\n      })();\n    </script>\n'''
+          marker = '    <script type="module" crossorigin src="/apps/nexus-grant-preview/assets/index-B5lvPHeY.js"></script>'
+          if marker not in html:
+              raise SystemExit('Public asset marker not found')
+          html = html.replace(marker, restore + marker, 1)
+          index.write_text(html)
+
+          js_path = root / 'assets/index-B5lvPHeY.js'
+          js = js_path.read_text()
+          js_replacements = [
+              ('const Mj="/",', 'const Mj="/apps/nexus-grant-preview/",'),
+              ('const Ax="/",', 'const Ax="/apps/nexus-grant-preview/",'),
+              ('const Rp="/",', 'const Rp="/apps/nexus-grant-preview/",'),
+              (r'base:"/".replace(/\/$/,"")', r'base:"/apps/nexus-grant-preview/".replace(/\/$/,"")'),
+          ]
+          for old, new in js_replacements:
+              if old not in js:
+                  raise SystemExit(f'Missing JS base marker: {old}')
+              js = js.replace(old, new, 1)
+          js_path.write_text(js)
+          PY
+
+      - name: Replace isolated preview package
+        run: |
+          rm -rf apps/nexus-grant-preview
+          mkdir -p apps/nexus-grant-preview
+          cp -a /tmp/nexus-grant-fix/. apps/nexus-grant-preview/
+          cat > nexus-grant-preview.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <meta name="theme-color" content="#050913">
+          <title>NOSMO Nexus Grant Demo</title>
+          <meta http-equiv="refresh" content="0; url=/apps/nexus-grant-preview/?route=grant-demo">
+          <link rel="canonical" href="https://nosmotechnology.co.uk/apps/nexus-grant-preview/?route=grant-demo">
+          <script>window.location.replace('/apps/nexus-grant-preview/?route=grant-demo'+window.location.hash);</script>
+          <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050913;color:#f4f8fb;font-family:Arial,sans-serif}a{color:#67e8f9}</style>
+          </head>
+          <body>Opening <a href="/apps/nexus-grant-preview/?route=grant-demo">NOSMO Nexus Grant Demo</a>…</body>
+          </html>
+          HTML
+
+      - name: Verify isolated preview
+        run: |
+          node --check apps/nexus-grant-preview/assets/index-B5lvPHeY.js
+          grep -q '/apps/nexus-grant-preview/assets/index-B5lvPHeY.js' apps/nexus-grant-preview/index.html
+          grep -q 'base:"/apps/nexus-grant-preview/".replace' apps/nexus-grant-preview/assets/index-B5lvPHeY.js
+          grep -q 'path:"/grant-demo"' apps/nexus-grant-preview/assets/index-B5lvPHeY.js
+          grep -q 'pointer: coarse' apps/nexus-grant-preview/assets/index-B5lvPHeY.js
+          grep -q 'Wybierz krok prezentacji' apps/nexus-grant-preview/assets/index-B5lvPHeY.js
+          test -f apps/nexus-grant-preview/doorflow-demo/index.html
+          test -f apps/nexus-grant-preview/fire-door-register-demo/app.html
+          test -f apps/nexus-grant-preview/electrical-commissioning/index.html
+
+      - name: Commit preview and remove one-time workflow
+        run: |
+          rm .github/workflows/publish-nexus-grant-mobile-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/nexus-grant-preview nexus-grant-preview.html .github/workflows/publish-nexus-grant-mobile-fix.yml
+          git commit -m "Fix Nexus grant preview mobile interaction"
+          git push origin HEAD:main
