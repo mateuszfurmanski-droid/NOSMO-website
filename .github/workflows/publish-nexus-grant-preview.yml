@@ -1,0 +1,116 @@
+name: Publish Nexus Grant Preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-nexus-grant-preview.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_URL: 'https://sdmntprukwest.oaiusercontent.com/files/00000000-1a8c-8243-9bd7-83da1b774e16/raw?se=2026-08-03T10:12:34Z&sp=r&sv=2026-02-06&sr=b&scid=0e487c49-fb92-5b2b-a47e-853fbb42e124&skoid=8981e47a-681f-4a6a-b86c-73d6347614b7&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-03T06:42:04Z&ske=2026-08-04T06:42:04Z&sks=b&skv=2026-02-06&sig=R217sAL3o03hc6ogw%2BBWSEAtBQC3hRxvItKh7VEpsLQ%3D'
+    steps:
+      - name: Check out public website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download validated grant demo artifact
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-grant.zip
+          rm -rf /tmp/nexus-grant-build
+          mkdir -p /tmp/nexus-grant-build
+          unzip -q /tmp/nexus-grant.zip -d /tmp/nexus-grant-build
+          test -f /tmp/nexus-grant-build/index.html
+          test -f /tmp/nexus-grant-build/assets/index-BD1S8JAE.js
+          test -f /tmp/nexus-grant-build/assets/index-ctJDnh0G.css
+
+      - name: Prepare isolated public base path
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          root = Path('/tmp/nexus-grant-build')
+          index = root / 'index.html'
+          html = index.read_text()
+
+          replacements = {
+              'href="/favicon.svg"': 'href="/apps/nexus-grant-preview/favicon.svg"',
+              'src="/assets/index-BD1S8JAE.js"': 'src="/apps/nexus-grant-preview/assets/index-BD1S8JAE.js"',
+              'href="/assets/index-ctJDnh0G.css"': 'href="/apps/nexus-grant-preview/assets/index-ctJDnh0G.css"',
+          }
+          for old, new in replacements.items():
+              if old not in html:
+                  raise SystemExit(f'Missing index marker: {old}')
+              html = html.replace(old, new, 1)
+
+          restore = '''    <script>\n      (() => {\n        const params = new URLSearchParams(window.location.search);\n        const restoredRoute = params.get("route");\n        const safeRoute = restoredRoute && /^[a-z0-9/_-]+$/i.test(restoredRoute)\n          ? restoredRoute.replace(/^\\/+|\\/+$/g, "")\n          : "";\n        if (safeRoute) {\n          window.history.replaceState(null, "", `/apps/nexus-grant-preview/${safeRoute}${window.location.hash || ""}`);\n        }\n      })();\n    </script>\n'''
+          marker = '    <script type="module" crossorigin src="/apps/nexus-grant-preview/assets/index-BD1S8JAE.js"></script>'
+          if marker not in html:
+              raise SystemExit('Public asset marker not found')
+          html = html.replace(marker, restore + marker, 1)
+          index.write_text(html)
+
+          js_path = root / 'assets/index-BD1S8JAE.js'
+          js = js_path.read_text()
+          js_replacements = [
+              ('const Mj="/",', 'const Mj="/apps/nexus-grant-preview/",'),
+              ('const Ax="/",Yi=', 'const Ax="/apps/nexus-grant-preview/",Yi='),
+              ('const Rp="/",Te=', 'const Rp="/apps/nexus-grant-preview/",Te='),
+              (r'base:"/".replace(/\/$/,"")', r'base:"/apps/nexus-grant-preview/".replace(/\/$/,"")'),
+          ]
+          for old, new in js_replacements:
+              if old not in js:
+                  raise SystemExit(f'Missing JS base marker: {old}')
+              js = js.replace(old, new, 1)
+          js_path.write_text(js)
+          PY
+
+      - name: Replace isolated preview package
+        run: |
+          rm -rf apps/nexus-grant-preview
+          mkdir -p apps/nexus-grant-preview
+          cp -a /tmp/nexus-grant-build/. apps/nexus-grant-preview/
+          cat > nexus-grant-preview.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <meta name="theme-color" content="#050913">
+          <title>NOSMO Nexus Grant Demo</title>
+          <meta http-equiv="refresh" content="0; url=/apps/nexus-grant-preview/?route=grant-demo">
+          <link rel="canonical" href="https://nosmotechnology.co.uk/apps/nexus-grant-preview/?route=grant-demo">
+          <script>window.location.replace('/apps/nexus-grant-preview/?route=grant-demo'+window.location.hash);</script>
+          <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050913;color:#f4f8fb;font-family:Arial,sans-serif}a{color:#67e8f9}</style>
+          </head>
+          <body>Opening <a href="/apps/nexus-grant-preview/?route=grant-demo">NOSMO Nexus Grant Demo</a>…</body>
+          </html>
+          HTML
+
+      - name: Verify isolated preview
+        run: |
+          node --check apps/nexus-grant-preview/assets/index-BD1S8JAE.js
+          grep -q '/apps/nexus-grant-preview/assets/index-BD1S8JAE.js' apps/nexus-grant-preview/index.html
+          grep -q 'base:"/apps/nexus-grant-preview/".replace' apps/nexus-grant-preview/assets/index-BD1S8JAE.js
+          grep -q 'path:"/grant-demo"' apps/nexus-grant-preview/assets/index-BD1S8JAE.js
+          grep -q 'const Ax="/apps/nexus-grant-preview/"' apps/nexus-grant-preview/assets/index-BD1S8JAE.js
+          test -f apps/nexus-grant-preview/doorflow-demo/index.html
+          test -f apps/nexus-grant-preview/fire-door-register-demo/app.html
+          test -f apps/nexus-grant-preview/electrical-commissioning/index.html
+
+      - name: Commit preview and remove one-time workflow
+        run: |
+          rm .github/workflows/publish-nexus-grant-preview.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/nexus-grant-preview nexus-grant-preview.html .github/workflows/publish-nexus-grant-preview.yml
+          git commit -m "Publish isolated Nexus grant preview"
+          git push origin HEAD:main
