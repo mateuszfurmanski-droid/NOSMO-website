@@ -1,0 +1,50 @@
+name: Publish tuned graph preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-graph-preview-motion.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ARTIFACT_URL: 'https://sdmntprnorthcentralus.oaiusercontent.com/files/00000000-3a74-822f-bd16-82817b8d77c4/raw?se=2026-08-04T07:48:50Z&sp=r&sv=2026-02-06&sr=b&scid=34d7d7de-04c9-5023-9956-9d74430d9b44&skoid=a63e6f05-dc2f-4fa5-b0e3-b1cb9c0893bb&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-04T05:10:38Z&ske=2026-08-05T05:10:38Z&sks=b&skv=2026-02-06&sig=dwlzs3O/eLsmOj5aWrgpeBcwyKCrCMIskb1A%2BWPWRoU%3D'
+
+    steps:
+      - name: Check out website main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download validated graph preview
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-graph-preview.zip
+          rm -rf /tmp/nexus-graph-preview
+          mkdir -p /tmp/nexus-graph-preview
+          unzip -q /tmp/nexus-graph-preview.zip -d /tmp/nexus-graph-preview
+          test -f /tmp/nexus-graph-preview/index.html
+          test -f /tmp/nexus-graph-preview/relationship-tree/index.html
+          grep -q '/apps/nexus-graph-preview/assets/' /tmp/nexus-graph-preview/index.html
+
+      - name: Replace public graph preview
+        run: |
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-graph-preview/. apps/nexus-graph-preview/
+
+      - name: Commit preview and remove one-time workflow
+        run: |
+          rm .github/workflows/publish-graph-preview-motion.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/nexus-graph-preview .github/workflows/publish-graph-preview-motion.yml
+          git commit -m "Tune Nexus graph release glide"
+          git push origin HEAD:main
