@@ -16,20 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      (() => {
-        const params = new URLSearchParams(window.location.search);
-        const restoredRoute = params.get("route");
-        const safeRoute = restoredRoute && /^[a-z0-9/_-]+$/i.test(restoredRoute)
-          ? restoredRoute.replace(/^\/+|\/+$/g, "")
-          : "";
-        if (safeRoute) {
-          window.history.replaceState(null, "", `/apps/nexus-grant-preview/${safeRoute}${window.location.hash || ""}`);
-        }
-      })();
-    </script>
-    <script type="module" crossorigin src="/apps/nexus-grant-preview/assets/index-B5lvPHeY.js"></script>
-    <link rel="stylesheet" crossorigin href="/apps/nexus-grant-preview/assets/index-BwbB2obq.css">
+    <script type="module" crossorigin src="/apps/nexus-grant-preview/assets/index-D1luFVE1.js"></script>
+    <link rel="stylesheet" crossorigin href="/apps/nexus-grant-preview/assets/index-Zq406dZZ.css">
   </head>
   <body>
     <div id="root"></div>
