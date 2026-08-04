@@ -1,0 +1,50 @@
+name: Publish Multi Folder Dock Preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-multi-folder-dock-preview.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ARTIFACT_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-cac0-81f4-8bc5-b2b206e60bc9/raw?se=2026-08-04T10:48:00Z&sp=r&sv=2026-02-06&sr=b&scid=43631cff-365d-55ff-a280-9b9cc1e358cb&skoid=ba81670d-b682-4d2d-9682-ac0ffdfb3fa1&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-03T22:30:49Z&ske=2026-08-04T22:30:49Z&sks=b&skv=2026-02-06&sig=5hV3d0QsZFN6Tnj/N7pTEcNYwp3OIyT%2BXSIW/X089Nc%3D'
+
+    steps:
+      - name: Checkout website main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download verified folder dock build
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-folder-dock.zip
+          rm -rf /tmp/nexus-folder-dock
+          mkdir -p /tmp/nexus-folder-dock
+          unzip -q /tmp/nexus-folder-dock.zip -d /tmp/nexus-folder-dock
+          test -f /tmp/nexus-folder-dock/index.html
+          test -f /tmp/nexus-folder-dock/relationship-tree/index.html
+          grep -q '/apps/nexus-graph-preview/assets/' /tmp/nexus-folder-dock/index.html
+
+      - name: Replace public graph preview
+        run: |
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-folder-dock/. apps/nexus-graph-preview/
+
+      - name: Commit preview and remove publisher
+        run: |
+          rm .github/workflows/publish-multi-folder-dock-preview.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/nexus-graph-preview .github/workflows/publish-multi-folder-dock-preview.yml
+          git commit -m "Publish multi-open Nexus folder dock"
+          git push origin HEAD:main
