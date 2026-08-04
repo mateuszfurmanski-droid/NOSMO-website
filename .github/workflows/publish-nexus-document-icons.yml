@@ -1,0 +1,55 @@
+name: Publish Nexus document icons
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-nexus-document-icons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ARTIFACT_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-0b28-81f4-a6c8-36620d9811a1/raw?se=2026-08-04T13:42:08Z&sp=r&sv=2026-02-06&sr=b&scid=c3cd5d62-1d34-5421-8df4-5e4386e043ef&skoid=c30e7ce7-1f51-4051-a377-288cdba21c02&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-04T06:58:42Z&ske=2026-08-05T06:58:42Z&sks=b&skv=2026-02-06&sig=KnVTDjD%2B6TC7/HTHRVDNixybcEnPg/IGIrNrOIp1Y4c%3D'
+    steps:
+      - name: Checkout website
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Nexus preview build
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-preview.zip
+          rm -rf /tmp/nexus-preview
+          mkdir -p /tmp/nexus-preview
+          unzip -q /tmp/nexus-preview.zip -d /tmp/nexus-preview
+
+      - name: Replace public preview
+        run: |
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-preview/. apps/nexus-graph-preview/
+          test -f apps/nexus-graph-preview/index.html
+          test -f apps/nexus-graph-preview/relationship-tree/index.html
+          test -d apps/nexus-graph-preview/assets
+          grep -q '/apps/nexus-graph-preview/' apps/nexus-graph-preview/relationship-tree/index.html
+
+      - name: Remove temporary workflow
+        run: rm -f .github/workflows/publish-nexus-document-icons.yml
+
+      - name: Commit published build
+        run: |
+          git config user.name "NOSMO Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Preview already current."
+            exit 0
+          fi
+          git commit -m "Publish Nexus document format icons"
+          git push origin HEAD:main
