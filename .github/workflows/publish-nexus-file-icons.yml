@@ -1,0 +1,58 @@
+name: Publish Nexus file icons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-nexus-file-icons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout website
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download verified Nexus preview
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 \
+            'https://sdmntprukwest.oaiusercontent.com/files/00000000-5198-8243-87df-0534d7c9eaca/raw?se=2026-08-06T11%3A58%3A16Z&sp=r&sv=2026-02-06&sr=b&scid=433b561c-2b97-5c2e-b11a-dcbd7c807664&skoid=e32cbaad-a1eb-4299-9f16-1b364ab43781&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-06T08%3A42%3A16Z&ske=2026-08-07T08%3A42%3A16Z&sks=b&skv=2026-02-06&sig=oFbu6RBKeO97EWaHoYV4lB%2B%2BGkddng/wYdaIxyEE/u8%3D' \
+            --output /tmp/nexus-graph-preview.zip
+          rm -rf /tmp/nexus-graph-preview
+          mkdir -p /tmp/nexus-graph-preview
+          unzip -q /tmp/nexus-graph-preview.zip -d /tmp/nexus-graph-preview
+
+      - name: Replace public graph preview
+        shell: bash
+        run: |
+          test -f /tmp/nexus-graph-preview/index.html
+          test -f /tmp/nexus-graph-preview/relationship-tree/index.html
+          test -n "$(find /tmp/nexus-graph-preview/assets -maxdepth 1 -name 'index-*.js' -print -quit)"
+          test -n "$(find /tmp/nexus-graph-preview/assets -maxdepth 1 -name 'index-*.css' -print -quit)"
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-graph-preview/. apps/nexus-graph-preview/
+          grep -q '/apps/nexus-graph-preview/' apps/nexus-graph-preview/index.html
+          grep -q '/apps/nexus-graph-preview/' apps/nexus-graph-preview/relationship-tree/index.html
+
+      - name: Remove one-time workflow and publish
+        shell: bash
+        run: |
+          rm -f .github/workflows/publish-nexus-file-icons.yml
+          git config user.name 'NOSMO Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Nothing to publish.'
+            exit 0
+          fi
+          git commit -m 'Publish shared Nexus file icon system'
+          git push origin HEAD:main
