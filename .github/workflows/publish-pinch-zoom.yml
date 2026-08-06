@@ -1,5 +1,6 @@
 name: Publish Nexus pinch zoom
 
+# Trigger registered workflow after creation.
 on:
   push:
     branches: [main]
