@@ -1,0 +1,48 @@
+name: Publish glossy Nexus file icons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-glossy-file-icons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download built Nexus preview
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 'https://sdmntpritalynorth.oaiusercontent.com/files/00000000-8648-8246-9086-4c5928a83701/raw?se=2026-08-06T12%3A23%3A23Z&sp=r&sv=2026-02-06&sr=b&scid=27dcd8e7-eca2-5d84-9044-ceee5cd701e5&skoid=e32cbaad-a1eb-4299-9f16-1b364ab43781&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-06T05%3A27%3A15Z&ske=2026-08-07T05%3A27%3A15Z&sks=b&skv=2026-02-06&sig=NYnfkzSoQd34yihKpFlGxQa9opemVxgrcgh6zQEP6qM%3D' -o /tmp/nexus-preview.zip
+          rm -rf /tmp/nexus-preview
+          mkdir -p /tmp/nexus-preview
+          unzip -q /tmp/nexus-preview.zip -d /tmp/nexus-preview
+
+      - name: Replace public preview
+        shell: bash
+        run: |
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-preview/. apps/nexus-graph-preview/
+          test -f apps/nexus-graph-preview/index.html
+          test -f apps/nexus-graph-preview/relationship-tree/index.html
+          test -d apps/nexus-graph-preview/assets
+          grep -q '/apps/nexus-graph-preview/' apps/nexus-graph-preview/index.html
+
+      - name: Commit public build and remove publisher
+        shell: bash
+        run: |
+          rm -f .github/workflows/publish-glossy-file-icons.yml
+          git config user.name 'NOSMO Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Publish glossy 3D Nexus file icons'
+          git push origin HEAD:main
