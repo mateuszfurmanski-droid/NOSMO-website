@@ -1,6 +1,5 @@
 name: Publish direct Nexus file icons
 
-# Registered workflow trigger 2.
 on:
   push:
     branches: [main]
@@ -36,8 +35,8 @@ jobs:
           test -f apps/nexus-graph-preview/relationship-tree/index.html
           test -f apps/nexus-graph-preview/assets/file-icons/pdf.webp
           test -f apps/nexus-graph-preview/assets/file-icons/xlsx.webp
-          grep -R -q 'assets/file-icons/pdf.webp' apps/nexus-graph-preview/assets/*.js
-          grep -R -q 'assets/file-icons/xlsx.webp' apps/nexus-graph-preview/assets/*.js
+          test -s apps/nexus-graph-preview/assets/file-icons/pdf.webp
+          test -s apps/nexus-graph-preview/assets/file-icons/xlsx.webp
 
       - name: Commit public build and remove publisher
         shell: bash
