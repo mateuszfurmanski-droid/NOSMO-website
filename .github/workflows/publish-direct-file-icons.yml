@@ -1,0 +1,49 @@
+name: Publish direct Nexus file icons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-direct-file-icons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download verified graph preview
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-2828-81f4-a120-52c55a44e613/raw?se=2026-08-06T13%3A12%3A13Z&sp=r&sv=2026-02-06&sr=b&scid=cdeb36d7-1518-5a67-9cb9-cdc0a95fb291&skoid=56822d8b-6cfd-42ed-a00d-1452dca42036&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-06T08%3A24%3A28Z&ske=2026-08-07T08%3A24%3A28Z&sks=b&skv=2026-02-06&sig=Z/ixNYNtRmP0%2BQadcimvN69Z5c1ystxAcq%2B%2B8i38Tm4%3D' -o /tmp/nexus-preview.zip
+          rm -rf /tmp/nexus-preview
+          mkdir -p /tmp/nexus-preview
+          unzip -q /tmp/nexus-preview.zip -d /tmp/nexus-preview
+
+      - name: Replace public graph preview
+        shell: bash
+        run: |
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-preview/. apps/nexus-graph-preview/
+          test -f apps/nexus-graph-preview/relationship-tree/index.html
+          test -f apps/nexus-graph-preview/assets/file-icons/pdf.webp
+          test -f apps/nexus-graph-preview/assets/file-icons/xlsx.webp
+          grep -R -q 'assets/file-icons/pdf.webp' apps/nexus-graph-preview/assets/*.js
+          grep -R -q 'assets/file-icons/xlsx.webp' apps/nexus-graph-preview/assets/*.js
+
+      - name: Commit public build and remove publisher
+        shell: bash
+        run: |
+          rm -f .github/workflows/publish-direct-file-icons.yml
+          git config user.name 'NOSMO Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Publish direct PDF and XLSX icon files'
+          git push origin HEAD:main
