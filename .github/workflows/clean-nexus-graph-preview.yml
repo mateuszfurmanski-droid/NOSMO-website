@@ -1,0 +1,105 @@
+name: Clean existing Nexus graph preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/clean-nexus-graph-preview.yml
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Clean only stale graph bundles and refresh current HTML
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path('apps/nexus-graph-preview')
+          assets = root / 'assets'
+          html_paths = [root / 'index.html', root / 'relationship-tree' / 'index.html']
+
+          for path in html_paths:
+              if not path.exists():
+                  raise SystemExit(f'Missing required HTML: {path}')
+
+          referenced = set()
+          pattern = re.compile(r'/apps/nexus-graph-preview/assets/(index-[^"\']+\.(?:js|css))')
+          for path in html_paths:
+              text = path.read_text(encoding='utf-8')
+              referenced.update(pattern.findall(text))
+
+          if not referenced:
+              raise SystemExit('No current JS/CSS references found; refusing to clean')
+
+          existing = {p.name for p in assets.glob('index-*') if p.suffix in {'.js', '.css'}}
+          missing = referenced - existing
+          if missing:
+              raise SystemExit(f'Current referenced assets missing: {sorted(missing)}')
+
+          stale = sorted(existing - referenced)
+          print('Referenced bundles:', sorted(referenced))
+          print('Stale bundles to delete:', stale)
+          for name in stale:
+              (assets / name).unlink()
+
+          js_files = [assets / name for name in referenced if name.endswith('.js')]
+          if not js_files:
+              raise SystemExit('No current JavaScript bundle found')
+          js_text = '\n'.join(path.read_text(encoding='utf-8') for path in js_files)
+          for required in ('assets/file-icons/pdf.webp', 'assets/file-icons/xlsx.webp'):
+              if required not in js_text:
+                  raise SystemExit(f'Current JS does not reference {required}')
+
+          for icon in ('pdf.webp', 'xlsx.webp'):
+              icon_path = assets / 'file-icons' / icon
+              if not icon_path.exists() or icon_path.stat().st_size < 1000:
+                  raise SystemExit(f'Invalid current icon asset: {icon_path}')
+
+          stamp = '2026-08-06T15:34+01:00-clean-existing-folder'
+          for path in html_paths:
+              text = path.read_text(encoding='utf-8')
+              text = re.sub(r'\s*<meta name="nosmo-build"[^>]*>', '', text)
+              text = text.replace('<head>', f'<head>\n    <meta name="nosmo-build" content="{stamp}" />\n    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />\n    <meta http-equiv="Pragma" content="no-cache" />\n    <meta http-equiv="Expires" content="0" />', 1)
+              text = re.sub(
+                  r'(src="/apps/nexus-graph-preview/assets/index-[^"]+\.js)(?:\?[^"\s]*)?("[^>]*>)',
+                  rf'\1?deploy=20260806-1534\2',
+                  text,
+              )
+              text = re.sub(
+                  r'(href="/apps/nexus-graph-preview/assets/index-[^"]+\.css)(?:\?[^"\s]*)?("[^>]*>)',
+                  rf'\1?deploy=20260806-1534\2',
+                  text,
+              )
+              path.write_text(text, encoding='utf-8')
+
+          print('Cleaned existing folder without changing its route.')
+          PY
+
+      - name: Verify retained build
+        shell: bash
+        run: |
+          test -f apps/nexus-graph-preview/relationship-tree/index.html
+          grep -q 'deploy=20260806-1534' apps/nexus-graph-preview/relationship-tree/index.html
+          test -f apps/nexus-graph-preview/assets/file-icons/pdf.webp
+          test -f apps/nexus-graph-preview/assets/file-icons/xlsx.webp
+
+      - name: Commit cleanup and remove one-time workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/clean-nexus-graph-preview.yml
+          git config user.name 'NOSMO Build Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Clean existing Nexus graph preview deployment'
+          git push origin HEAD:main
