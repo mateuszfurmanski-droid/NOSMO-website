@@ -1,5 +1,6 @@
 name: Publish all-blue Nexus dock
 
+# Trigger registered publisher.
 on:
   push:
     branches: [main]
