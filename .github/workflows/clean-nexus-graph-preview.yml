@@ -1,5 +1,6 @@
 name: Clean existing Nexus graph preview
 
+# Registered one-time cleanup trigger.
 on:
   push:
     branches: [main]
