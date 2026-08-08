@@ -12,18 +12,10 @@
 <body>
   <main class="world-shell" id="worldShell">
     <nav class="system-rail glass" aria-label="Nexus Project World navigation">
-      <button class="nav-tile active" id="nexusTile" type="button" aria-label="Show Nexus project world">
-        <span class="tile-icon">N</span><span class="tile-label">NEXUS</span><span class="tile-sub">WORLD</span>
-      </button>
-      <button class="nav-tile project-tile" id="projectTile" type="button" title="e-SAFE Catania Real Pilot">
-        <span class="tile-icon">▣</span><span class="tile-label">PROJECT</span><span class="tile-sub">e-SAFE</span>
-      </button>
-      <button class="nav-tile" id="timeTile" type="button" aria-expanded="false" aria-controls="timelineZone">
-        <span class="tile-icon">◷</span><span class="tile-label">TIME</span><span class="tile-sub" id="timeTileValue">SIM</span>
-      </button>
-      <button class="nav-tile" id="sourcesTile" type="button" aria-label="Open project source library">
-        <span class="tile-icon">▤</span><span class="tile-label">SOURCES</span><span class="tile-sub" id="sourceTileValue">0 DOCS</span>
-      </button>
+      <button class="nav-tile active" id="nexusTile" type="button" aria-label="Show Nexus project world"><span class="tile-icon">N</span><span class="tile-label">NEXUS</span><span class="tile-sub">WORLD</span></button>
+      <button class="nav-tile project-tile" id="projectTile" type="button" title="e-SAFE Catania Real Pilot"><span class="tile-icon">▣</span><span class="tile-label">PROJECT</span><span class="tile-sub">e-SAFE</span></button>
+      <button class="nav-tile" id="timeTile" type="button" aria-expanded="false" aria-controls="timelineZone"><span class="tile-icon">◷</span><span class="tile-label">TIME</span><span class="tile-sub" id="timeTileValue">SIM</span></button>
+      <button class="nav-tile" id="sourcesTile" type="button" aria-label="Open project source library"><span class="tile-icon">▤</span><span class="tile-label">SOURCES</span><span class="tile-sub" id="sourceTileValue">0 DOCS</span></button>
     </nav>
 
     <section class="timeline-zone glass" id="timelineZone" aria-label="Project Timeline Zone" aria-hidden="true">
@@ -37,24 +29,17 @@
 
     <iframe id="nexusFrame" class="nexus-frame" title="NOSMO Nexus Relationship Tree" src="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&embed=1" loading="eager" allow="fullscreen"></iframe>
 
-    <section class="project-world-layer" id="projectWorldLayer" aria-label="e-SAFE Catania project graph">
-      <div class="world-stage" id="worldStage"><svg class="world-network" id="worldNetwork" preserveAspectRatio="none"></svg><div class="world-node-host" id="worldNodeHost"></div><div class="world-status-chip" id="worldStatus"><strong>0</strong> / 95 sources</div></div>
-    </section>
+    <section class="project-world-layer" id="projectWorldLayer" aria-label="e-SAFE Catania project graph"><div class="world-stage" id="worldStage"><svg class="world-network" id="worldNetwork" preserveAspectRatio="none"></svg><div class="world-node-host" id="worldNodeHost"></div><div class="world-status-chip" id="worldStatus"><strong>0</strong> / 95 sources</div></div></section>
 
-    <aside class="world-panel" id="projectPanel" aria-label="Project details">
-      <div class="world-panel-head"><div><div class="world-panel-kicker">REAL PROJECT · e-SAFE H2020</div><h2>e-SAFE Catania Real Pilot</h2></div><button class="world-panel-close" id="closeProjectPanel">×</button></div>
-      <div class="world-panel-body"><div class="provenance-band"><strong>Project facts</strong> are real e-SAFE context. Timeline placement of system nodes is currently derived from the source-publication chronology until construction-event dates are extracted from the PDFs.</div><div class="project-facts" id="projectFacts"></div><div class="project-system-grid" id="projectSystems"></div></div>
-    </aside>
+    <aside class="world-panel" id="projectPanel" aria-label="Project details"><div class="world-panel-head"><div><div class="world-panel-kicker">REAL PROJECT · e-SAFE H2020</div><h2>e-SAFE Catania Real Pilot</h2></div><button class="world-panel-close" id="closeProjectPanel">×</button></div><div class="world-panel-body"><div class="provenance-band"><strong>Project facts</strong> are real e-SAFE context. Timeline placement of system nodes is currently derived from the source-publication chronology until construction-event dates are extracted from the PDFs.</div><div class="project-facts" id="projectFacts"></div><div class="project-system-grid" id="projectSystems"></div></div></aside>
 
-    <aside class="world-panel" id="sourceLibrary" aria-label="Project source library">
-      <div class="world-panel-head"><div><div class="world-panel-kicker">SOURCE LIBRARY</div><h2>e-SAFE project records</h2></div><button class="world-panel-close" id="closeSourceLibrary">×</button></div>
-      <div class="world-panel-body"><div class="source-tools"><input class="source-search" id="sourceSearch" type="search" placeholder="Search 95 records…" /><select class="source-scope" id="sourceScope"><option value="time">AS OF TIME</option><option value="all">ALL 95</option></select></div><div class="source-filter-row" id="sourceFilterRow"></div><div class="source-summary" id="sourceSummary"></div><div class="source-list" id="sourceList"></div></div>
-    </aside>
+    <aside class="world-panel" id="sourceLibrary" aria-label="Project source library"><div class="world-panel-head"><div><div class="world-panel-kicker">SOURCE LIBRARY</div><h2>e-SAFE project records</h2></div><button class="world-panel-close" id="closeSourceLibrary">×</button></div><div class="world-panel-body"><div class="source-tools"><input class="source-search" id="sourceSearch" type="search" placeholder="Search 95 records…" /><select class="source-scope" id="sourceScope"><option value="time">AS OF TIME</option><option value="all">ALL 95</option></select></div><div class="source-filter-row" id="sourceFilterRow"></div><div class="source-summary" id="sourceSummary"></div><div class="source-list" id="sourceList"></div></div></aside>
 
     <aside class="event-drawer glass" id="eventDrawer" aria-hidden="true"><div class="drawer-head"><div><div class="eyebrow">PROJECT EVENT</div><h2 id="drawerTitle">—</h2></div><button class="close-panel" id="closeDrawer" aria-label="Close event">×</button></div><dl id="drawerMeta"></dl><div class="drawer-files" id="drawerFiles"></div><a id="drawerSource" class="source-link" href="#" target="_blank" rel="noopener">Open source record ↗</a><div class="provenance-note"><strong>Provenance:</strong> source publication dates are preserved. Construction-event dates will be added separately as they are extracted from project documents.</div></aside>
   </main>
   <script src="./data.js"></script>
   <script src="./world.js"></script>
   <script src="./app.js"></script>
+  <script src="./world-sync.js"></script>
 </body>
 </html>
