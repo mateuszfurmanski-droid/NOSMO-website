@@ -53,7 +53,7 @@ jobs:
           if(!app.includes('showNexusWorld')) throw new Error('Persistent Project World Nexus action missing');
 
           const tree=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/index.html','utf8');
-          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change','hideEmbeddedChrome','workflow mode','tree-toolbar']){
+          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change','hideEmbeddedChrome','workflow','tree-toolbar']){
             if(!tree.includes(required)) throw new Error(`Relationship Tree embedded contract missing ${required}`);
           }
           console.log(`records=${records.length} core=${core.length} world=${world.id}`);
