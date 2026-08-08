@@ -1,0 +1,17 @@
+:root{--tree-chrome-crop:112px}
+
+/* The Relationship Tree keeps its own desktop/mobile toolbar. In Project World demo
+   the outer Nexus rail is the only top navigation, so crop the embedded toolbar
+   from the iframe viewport while preserving the tree canvas and bottom app dock. */
+.nexus-frame{
+  top:calc(var(--rail-h) - var(--tree-chrome-crop));
+  height:calc(100% - var(--rail-h) + var(--tree-chrome-crop));
+}
+.world-shell.timeline-open .nexus-frame{
+  top:calc(var(--rail-h) + var(--timeline-h) - var(--tree-chrome-crop));
+  height:calc(100% - var(--rail-h) - var(--timeline-h) + var(--tree-chrome-crop));
+}
+
+@media(max-width:760px){
+  :root{--tree-chrome-crop:128px}
+}
