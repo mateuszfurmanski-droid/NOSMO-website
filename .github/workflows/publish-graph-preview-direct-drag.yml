@@ -1,0 +1,50 @@
+name: Publish direct-drag graph preview
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/publish-graph-preview-direct-drag.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ARTIFACT_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-bd18-81f4-8ae9-569bfe540d3e/raw?se=2026-08-08T12%3A52%3A30Z&sp=r&sv=2026-02-06&sr=b&scid=fc17437a-91df-5005-a42c-9bd29910fff2&skoid=c30e7ce7-1f51-4051-a377-288cdba21c02&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T10%3A21%3A21Z&ske=2026-08-09T10%3A21%3A21Z&sks=b&skv=2026-02-06&sig=X%2BS2NXg5VZh6UYbf/pWw1u5XnxVS3RgGRDzqOpIiq88%3D'
+
+    steps:
+      - name: Check out website main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Download validated graph preview
+        run: |
+          curl --fail --location "$ARTIFACT_URL" --output /tmp/nexus-graph-preview.zip
+          rm -rf /tmp/nexus-graph-preview
+          mkdir -p /tmp/nexus-graph-preview
+          unzip -q /tmp/nexus-graph-preview.zip -d /tmp/nexus-graph-preview
+          test -f /tmp/nexus-graph-preview/index.html
+          test -f /tmp/nexus-graph-preview/relationship-tree/index.html
+          grep -q '/apps/nexus-graph-preview/assets/' /tmp/nexus-graph-preview/index.html
+
+      - name: Replace public graph preview
+        run: |
+          rm -rf apps/nexus-graph-preview
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-graph-preview/. apps/nexus-graph-preview/
+
+      - name: Commit preview and remove one-time workflow
+        run: |
+          rm .github/workflows/publish-graph-preview-direct-drag.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/nexus-graph-preview .github/workflows/publish-graph-preview-direct-drag.yml
+          git commit -m "Publish direct-touch Nexus graph drag fix"
+          git push origin HEAD:main
