@@ -1,0 +1,55 @@
+name: Deploy Nexus graph artifact
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/deploy-nexus-graph-artifact.yml
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download validated Nexus artifact
+        env:
+          ARTIFACT_URL: 'https://sdmntprnortheu.oaiusercontent.com/files/00000000-4794-81f4-853b-e89c69621a1a/raw?se=2026-08-08T17%3A55%3A48Z&sp=r&sv=2026-02-06&sr=b&scid=c2906e83-fb9c-51b1-a66d-73d223c58cb2&skoid=ba81670d-b682-4d2d-9682-ac0ffdfb3fa1&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-08-08T06%3A58%3A21Z&ske=2026-08-09T06%3A58%3A21Z&sks=b&skv=2026-02-06&sig=PMcah2khlotjUULXZ9z1UoZz7lGQb03Q5QcLgzlABDc%3D'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 "$ARTIFACT_URL" -o /tmp/nexus-graph-preview.zip
+          rm -rf /tmp/nexus-graph-preview
+          mkdir -p /tmp/nexus-graph-preview
+          unzip -q /tmp/nexus-graph-preview.zip -d /tmp/nexus-graph-preview
+          test -f /tmp/nexus-graph-preview/relationship-tree/index.html
+          test -n "$(find /tmp/nexus-graph-preview/assets -maxdepth 1 -name 'index-*.js' -print -quit)"
+
+      - name: Replace public Nexus graph preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p apps/nexus-graph-preview
+          cp -a /tmp/nexus-graph-preview/. apps/nexus-graph-preview/
+          printf '%s\n' '71daa215dd0dc15638ccaeb317ac88bdc8d7069d' > apps/nexus-graph-preview/DEPLOYED_COMMIT.txt
+          git add apps/nexus-graph-preview
+          git diff --cached --check
+
+      - name: Commit deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then
+            echo 'Artifact already deployed'
+            exit 0
+          fi
+          git config user.name 'nosmo-deploy'
+          git config user.email 'actions@users.noreply.github.com'
+          git commit -m 'Deploy Nexus graph preview 71daa21'
+          git push origin HEAD:main
