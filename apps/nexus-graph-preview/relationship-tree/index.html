@@ -4,23 +4,70 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>NOSMO Nexus™</title>
-    <meta name="description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta name="description" content="NOSMO Nexus™ — connected project intelligence and WorkSuite operations." />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="NOSMO Nexus™" />
-    <meta property="og:description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta property="og:description" content="NOSMO Nexus™ — connected project intelligence and WorkSuite operations." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="NOSMO Nexus™" />
-    <meta name="twitter:description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:description" content="NOSMO Nexus™ — connected project intelligence and WorkSuite operations." />
     <link rel="icon" type="image/svg+xml" href="/apps/nexus-graph-preview/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-DV4YaLnF.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-WO_Iu468.css">
-  <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
-</head>
+    <script>
+      history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");
+    </script>
+  </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Phase 1 WorkSuite compatibility shim.
+      // The current Nexus graph is a compiled export. Until its editable source
+      // build is republished, rebrand user-visible DoorFlow text and launcher
+      // links at runtime without modifying or de-minifying the generated bundle.
+      (() => {
+        const LEGACY_ROUTE = "/apps/doorflow/";
+        const WORKSUITE_ROUTE = "/apps/worksuite/";
+        let queued = false;
+
+        function applyWorkSuiteBrand() {
+          queued = false;
+
+          document.querySelectorAll(`a[href="${LEGACY_ROUTE}"]`).forEach((link) => {
+            if (link.getAttribute("href") === LEGACY_ROUTE) {
+              link.setAttribute("href", WORKSUITE_ROUTE);
+              link.setAttribute("aria-label", (link.getAttribute("aria-label") || "Open WorkSuite").replace(/DoorFlow/g, "WorkSuite"));
+              link.setAttribute("title", (link.getAttribute("title") || "WorkSuite").replace(/DoorFlow/g, "WorkSuite"));
+            }
+          });
+
+          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          const nodes = [];
+          while (walker.nextNode()) nodes.push(walker.currentNode);
+
+          nodes.forEach((node) => {
+            const parent = node.parentElement;
+            if (!parent || parent.closest("script, style, textarea, input")) return;
+            if (node.nodeValue && node.nodeValue.includes("DoorFlow")) {
+              node.nodeValue = node.nodeValue.replace(/DoorFlow/g, "WorkSuite");
+            }
+          });
+        }
+
+        function queueApply() {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(applyWorkSuiteBrand);
+        }
+
+        const observer = new MutationObserver(queueApply);
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+        queueApply();
+      })();
+    </script>
   </body>
 </html>
