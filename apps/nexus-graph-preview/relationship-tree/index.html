@@ -38,20 +38,55 @@
         });
 
         if (embedded) {
-          const hideDuplicateNexusMenu = () => {
+          const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+          const hideEmbeddedChrome = () => {
             document.querySelectorAll('button,a').forEach((el) => {
-              const label = (el.textContent || '').trim().toLowerCase();
+              const label = norm(el.textContent);
               if (label.includes('nexus menu')) {
                 el.style.display = 'none';
                 el.setAttribute('aria-hidden', 'true');
+                el.dataset.nexusEmbeddedHidden = 'nexus-menu';
+              }
+            });
+
+            const workflowControls = Array.from(document.querySelectorAll('button,[role="button"],div'))
+              .filter((el) => norm(el.textContent).includes('workflow mode'));
+
+            workflowControls.forEach((workflowControl) => {
+              let node = workflowControl;
+              let toolbar = null;
+              for (let depth = 0; node && depth < 8; depth += 1, node = node.parentElement) {
+                const text = norm(node.innerText || node.textContent);
+                const rect = node.getBoundingClientRect();
+                const looksLikeToolbar =
+                  text.includes('workflow mode') &&
+                  text.includes('objects') &&
+                  text.includes('links') &&
+                  rect.width >= 240 &&
+                  rect.height >= 50 &&
+                  rect.height <= 190;
+                if (looksLikeToolbar) {
+                  toolbar = node;
+                  break;
+                }
+              }
+              if (toolbar) {
+                toolbar.style.display = 'none';
+                toolbar.setAttribute('aria-hidden', 'true');
+                toolbar.dataset.nexusEmbeddedHidden = 'tree-toolbar';
               }
             });
           };
+
           window.addEventListener('DOMContentLoaded', () => {
-            hideDuplicateNexusMenu();
-            const observer = new MutationObserver(hideDuplicateNexusMenu);
-            observer.observe(document.body, { childList: true, subtree: true });
-            window.setTimeout(() => observer.disconnect(), 15000);
+            hideEmbeddedChrome();
+            requestAnimationFrame(hideEmbeddedChrome);
+            window.setTimeout(hideEmbeddedChrome, 250);
+            window.setTimeout(hideEmbeddedChrome, 1000);
+            const observer = new MutationObserver(hideEmbeddedChrome);
+            observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+            window.setTimeout(() => observer.disconnect(), 30000);
           });
         }
       })();

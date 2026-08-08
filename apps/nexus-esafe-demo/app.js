@@ -65,13 +65,31 @@
     const cutoff=sourceDateAt(p);
     return records.filter(r=>new Date(r.date+'T23:59:59Z')<=cutoff);
   };
-  const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));
 
   function setTimelineOpen(open){
     e.shell.classList.toggle('timeline-open',open);
     e.timeline.setAttribute('aria-hidden',String(!open));
     e.timeTile.setAttribute('aria-expanded',String(open));
     e.timeTile.classList.toggle('active',open);
+    e.nexusTile.classList.toggle('active',!open && !e.drawer.classList.contains('open'));
+  }
+
+  function closeDrawer(){
+    e.drawer.classList.remove('open');
+    e.drawer.setAttribute('aria-hidden','true');
+    e.sourcesTile.classList.remove('active');
+    if(!e.shell.classList.contains('timeline-open'))e.nexusTile.classList.add('active');
+  }
+
+  function showNexusWorld(){
+    playing=false;
+    e.playBtn.textContent='▶';
+    e.playBtn.classList.remove('playing');
+    setTimelineOpen(false);
+    closeDrawer();
+    e.nexusTile.classList.add('active');
+    try{e.frame.contentWindow.focus()}catch(_){ }
   }
 
   function notifyNexus(p,visible){
@@ -146,6 +164,8 @@
     if(!r)return;
     selectedEvent=r;
     if(window.matchMedia('(max-width:760px)').matches)setTimelineOpen(false);
+    e.nexusTile.classList.remove('active');
+    e.sourcesTile.classList.add('active');
     const sd=simDateAt(pForSourceDate(new Date(r.date+'T00:00:00Z')));
     const meta=[
       ['Source date',fmtDate(new Date(r.date+'T00:00:00Z'))],
@@ -212,15 +232,15 @@
     render();
   });
   e.liveBtn.addEventListener('click',jumpLive);
-  e.timeTile.addEventListener('click',()=>setTimelineOpen(!e.shell.classList.contains('timeline-open')));
+  e.timeTile.addEventListener('click',()=>{
+    closeDrawer();
+    setTimelineOpen(!e.shell.classList.contains('timeline-open'));
+  });
   e.closeTimeline.addEventListener('click',()=>setTimelineOpen(false));
-  e.nexusTile.addEventListener('click',()=>{window.location.href='/apps/nexus-graph-preview/relationship-tree/'});
+  e.nexusTile.addEventListener('click',showNexusWorld);
   e.sourcesTile.addEventListener('click',()=>openDrawer(selectedEvent));
   e.eventCard.addEventListener('click',()=>openDrawer(selectedEvent));
-  e.closeDrawer.addEventListener('click',()=>{
-    e.drawer.classList.remove('open');
-    e.drawer.setAttribute('aria-hidden','true');
-  });
+  e.closeDrawer.addEventListener('click',closeDrawer);
 
   e.rangeStart.textContent=`SOURCE ${fmtDate(sourceStart)}`;
   e.rangeEnd.textContent=`SOURCE ${fmtDate(sourceEnd)}`;
