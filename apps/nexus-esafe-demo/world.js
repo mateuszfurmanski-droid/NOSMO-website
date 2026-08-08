@@ -4,11 +4,11 @@
 
   const categories=['Survey','Design','BIM','Production','Construction','Testing','Research','Communication'];
   const zones=[
-    {id:'survey',label:'Survey',categories:['Survey'],pos:[18,47],phases:['SURVEY'],semantic:'document',icon:'document'},
-    {id:'design',label:'Design + BIM',categories:['Design','BIM'],pos:[28,72],phases:['DESIGN + BIM'],semantic:'document',icon:'document'},
-    {id:'works',label:'Delivery + Works',categories:['Production','Construction'],pos:[72,72],phases:['PROCUREMENT','CONSTRUCTION'],semantic:'task',icon:'task'},
-    {id:'testing',label:'Testing + Handover',categories:['Testing'],pos:[82,47],phases:['TESTING + HANDOVER'],semantic:'task',icon:'task'},
-    {id:'knowledge',label:'Knowledge',categories:['Research','Communication'],pos:[50,84],phases:[],semantic:'document',icon:'document'}
+    {id:'survey',label:'Survey',icon:'S',categories:['Survey'],pos:[18,48],phases:['SURVEY']},
+    {id:'design',label:'Design + BIM',icon:'DB',categories:['Design','BIM'],pos:[28,72],phases:['DESIGN + BIM']},
+    {id:'works',label:'Delivery + Works',icon:'W',categories:['Production','Construction'],pos:[72,72],phases:['PROCUREMENT','CONSTRUCTION']},
+    {id:'testing',label:'Testing + Handover',icon:'T',categories:['Testing'],pos:[82,48],phases:['TESTING + HANDOVER']},
+    {id:'knowledge',label:'Knowledge',icon:'K',categories:['Research','Communication'],pos:[50,84],phases:[]}
   ];
   const sourceStart=new Date(records[0].date+'T00:00:00Z');
   const sourceEnd=new Date(records[records.length-1].date+'T00:00:00Z');
@@ -41,26 +41,21 @@
   const stage=el('worldStage'),svg=el('worldNetwork'),host=el('worldNodeHost');
   const projectPanel=el('projectPanel'),sourcePanel=el('sourceLibrary'),sourceList=el('sourceList'),sourceSearch=el('sourceSearch'),sourceScope=el('sourceScope'),sourceSummary=el('sourceSummary'),filterRow=el('sourceFilterRow');
   const projectTile=el('projectTile'),sourcesTile=el('sourcesTile'),nexusTile=el('nexusTile');
-  const defaultScale=window.matchMedia?.('(max-width:760px)').matches?.74:.9;
 
   let state={progress:.72,visible:records.filter(r=>pctFor(r)<=.72),phase:'CONSTRUCTION',mode:'simulation'};
   let viewMode='overview';
   let categoryFilter='ALL';
   let zoneFilter=null;
-  let pan={x:0,y:0,scale:defaultScale,drag:false,lastX:0,lastY:0};
+  let pan={x:0,y:0,scale:1,drag:false,lastX:0,lastY:0};
 
   const path=document.createElement('div');
   path.className='world-path';
   stage.prepend(path);
 
-  function applyPan(){
-    const transform=`translate(${pan.x}px,${pan.y}px) scale(${pan.scale})`;
-    host.style.transform=transform;
-    svg.style.transform=transform;
-  }
   function resetPan(){
-    pan={x:0,y:0,scale:defaultScale,drag:false,lastX:0,lastY:0};
-    applyPan();
+    pan={x:0,y:0,scale:1,drag:false,lastX:0,lastY:0};
+    host.style.transform='';
+    svg.style.transform='';
   }
   function closePanels(){
     projectPanel.classList.remove('open');
@@ -143,40 +138,29 @@
     sourceList.innerHTML=list.map(r=>`<a class="source-item ${r.core?'core':''}" href="${r.url}" target="_blank" rel="noopener"><span class="source-type">${esc(r.category.toUpperCase().slice(0,5))}</span><span class="source-main"><span class="source-title">${esc(r.title)}</span><span class="source-meta">${esc(r.date)} · ${r.files.length} file${r.files.length===1?'':'s'} · ${r.core?'CORE PILOT · ':''}CC BY 4.0</span></span><span class="source-arrow">↗</span></a>`).join('')||'<div class="provenance-band">No records match this filter at the selected project time.</div>';
   }
 
-  function iconSvg(kind){
-    if(kind==='task')return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg>';
-    if(kind==='document')return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 12h5M10 16h5"></path></svg>';
-    if(kind==='levels')return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 8 8-4 8 4-8 4z"></path><path d="m4 12 8 4 8-4M4 16l8 4 8-4"></path></svg>';
-    if(kind==='building')return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 9h2M13 9h2M9 13h2M13 13h2M9 17h6"></path></svg>';
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V8l8-5 8 5v13"></path><path d="M9 21v-6h6v6"></path></svg>';
-  }
-
-  function node(id,x,y,label,type,semantic,icon,action,{center=false,pinned=false}={}){
-    return{id,x,y,label,type,semantic,icon,action,center,pinned};
-  }
+  function node(id,x,y,label,sub,type='zone',icon='•',action){return{id,x,y,label,sub,type,icon,action}}
   function countFor(cats){return state.visible.filter(r=>cats.includes(r.category)).length}
 
   function buildOverview(){
     const nodes=[];
-    nodes.push(node('project',50,53,'e-SAFE Catania','PROJECT','project','project',openProject,{center:true}));
-    nodes.push(node('building',50,28,'Pilot Building','PROJECT','project','building',showBuilding));
+    nodes.push(node('project',50,53,'e-SAFE Catania','REAL PILOT','project','▣',openProject));
+    nodes.push(node('building',50,31,'Pilot Building','5 STOREYS · 10 APARTMENTS','building','⌂',showBuilding));
     zones.forEach(z=>{
       const count=countFor(z.categories);
-      if(count===0&&z.id!=='knowledge')return;
       const active=z.phases.includes(state.phase);
-      nodes.push(node(`zone-${z.id}`,z.pos[0],z.pos[1],z.label,z.semantic.toUpperCase(),z.semantic,z.icon,()=>openSources(z.categories),{pinned:active}));
+      nodes.push(node(`zone-${z.id}`,z.pos[0],z.pos[1],z.label,`${count} RECORD${count===1?'':'S'}`,`zone${active?' current':''}${count===0?' inactive':''}`,z.icon,()=>openSources(z.categories)));
     });
     return nodes;
   }
 
   function buildBuilding(){
     const nodes=[];
-    nodes.push(node('building',50,49,'Pilot Building','PROJECT','project','building',openProject,{center:true}));
+    nodes.push(node('building',50,48,'Pilot Building','Via Acquicella Porto 27/H','building','⌂',openProject));
     const xs=[12,31,50,69,88];
-    xs.forEach((x,i)=>nodes.push(node(`l${i}`,x,23,`Level ${i}`,'PROJECT','project','levels',openProject)));
+    xs.forEach((x,i)=>nodes.push(node(`l${i}`,x,24,`Level ${i}`,i===0?'GROUND':'RESIDENTIAL','level',String(i),openProject)));
     const sys=availableSystems();
-    nodes.push(node('systems',30,72,'Retrofit Systems','TASK','task','task',openProject,{pinned:sys.length>0}));
-    nodes.push(node('library',70,72,'Project Sources','DOCUMENT','document','document',()=>openSources()));
+    nodes.push(node('systems',30,70,'Retrofit Systems',`${sys.length} ACTIVE`,`hub${sys.length?' current':''}`,'SYS',openProject));
+    nodes.push(node('library',70,70,'Project Sources',`${state.visible.length} / 95 RECORDS`,'hub','DOC',()=>openSources()));
     return nodes;
   }
 
@@ -197,36 +181,19 @@
 
   function renderPath(){
     path.innerHTML=viewMode==='overview'
-      ?'<span>NEXUS</span><strong>PROJECT OVERVIEW</strong>'
-      :'<button type="button" id="worldBack">‹ OVERVIEW</button><span>e-SAFE</span><strong>PILOT BUILDING</strong>';
+      ?`<span>NEXUS</span><strong>PROJECT OVERVIEW</strong>`
+      :`<button type="button" id="worldBack">‹ OVERVIEW</button><span>e-SAFE</span><strong>PILOT BUILDING</strong>`;
     path.querySelector('#worldBack')?.addEventListener('click',showOverview);
   }
-
-  function renderNode(n){
-    return `<button class="nexus-map-node semantic-${esc(n.semantic)}${n.center?' is-center':''}" data-node="${esc(n.id)}" style="left:${n.x}%;top:${n.y}%" type="button" aria-label="${esc(n.type.toLowerCase())}: ${esc(n.label)}">
-      <span class="nexus-map-node-frame">
-        <span class="nexus-map-node-chip">${iconSvg(n.icon)}</span>
-        ${n.pinned&&!n.center?'<span class="nexus-map-pin" aria-hidden="true"></span>':''}
-        ${!n.center?'<span class="nexus-map-connect" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7.5l-1.1 1.1"></path><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7.5l1.1-1.1"></path></svg></span>':''}
-      </span>
-      <span class="nexus-map-node-label">${esc(n.label)}</span>
-      <span class="nexus-map-node-type">${esc(n.type)}</span>
-    </button>`;
-  }
-
   function renderGraph(){
     renderPath();
     renderProject();
     const nodes=buildNodes(),by=Object.fromEntries(nodes.map(n=>[n.id,n]));
     svg.innerHTML=linksFor(nodes).map(([a,b,core])=>`<line class="${core?'core':''}" x1="${by[a].x}%" y1="${by[a].y}%" x2="${by[b].x}%" y2="${by[b].y}%"></line>`).join('');
-    host.innerHTML=nodes.map(renderNode).join('');
-    nodes.forEach(n=>{
-      const btn=host.querySelector(`[data-node="${CSS.escape(n.id)}"]`);
-      if(btn&&n.action)btn.addEventListener('click',n.action);
-    });
+    host.innerHTML=nodes.map(n=>`<button class="world-node ${n.type}" data-node="${n.id}" style="left:${n.x}%;top:${n.y}%"><span class="wn-icon">${esc(n.icon)}</span><span class="wn-label">${esc(n.label)}</span><span class="wn-sub">${esc(n.sub)}</span></button>`).join('');
+    nodes.forEach(n=>{const btn=host.querySelector(`[data-node="${CSS.escape(n.id)}"]`);if(btn&&n.action)btn.addEventListener('click',n.action)});
     el('worldStatus').innerHTML=`<strong>${state.visible.length}</strong> / 95 · <strong>${esc(state.phase)}</strong> · ${Math.round(state.progress*100)}%`;
     renderSources();
-    applyPan();
   }
 
   function update(next){state={...state,...next};renderGraph()}
@@ -242,21 +209,8 @@
   nexusTile?.addEventListener('click',showOverview);
   sourcesTile?.addEventListener('click',e=>{e.stopImmediatePropagation();zoneFilter=null;categoryFilter='ALL';openSources()});
 
-  stage?.addEventListener('pointerdown',e=>{
-    if(e.target.closest('.nexus-map-node,.world-path'))return;
-    pan.drag=true;pan.lastX=e.clientX;pan.lastY=e.clientY;
-    stage.setPointerCapture?.(e.pointerId);
-  });
-  stage?.addEventListener('pointermove',e=>{
-    if(!pan.drag)return;
-    pan.x+=e.clientX-pan.lastX;pan.y+=e.clientY-pan.lastY;pan.lastX=e.clientX;pan.lastY=e.clientY;
-    applyPan();
-  });
+  stage?.addEventListener('pointerdown',e=>{if(e.target.closest('.world-node,.world-path'))return;pan.drag=true;pan.lastX=e.clientX;pan.lastY=e.clientY;stage.setPointerCapture?.(e.pointerId)});
+  stage?.addEventListener('pointermove',e=>{if(!pan.drag)return;pan.x+=e.clientX-pan.lastX;pan.y+=e.clientY-pan.lastY;pan.lastX=e.clientX;pan.lastY=e.clientY;host.style.transform=`translate(${pan.x}px,${pan.y}px) scale(${pan.scale})`;svg.style.transform=`translate(${pan.x}px,${pan.y}px) scale(${pan.scale})`});
   stage?.addEventListener('pointerup',()=>pan.drag=false);
   stage?.addEventListener('pointercancel',()=>pan.drag=false);
-  stage?.addEventListener('wheel',e=>{
-    e.preventDefault();
-    pan.scale=Math.max(.35,Math.min(1.15,pan.scale*(e.deltaY>0?.92:1.08)));
-    applyPan();
-  },{passive:false});
 })();
