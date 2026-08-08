@@ -48,7 +48,7 @@ jobs:
           const html=fs.readFileSync('apps/nexus-esafe-demo/index.html','utf8');
           for(const required of ['data.js','app.js','world.js','world-sync.js','world.css','projectWorldLayer','sourceLibrary','projectPanel','nexus-graph-preview/relationship-tree']) if(!html.includes(required)) throw new Error(`Missing ${required}`);
           const worldJs=fs.readFileSync('apps/nexus-esafe-demo/world.js','utf8');
-          for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','Level 4','openSources','95']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
+          for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','xs=[18,34,50,66,82]','openSources','95']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
           const sync=fs.readFileSync('apps/nexus-esafe-demo/world-sync.js','utf8');
           if(!sync.includes('requestAnimationFrame')||!sync.includes('ESAFE_WORLD.update')) throw new Error('Timeline/world synchronization missing');
           const app=fs.readFileSync('apps/nexus-esafe-demo/app.js','utf8');
