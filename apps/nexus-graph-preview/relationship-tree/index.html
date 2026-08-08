@@ -20,9 +20,13 @@
       (() => {
         const initialUrl = new URL(window.location.href);
         const world = initialUrl.searchParams.get('world') || 'dev';
+        const embedded = initialUrl.searchParams.get('embed') === '1';
         window.__NEXUS_PROJECT_WORLD__ = world;
         window.__NEXUS_PROJECT_TIME__ = null;
+        window.__NEXUS_EMBEDDED__ = embedded;
         document.documentElement.dataset.nexusWorld = world;
+        if (embedded) document.documentElement.dataset.nexusEmbedded = 'true';
+
         window.addEventListener('message', (event) => {
           if (event.origin !== window.location.origin) return;
           const payload = event.data;
@@ -32,6 +36,24 @@
           document.documentElement.dataset.nexusTimeMode = payload.mode || '';
           window.dispatchEvent(new CustomEvent('nexus:project-time-change', { detail: payload }));
         });
+
+        if (embedded) {
+          const hideDuplicateNexusMenu = () => {
+            document.querySelectorAll('button,a').forEach((el) => {
+              const label = (el.textContent || '').trim().toLowerCase();
+              if (label.includes('nexus menu')) {
+                el.style.display = 'none';
+                el.setAttribute('aria-hidden', 'true');
+              }
+            });
+          };
+          window.addEventListener('DOMContentLoaded', () => {
+            hideDuplicateNexusMenu();
+            const observer = new MutationObserver(hideDuplicateNexusMenu);
+            observer.observe(document.body, { childList: true, subtree: true });
+            window.setTimeout(() => observer.disconnect(), 15000);
+          });
+        }
       })();
     </script>
     <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CG6GP8Yp.js"></script>
