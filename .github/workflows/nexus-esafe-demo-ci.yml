@@ -58,7 +58,7 @@ jobs:
           if(html.includes('compact-tiles.js')||html.includes('compact-tiles.css')) throw new Error('Rejected demo-specific compact tile layer must not be loaded');
 
           const worldJs=fs.readFileSync('apps/nexus-esafe-demo/world.js','utf8');
-          for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','showOverview','showBuilding','const xs=[12,31,50,69,88]','Delivery + Works','Knowledge','openSources','nexus-map-node-frame','nexus-map-node-label','nexus-map-node-type','semantic-document','semantic-task']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
+          for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','showOverview','showBuilding','const xs=[12,31,50,69,88]','Delivery + Works','Knowledge','openSources','nexus-map-node-frame','nexus-map-node-label','nexus-map-node-type','semantic-${esc(n.semantic)}']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
           if(worldJs.includes("nodes.filter(n=>n.id.startsWith('doc-'))")) throw new Error('Core documents must not be loose overview graph nodes');
 
           const canonicalCss=fs.readFileSync('apps/nexus-esafe-demo/canonical-tree-nodes.css','utf8');
