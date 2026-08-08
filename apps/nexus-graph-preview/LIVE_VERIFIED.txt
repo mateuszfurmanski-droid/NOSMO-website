@@ -1,0 +1,7 @@
+source_commit=71daa215dd0dc15638ccaeb317ac88bdc8d7069d
+public_bundle=index-CWI-Glgh.js
+project_world_bridge=verified
+doorflow=HTTP_OK
+fire_register=HTTP_OK
+electrical=HTTP_OK
+verified_at=2026-08-08T17:59:50Z
