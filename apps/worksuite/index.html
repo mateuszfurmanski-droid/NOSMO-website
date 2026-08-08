@@ -2,19 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07101d" />
   <title>NOSMO WorkSuite</title>
   <meta name="description" content="NOSMO WorkSuite — build, inspect, commission and prove project work." />
-  <meta http-equiv="refresh" content="0; url=/apps/doorflow/" />
   <link rel="canonical" href="/apps/worksuite/" />
-  <script>
-    // Phase 1 compatibility entry. Keep the query/hash when handing off to the
-    // existing deployed application until WorkSuite has its own published build.
-    const next = "/apps/doorflow/" + window.location.search + window.location.hash;
-    window.location.replace(next);
-  </script>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101d}
+    #worksuite-runtime{display:block;width:100%;height:100%;border:0;background:#07101d}
+  </style>
 </head>
 <body>
-  <p>Opening NOSMO WorkSuite…</p>
+  <iframe
+    id="worksuite-runtime"
+    title="NOSMO WorkSuite"
+    src="/apps/doorflow/"
+    allow="camera; microphone"
+  ></iframe>
+  <script>
+    // Phase 1 compatibility host. The existing DoorFlow deployment remains the
+    // runtime while WorkSuite becomes the canonical product surface. Because the
+    // legacy app is served from the same origin, this wrapper can safely update
+    // user-visible branding without changing its storage keys or application data.
+    (() => {
+      const frame = document.getElementById("worksuite-runtime");
+
+      function brandFrame() {
+        let doc;
+        try {
+          doc = frame.contentDocument;
+        } catch {
+          return;
+        }
+        if (!doc || !doc.body) return;
+
+        doc.title = "NOSMO WorkSuite";
+        const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+
+        nodes.forEach((node) => {
+          const parent = node.parentElement;
+          if (!parent || parent.closest("script,style,textarea,input")) return;
+          if (node.nodeValue && /DoorFlow/i.test(node.nodeValue)) {
+            node.nodeValue = node.nodeValue
+              .replace(/NOSMO\s+DOORFLOW/gi, "NOSMO WORKSUITE")
+              .replace(/NOSMO\s+DoorFlow/gi, "NOSMO WorkSuite")
+              .replace(/DoorFlow/gi, "WorkSuite");
+          }
+        });
+      }
+
+      frame.addEventListener("load", () => {
+        brandFrame();
+        try {
+          const observer = new MutationObserver(brandFrame);
+          observer.observe(frame.contentDocument.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+          });
+        } catch {
+          // The legacy page remains usable even if runtime branding cannot attach.
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
