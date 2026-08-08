@@ -24,7 +24,7 @@ jobs:
         run: |
           node --check apps/nexus-esafe-demo/data.js
           node --check apps/nexus-esafe-demo/app.js
-      - name: Validate demo dataset, world manifest and context bridge
+      - name: Validate demo dataset, world manifest and embedded chrome contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -44,13 +44,17 @@ jobs:
           if(!world.simulation?.playbackSpeeds?.includes(100)) throw new Error('Playback speed contract missing');
 
           const html=fs.readFileSync('apps/nexus-esafe-demo/index.html','utf8');
-          for(const required of ['data.js','app.js','styles.css','nexus-graph-preview/relationship-tree']){
+          for(const required of ['data.js','app.js','styles.css','nexus-graph-preview/relationship-tree','NEXUS','WORLD']){
             if(!html.includes(required)) throw new Error(`Missing ${required}`);
           }
 
+          const app=fs.readFileSync('apps/nexus-esafe-demo/app.js','utf8');
+          if(app.includes("window.location.href='/apps/nexus-graph-preview/relationship-tree/'")) throw new Error('NEXUS tile must not navigate out of Project World');
+          if(!app.includes('showNexusWorld')) throw new Error('Persistent Project World Nexus action missing');
+
           const tree=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/index.html','utf8');
-          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change']){
-            if(!tree.includes(required)) throw new Error(`Relationship Tree context bridge missing ${required}`);
+          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change','hideEmbeddedChrome','workflow mode','tree-toolbar']){
+            if(!tree.includes(required)) throw new Error(`Relationship Tree embedded contract missing ${required}`);
           }
           console.log(`records=${records.length} core=${core.length} world=${world.id}`);
           NODE
