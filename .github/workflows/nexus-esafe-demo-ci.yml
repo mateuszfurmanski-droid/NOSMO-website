@@ -23,20 +23,27 @@ jobs:
       - name: Validate JavaScript
         run: |
           node --check apps/nexus-esafe-demo/data.js
-          node --check apps/nexus-esafe-demo/app.js
+          node --check apps/nexus-esafe-demo/files.js
           node --check apps/nexus-esafe-demo/world.js
+          node --check apps/nexus-esafe-demo/app.js
           node --check apps/nexus-esafe-demo/world-sync.js
+          node --check apps/nexus-esafe-demo/files-ui.js
       - name: Validate demo dataset and Project World contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const vm=require('vm');
-          const code=fs.readFileSync('apps/nexus-esafe-demo/data.js','utf8');
-          const sandbox={window:{}};
+          const sandbox={window:{},encodeURIComponent};
           vm.createContext(sandbox);
-          vm.runInContext(code,sandbox);
+          vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/data.js','utf8'),sandbox);
+          vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/files.js','utf8'),sandbox);
           const records=sandbox.window.ESAFE_RECORDS;
           if(!Array.isArray(records)||records.length!==95) throw new Error(`Expected 95 records, got ${records?.length}`);
+          const fileCount=records.reduce((n,r)=>n+(r.files?.length||0),0);
+          if(fileCount!==106) throw new Error(`Expected 106 source files, got ${fileCount}`);
+          const d51=records.find(r=>r.id==='6260847');
+          if(!d51?.files?.[0]?.name?.includes('Detailed survey of the real pilot')) throw new Error('D5.1 real filename missing');
+          if(!d51?.files?.[0]?.url?.includes('/6260847/files/')) throw new Error('D5.1 direct file URL missing');
           const core=records.filter(r=>r.core);
           if(core.length<5) throw new Error(`Expected core real-pilot records, got ${core.length}`);
           const world=JSON.parse(fs.readFileSync('apps/nexus-esafe-demo/project-world.json','utf8'));
@@ -46,14 +53,16 @@ jobs:
           if(world.status!=='DEMO_V1_STATE_RECONSTRUCTION') throw new Error('State reconstruction status missing');
           if(!world.simulation?.playbackSpeeds?.includes(100)) throw new Error('Playback speed contract missing');
           const html=fs.readFileSync('apps/nexus-esafe-demo/index.html','utf8');
-          for(const required of ['data.js','app.js','world.js','world-sync.js','world.css','projectWorldLayer','sourceLibrary','projectPanel','nexus-graph-preview/relationship-tree']) if(!html.includes(required)) throw new Error(`Missing ${required}`);
+          for(const required of ['data.js','files.js','world.js','app.js','world-sync.js','files-ui.js','world.css','files-ui.css','projectWorldLayer','sourceLibrary','projectPanel','nexus-graph-preview/relationship-tree']) if(!html.includes(required)) throw new Error(`Missing ${required}`);
           const worldJs=fs.readFileSync('apps/nexus-esafe-demo/world.js','utf8');
           for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','xs=[18,34,50,66,82]','openSources','95']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
           const sync=fs.readFileSync('apps/nexus-esafe-demo/world-sync.js','utf8');
           if(!sync.includes('requestAnimationFrame')||!sync.includes('ESAFE_WORLD.update')) throw new Error('Timeline/world synchronization missing');
+          const filesUi=fs.readFileSync('apps/nexus-esafe-demo/files-ui.js','utf8');
+          for(const required of ['source-file-link','drawer-file-link','fileName','fileUrl']) if(!filesUi.includes(required)) throw new Error(`Individual-file UI missing ${required}`);
           const app=fs.readFileSync('apps/nexus-esafe-demo/app.js','utf8');
           if(app.includes("window.location.href='/apps/nexus-graph-preview/relationship-tree/'")) throw new Error('NEXUS tile must not navigate out of Project World');
           const tree=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/index.html','utf8');
           for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change','hideEmbeddedChrome']) if(!tree.includes(required)) throw new Error(`Relationship Tree embedded contract missing ${required}`);
-          console.log(`records=${records.length} core=${core.length} world=${world.id} status=${world.status}`);
+          console.log(`records=${records.length} files=${fileCount} core=${core.length} world=${world.id}`);
           NODE
