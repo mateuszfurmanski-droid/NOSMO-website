@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>NOSMO Nexus — e-SAFE Catania Demo</title>
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="world-shell" id="worldShell">
+    <iframe
+      id="nexusFrame"
+      class="nexus-frame"
+      title="NOSMO Nexus Relationship Tree"
+      src="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo"
+      loading="eager"
+      allow="fullscreen"
+    ></iframe>
+
+    <header class="project-head glass">
+      <div class="brand-stack">
+        <div class="brand-row">
+          <span class="brand-mark">N</span>
+          <div>
+            <div class="eyebrow">NOSMO NEXUS · PROJECT WORLD</div>
+            <div class="project-title">e-SAFE Catania Real Pilot</div>
+          </div>
+        </div>
+        <div class="project-meta">Via Acquicella Porto 27/H · Catania · DEMO DATA WORLD</div>
+      </div>
+      <div class="head-actions">
+        <span class="pill live-pill" id="worldStatus">SIMULATION</span>
+        <button class="icon-btn" id="toggleTimeline" aria-label="Toggle timeline">⌄</button>
+      </div>
+    </header>
+
+    <section class="timeline-zone glass" id="timelineZone" aria-label="Project Timeline Zone">
+      <div class="zone-top">
+        <div class="clock-block">
+          <div class="eyebrow">PROJECT TIME</div>
+          <div class="clock-main" id="projectClock">—</div>
+          <div class="clock-sub" id="sourceClock">Source: —</div>
+        </div>
+
+        <div class="mode-switch" role="group" aria-label="Timeline mode">
+          <button data-mode="real">REAL</button>
+          <button data-mode="replay">REPLAY</button>
+          <button data-mode="simulation" class="active">SIMULATION</button>
+        </div>
+
+        <div class="playback-controls">
+          <button class="play-btn" id="playBtn" aria-label="Play or pause">▶</button>
+          <select id="speedSelect" aria-label="Playback speed">
+            <option value="0.25">0.25×</option>
+            <option value="1" selected>1×</option>
+            <option value="5">5×</option>
+            <option value="20">20×</option>
+            <option value="100">100×</option>
+          </select>
+          <button class="ghost-btn" id="liveBtn">LIVE</button>
+        </div>
+      </div>
+
+      <div class="phase-strip" id="phaseStrip">
+        <span data-end="0.15">SURVEY</span>
+        <span data-end="0.35">DESIGN + BIM</span>
+        <span data-end="0.55">PROCUREMENT</span>
+        <span data-end="0.85">CONSTRUCTION</span>
+        <span data-end="1">TESTING + HANDOVER</span>
+      </div>
+
+      <div class="rail-wrap">
+        <div class="rail-meta">
+          <span id="rangeStart">—</span>
+          <span id="compressionLabel">—</span>
+          <span id="rangeEnd">—</span>
+        </div>
+        <div class="rail">
+          <div class="rail-progress" id="railProgress"></div>
+          <div class="event-markers" id="eventMarkers"></div>
+          <input id="timeSlider" type="range" min="0" max="10000" value="7200" step="1" aria-label="Project time scrubber" />
+        </div>
+      </div>
+
+      <div class="zone-bottom">
+        <div class="metric">
+          <span class="metric-value" id="visibleDocs">0</span>
+          <span class="metric-label">documents available</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="visibleFiles">0</span>
+          <span class="metric-label">files available</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value" id="currentPhase">—</span>
+          <span class="metric-label">demo phase</span>
+        </div>
+        <button class="event-card" id="eventCard" type="button">
+          <span class="event-kicker">LATEST EVENT</span>
+          <span class="event-title" id="latestEventTitle">Move the timeline to explore the project</span>
+          <span class="event-detail" id="latestEventDetail">95 CC BY 4.0 source records loaded</span>
+        </button>
+      </div>
+    </section>
+
+    <aside class="event-drawer glass" id="eventDrawer" aria-hidden="true">
+      <div class="drawer-head">
+        <div>
+          <div class="eyebrow">PROJECT EVENT</div>
+          <h2 id="drawerTitle">—</h2>
+        </div>
+        <button class="icon-btn" id="closeDrawer" aria-label="Close event">×</button>
+      </div>
+      <dl id="drawerMeta"></dl>
+      <div class="drawer-files" id="drawerFiles"></div>
+      <a id="drawerSource" class="source-link" href="#" target="_blank" rel="noopener">Open source record ↗</a>
+      <div class="provenance-note">
+        <strong>Provenance:</strong> source publication dates are preserved. Construction-event dates will be added separately as they are extracted from project documents.
+      </div>
+    </aside>
+  </main>
+
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
