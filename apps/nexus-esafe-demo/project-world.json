@@ -1,0 +1,32 @@
+{
+  "schema": "nosmo.project-world.v1",
+  "id": "esafe-catania-demo",
+  "name": "e-SAFE Catania Real Pilot",
+  "environment": "DEMO",
+  "nexusSurface": "/apps/nexus-graph-preview/relationship-tree/",
+  "source": {
+    "type": "ZENODO_GRANT",
+    "grantId": "893135",
+    "records": 95,
+    "files": 106,
+    "licenceMetadata": "CC BY 4.0",
+    "sourceTimeline": {
+      "start": "2021-06-28",
+      "end": "2026-03-21",
+      "basis": "SOURCE_PUBLICATION_DATE_V0"
+    }
+  },
+  "simulation": {
+    "start": "2026-06-01",
+    "end": "2026-08-31",
+    "timeCompressionApprox": 18.98,
+    "modes": ["REAL", "REPLAY", "SIMULATION"],
+    "playbackSpeeds": [0.25, 1, 5, 20, 100]
+  },
+  "provenance": {
+    "rule": "SOURCE_PUBLICATION_DATE_IS_NOT_PROJECT_EVENT_DATE",
+    "futureField": "projectEventDate",
+    "sourceField": "documentPublishedAt"
+  },
+  "status": "DEMO_V0_SOURCE_CHRONOLOGY"
+}

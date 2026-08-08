@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'apps/nexus-esafe-demo/**'
+      - 'apps/nexus-graph-preview/relationship-tree/index.html'
       - '.github/workflows/nexus-esafe-demo-ci.yml'
   workflow_dispatch:
 
@@ -23,7 +24,7 @@ jobs:
         run: |
           node --check apps/nexus-esafe-demo/data.js
           node --check apps/nexus-esafe-demo/app.js
-      - name: Validate demo dataset and shell
+      - name: Validate demo dataset, world manifest and context bridge
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -36,9 +37,20 @@ jobs:
           if(!Array.isArray(records)||records.length!==95) throw new Error(`Expected 95 records, got ${records?.length}`);
           const core=records.filter(r=>r.core);
           if(core.length<5) throw new Error(`Expected core real-pilot records, got ${core.length}`);
+
+          const world=JSON.parse(fs.readFileSync('apps/nexus-esafe-demo/project-world.json','utf8'));
+          if(world.id!=='esafe-catania-demo') throw new Error('Unexpected Project World id');
+          if(world.source?.records!==95||world.source?.files!==106) throw new Error('Project World source inventory mismatch');
+          if(!world.simulation?.playbackSpeeds?.includes(100)) throw new Error('Playback speed contract missing');
+
           const html=fs.readFileSync('apps/nexus-esafe-demo/index.html','utf8');
           for(const required of ['data.js','app.js','styles.css','nexus-graph-preview/relationship-tree']){
             if(!html.includes(required)) throw new Error(`Missing ${required}`);
           }
-          console.log(`records=${records.length} core=${core.length}`);
+
+          const tree=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/index.html','utf8');
+          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change']){
+            if(!tree.includes(required)) throw new Error(`Relationship Tree context bridge missing ${required}`);
+          }
+          console.log(`records=${records.length} core=${core.length} world=${world.id}`);
           NODE
