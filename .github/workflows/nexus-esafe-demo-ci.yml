@@ -59,7 +59,7 @@ jobs:
           for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','showOverview','showBuilding','const xs=[12,31,50,69,88]','Delivery + Works','Knowledge','openSources','95']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
           if(worldJs.includes("nodes.filter(n=>n.id.startsWith('doc-'))")) throw new Error('Core documents must not be loose overview graph nodes');
           const compact=fs.readFileSync('apps/nexus-esafe-demo/compact-tiles.js','utf8');
-          for(const required of ['data-badge','Delivery + Works','Testing + Handover','MutationObserver']) if(!compact.includes(required)) throw new Error(`Compact tile contract missing ${required}`);
+          for(const required of ['dataset.badge','Delivery + Works','Testing + Handover','MutationObserver']) if(!compact.includes(required)) throw new Error(`Compact tile contract missing ${required}`);
           const compactCss=fs.readFileSync('apps/nexus-esafe-demo/compact-tiles.css','utf8');
           if(!compactCss.includes('width:78px')||!compactCss.includes('[data-badge]::after')) throw new Error('Compact mobile tile sizing/badge contract missing');
           const sync=fs.readFileSync('apps/nexus-esafe-demo/world-sync.js','utf8');
