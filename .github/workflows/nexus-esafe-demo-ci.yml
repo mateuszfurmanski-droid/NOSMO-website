@@ -1,0 +1,44 @@
+name: Nexus e-SAFE Demo CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/nexus-esafe-demo/**'
+      - '.github/workflows/nexus-esafe-demo-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate JavaScript
+        run: |
+          node --check apps/nexus-esafe-demo/data.js
+          node --check apps/nexus-esafe-demo/app.js
+      - name: Validate demo dataset and shell
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const vm=require('vm');
+          const code=fs.readFileSync('apps/nexus-esafe-demo/data.js','utf8');
+          const sandbox={window:{}};
+          vm.createContext(sandbox);
+          vm.runInContext(code,sandbox);
+          const records=sandbox.window.ESAFE_RECORDS;
+          if(!Array.isArray(records)||records.length!==95) throw new Error(`Expected 95 records, got ${records?.length}`);
+          const core=records.filter(r=>r.core);
+          if(core.length<5) throw new Error(`Expected core real-pilot records, got ${core.length}`);
+          const html=fs.readFileSync('apps/nexus-esafe-demo/index.html','utf8');
+          for(const required of ['data.js','app.js','styles.css','nexus-graph-preview/relationship-tree']){
+            if(!html.includes(required)) throw new Error(`Missing ${required}`);
+          }
+          console.log(`records=${records.length} core=${core.length}`);
+          NODE
