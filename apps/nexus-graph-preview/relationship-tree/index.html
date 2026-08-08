@@ -16,10 +16,28 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      (() => {
+        const initialUrl = new URL(window.location.href);
+        const world = initialUrl.searchParams.get('world') || 'dev';
+        window.__NEXUS_PROJECT_WORLD__ = world;
+        window.__NEXUS_PROJECT_TIME__ = null;
+        document.documentElement.dataset.nexusWorld = world;
+        window.addEventListener('message', (event) => {
+          if (event.origin !== window.location.origin) return;
+          const payload = event.data;
+          if (!payload || payload.type !== 'NEXUS_PROJECT_TIME_CHANGE') return;
+          window.__NEXUS_PROJECT_TIME__ = payload;
+          document.documentElement.dataset.nexusWorld = payload.worldId || world;
+          document.documentElement.dataset.nexusTimeMode = payload.mode || '';
+          window.dispatchEvent(new CustomEvent('nexus:project-time-change', { detail: payload }));
+        });
+      })();
+    </script>
     <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CG6GP8Yp.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-CDZx_Sdl.css">
-  <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
-</head>
+    <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
+  </head>
   <body>
     <div id="root"></div>
   </body>
