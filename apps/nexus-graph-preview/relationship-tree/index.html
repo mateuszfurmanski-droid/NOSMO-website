@@ -16,35 +16,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-q6WanLiB.js"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-DV4YaLnF.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-WO_Iu468.css">
-    <style>
-      [aria-label="Nexus folder dock"] > div { pointer-events: none !important; }
-      [aria-label="Nexus folder dock"] .pointer-events-auto { pointer-events: auto !important; }
-    </style>
-    <script>
-      history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");
-      document.addEventListener("click", function (event) {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const dock = target.closest('[aria-label="Nexus folder dock"]');
-        if (!dock) return;
-        const button = target.closest("button");
-        if (!button || !dock.contains(button) || button.disabled) return;
-        const label = (button.textContent || "").replace(/\s+/g, " ").trim();
-        const routes = {
-          "DoorFlow": "/apps/doorflow/",
-          "Fire Register": "/apps/fire-door-register/",
-          "Electrical": "/apps/nexus/electrical-commissioning/"
-        };
-        const route = routes[label];
-        if (!route) return;
-        event.preventDefault();
-        event.stopPropagation();
-        window.location.assign(route);
-      }, true);
-    </script>
-  </head>
+  <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
+</head>
   <body>
     <div id="root"></div>
   </body>
