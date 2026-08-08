@@ -25,10 +25,11 @@ jobs:
           node --check apps/nexus-esafe-demo/data.js
           node --check apps/nexus-esafe-demo/files.js
           node --check apps/nexus-esafe-demo/world.js
+          node --check apps/nexus-esafe-demo/compact-tiles.js
           node --check apps/nexus-esafe-demo/app.js
           node --check apps/nexus-esafe-demo/world-sync.js
           node --check apps/nexus-esafe-demo/files-ui.js
-      - name: Validate demo dataset and canonical Project World node contract
+      - name: Validate demo dataset and Project World contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
@@ -52,18 +53,15 @@ jobs:
           if(world.projectGraph?.storeys!==5||world.projectGraph?.apartments!==10) throw new Error('Real pilot building graph contract missing');
           if(world.status!=='DEMO_V1_STATE_RECONSTRUCTION') throw new Error('State reconstruction status missing');
           if(!world.simulation?.playbackSpeeds?.includes(100)) throw new Error('Playback speed contract missing');
-
           const html=fs.readFileSync('apps/nexus-esafe-demo/index.html','utf8');
-          for(const required of ['data.js','files.js','world.js','app.js','world-sync.js','files-ui.js','world.css','world-order.css','canonical-tree-nodes.css','files-ui.css','projectWorldLayer','sourceLibrary','projectPanel','nexus-graph-preview/relationship-tree']) if(!html.includes(required)) throw new Error(`Missing ${required}`);
-          if(html.includes('compact-tiles.js')||html.includes('compact-tiles.css')) throw new Error('Rejected demo-specific compact tile layer must not be loaded');
-
+          for(const required of ['data.js','files.js','world.js','compact-tiles.js','app.js','world-sync.js','files-ui.js','world.css','world-order.css','compact-tiles.css','files-ui.css','projectWorldLayer','sourceLibrary','projectPanel','nexus-graph-preview/relationship-tree']) if(!html.includes(required)) throw new Error(`Missing ${required}`);
           const worldJs=fs.readFileSync('apps/nexus-esafe-demo/world.js','utf8');
-          for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','showOverview','showBuilding','const xs=[12,31,50,69,88]','Delivery + Works','Knowledge','openSources','nexus-map-node-frame','nexus-map-node-label','nexus-map-node-type','semantic-${esc(n.semantic)}']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
+          for(const required of ['e-SAFE Catania','Via Acquicella Porto 27/H','showOverview','showBuilding','const xs=[12,31,50,69,88]','Delivery + Works','Knowledge','openSources','95']) if(!worldJs.includes(required)) throw new Error(`Project graph missing ${required}`);
           if(worldJs.includes("nodes.filter(n=>n.id.startsWith('doc-'))")) throw new Error('Core documents must not be loose overview graph nodes');
-
-          const canonicalCss=fs.readFileSync('apps/nexus-esafe-demo/canonical-tree-nodes.css','utf8');
-          for(const required of ['width:80px','height:80px','width:40px','height:40px','width:112px','height:112px','width:138px','nexus-map-node-label','nexus-map-node-type','semantic-task','semantic-document']) if(!canonicalCss.includes(required)) throw new Error(`Canonical Relationship Tree geometry missing ${required}`);
-
+          const compact=fs.readFileSync('apps/nexus-esafe-demo/compact-tiles.js','utf8');
+          for(const required of ['dataset.badge','Delivery + Works','Testing + Handover','MutationObserver']) if(!compact.includes(required)) throw new Error(`Compact tile contract missing ${required}`);
+          const compactCss=fs.readFileSync('apps/nexus-esafe-demo/compact-tiles.css','utf8');
+          if(!compactCss.includes('width:78px')||!compactCss.includes('[data-badge]::after')) throw new Error('Compact mobile tile sizing/badge contract missing');
           const sync=fs.readFileSync('apps/nexus-esafe-demo/world-sync.js','utf8');
           if(!sync.includes('requestAnimationFrame')||!sync.includes('ESAFE_WORLD.update')) throw new Error('Timeline/world synchronization missing');
           const filesUi=fs.readFileSync('apps/nexus-esafe-demo/files-ui.js','utf8');
@@ -72,5 +70,5 @@ jobs:
           if(app.includes("window.location.href='/apps/nexus-graph-preview/relationship-tree/'")) throw new Error('NEXUS tile must not navigate out of Project World');
           const tree=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/index.html','utf8');
           for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change','hideEmbeddedChrome']) if(!tree.includes(required)) throw new Error(`Relationship Tree embedded contract missing ${required}`);
-          console.log(`records=${records.length} files=${fileCount} core=${core.length} world=${world.id} layout=canonical-tree-nodes`);
+          console.log(`records=${records.length} files=${fileCount} core=${core.length} world=${world.id} layout=compact-tiles`);
           NODE
