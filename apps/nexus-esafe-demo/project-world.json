@@ -16,6 +16,14 @@
       "basis": "SOURCE_PUBLICATION_DATE_V0"
     }
   },
+  "projectGraph": {
+    "building": "Via Acquicella Porto 27/H",
+    "storeys": 5,
+    "apartments": 10,
+    "sourceClusters": ["Survey", "Design", "BIM", "Production", "Construction", "Testing", "Research", "Communication"],
+    "coreSystems": ["e-PANEL", "e-CLT", "e-THERM", "e-TANK", "Heat pump", "PV", "Battery", "e-BEMS", "Monitoring"],
+    "stateReconstruction": "TIMELINE_DRIVEN_V1"
+  },
   "simulation": {
     "start": "2026-06-01",
     "end": "2026-08-31",
@@ -26,7 +34,8 @@
   "provenance": {
     "rule": "SOURCE_PUBLICATION_DATE_IS_NOT_PROJECT_EVENT_DATE",
     "futureField": "projectEventDate",
-    "sourceField": "documentPublishedAt"
+    "sourceField": "documentPublishedAt",
+    "derivedPhasePlacement": true
   },
-  "status": "DEMO_V0_SOURCE_CHRONOLOGY"
+  "status": "DEMO_V1_STATE_RECONSTRUCTION"
 }
