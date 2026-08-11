@@ -6,6 +6,8 @@ on:
     paths:
       - 'apps/nexus-esafe-demo/**'
       - 'apps/nexus-graph-preview/relationship-tree/index.html'
+      - 'apps/nexus-graph-preview/relationship-tree/nexus-shell-v2.js'
+      - 'apps/nexus-graph-preview/relationship-tree/nexus-shell-v2.css'
       - '.github/workflows/nexus-esafe-demo-ci.yml'
   workflow_dispatch:
 
@@ -29,6 +31,7 @@ jobs:
           node --check apps/nexus-esafe-demo/app.js
           node --check apps/nexus-esafe-demo/world-sync.js
           node --check apps/nexus-esafe-demo/files-ui.js
+          node --check apps/nexus-graph-preview/relationship-tree/nexus-shell-v2.js
       - name: Validate demo dataset and Project World contract
         run: |
           node - <<'NODE'
@@ -69,6 +72,9 @@ jobs:
           const app=fs.readFileSync('apps/nexus-esafe-demo/app.js','utf8');
           if(app.includes("window.location.href='/apps/nexus-graph-preview/relationship-tree/'")) throw new Error('NEXUS tile must not navigate out of Project World');
           const tree=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/index.html','utf8');
-          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change','hideEmbeddedChrome']) if(!tree.includes(required)) throw new Error(`Relationship Tree embedded contract missing ${required}`);
-          console.log(`records=${records.length} files=${fileCount} core=${core.length} world=${world.id} layout=compact-tiles`);
+          const treeShell=fs.readFileSync('apps/nexus-graph-preview/relationship-tree/nexus-shell-v2.js','utf8');
+          for(const required of ['__NEXUS_PROJECT_WORLD__','NEXUS_PROJECT_TIME_CHANGE','nexus:project-time-change']) if(!tree.includes(required)) throw new Error(`Relationship Tree embedded contract missing ${required}`);
+          if(!treeShell.includes('hideEmbeddedChrome')) throw new Error('Relationship Tree embedded chrome suppression missing');
+          for(const required of ['nexusTopMenu','nexusTopProject','nexusTopTime','nexusTopFiles','nexusSettingsPanel','nexusThemeToggle']) if(!tree.includes(required)) throw new Error(`Relationship Tree shell missing ${required}`);
+          console.log(`records=${records.length} files=${fileCount} core=${core.length} world=${world.id} layout=compact-tiles shell=v2`);
           NODE
