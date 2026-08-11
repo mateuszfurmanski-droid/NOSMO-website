@@ -13,7 +13,7 @@ html,body{margin:0;width:100%;min-height:100%;background:#020713;color:#f5f8ff;f
 </head>
 <body>
 <div class="fallback" id="fallback"><div class="box"><div class="logo">NOSMO NEXUS</div><p>Opening Kamil Person Card…</p></div></div>
-<iframe id="cardFrame" title="Kamil Person Card" src="/person-card-kamil-v41.html?v=v41blue2"></iframe>
+<iframe id="cardFrame" title="Kamil Person Card" src="/person-card-kamil-v41.html?v=v41blue3"></iframe>
 <script>
 (()=>{
   const frame=document.getElementById('cardFrame');
@@ -31,6 +31,32 @@ html,body{margin:0;width:100%;min-height:100%;background:#020713;color:#f5f8ff;f
     return blueDataUri;
   };
 
+  const injectIndeed=doc=>{
+    if(!doc||doc.getElementById('nexusIndeedAction'))return;
+    const style=doc.createElement('style');
+    style.id='nexusIndeedStyle';
+    style.textContent=`
+      .comms{width:174px!important;gap:8px!important}
+      .comms .indeedAction{width:34px;height:34px;border:1px solid rgba(96,148,218,.26);border-radius:12px;background:rgba(5,16,29,.72);display:grid;place-items:center;text-decoration:none;cursor:pointer}
+      .indeedIcon{width:23px;height:23px;display:block}
+      @media(max-width:390px){.comms{width:154px!important;gap:7px!important}.comms .indeedAction{width:31px;height:31px;border-radius:11px}.indeedIcon{width:21px;height:21px}}
+      @media(max-width:340px){.comms{width:148px!important;gap:6px!important}}
+    `;
+    doc.head.appendChild(style);
+    const comms=doc.querySelector('.comms');
+    if(!comms)return;
+    const indeed=doc.createElement('a');
+    indeed.id='nexusIndeedAction';
+    indeed.className='indeedAction';
+    indeed.href='https://www.indeed.co.uk/';
+    indeed.target='_blank';
+    indeed.rel='noopener noreferrer';
+    indeed.setAttribute('aria-label','Indeed.co.uk profile');
+    indeed.title='Indeed.co.uk profile';
+    indeed.innerHTML='<svg class="indeedIcon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#003A9B"/><path d="M29.2 27.5h6.4v22.2h-6.4V27.5zm3.2-13.1c2.2 0 4 1.8 4 4s-1.8 4-4 4-4-1.8-4-4 1.8-4 4-4zm8.5 4.5c-4.6-3.5-11.8-4.2-17.2-1.4 4.1-5.5 12.9-6.4 17.2 1.4z" fill="#fff"/></svg>';
+    comms.appendChild(indeed);
+  };
+
   const patchFrame=async()=>{
     try{
       const logo=await getBlueLogo();
@@ -43,6 +69,7 @@ html,body{margin:0;width:100%;min-height:100%;background:#020713;color:#f5f8ff;f
           img.dataset.nexusBlueLogo='true';
           img.style.objectFit='contain';
         });
+        injectIndeed(doc);
         return targets.length>0;
       };
       const ok=apply();
@@ -55,8 +82,8 @@ html,body{margin:0;width:100%;min-height:100%;background:#020713;color:#f5f8ff;f
       setTimeout(apply,1500);
       return ok;
     }catch(error){
-      console.error('[NOSMO] Blue logo DOM patch failed',error);
-      fallback.innerHTML='<div class="box"><div class="logo">NOSMO NEXUS</div><p>Blue logo patch failed. Open original card:</p><p><a href="/person-card-kamil-v41.html?v=v41graph1">Kamil Person Card</a></p></div>';
+      console.error('[NOSMO] Person Card patch failed',error);
+      fallback.innerHTML='<div class="box"><div class="logo">NOSMO NEXUS</div><p>Person Card patch failed. Open original card:</p><p><a href="/person-card-kamil-v41.html?v=v41graph1">Kamil Person Card</a></p></div>';
       return false;
     }
   };
