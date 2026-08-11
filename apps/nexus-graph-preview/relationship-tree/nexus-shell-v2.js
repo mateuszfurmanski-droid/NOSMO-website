@@ -77,6 +77,24 @@
     const topTiles=[menuTile,projectTile,timeTile,filesTile];
     const panels=[menuPanel,filesPanel,settingsPanel];
 
+    const installFileLoaderMenuEntry=()=>{
+      if(!menuPanel||menuPanel.querySelector('[data-nexus-action="file-loader"]'))return;
+      const systemTitle=Array.from(menuPanel.querySelectorAll('.nexus-shell-section-title')).find(el=>norm(el.textContent)==='system');
+      const systemList=systemTitle?.nextElementSibling;
+      if(!systemList)return;
+      const button=document.createElement('button');
+      button.className='nexus-shell-action';
+      button.type='button';
+      button.dataset.nexusAction='file-loader';
+      button.innerHTML='<span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span>';
+      systemList.insertBefore(button,systemList.firstChild);
+    };
+
+    installFileLoaderMenuEntry();
+    document.querySelector('[data-nexus-file-action="upload"]')?.remove();
+    const filesSub=filesTile?.querySelector('.nexus-top-sub');
+    if(filesSub)filesSub.textContent='PROJECT DOCS';
+
     const findToolbar=()=>Array.from(document.querySelectorAll('[data-control]')).find(el=>{
       const text=norm(el.textContent);
       return text.includes('workflow')&&text.includes('objects')&&text.includes('links');
@@ -174,6 +192,11 @@
     document.querySelectorAll('[data-nexus-close-panel]').forEach(btn=>btn.addEventListener('click',closePanels));
     scrim?.addEventListener('click',()=>{closePanels();closeControls()});
 
+    document.querySelector('[data-nexus-action="file-loader"]')?.addEventListener('click',()=>{
+      closePanels();
+      fileInput?.click();
+    });
+
     document.querySelector('[data-nexus-action="controls"]')?.addEventListener('click',()=>{
       closePanels();
       clearTopActive();
@@ -189,7 +212,6 @@
     document.querySelector('[data-nexus-action="modules"]')?.addEventListener('click',()=>{closePanels();clickExistingNav('MODULES')});
     document.querySelector('[data-nexus-action="connections"]')?.addEventListener('click',()=>{closePanels();clickExistingNav('CONNECTIONS')});
 
-    document.querySelector('[data-nexus-file-action="upload"]')?.addEventListener('click',()=>fileInput?.click());
     document.querySelector('[data-nexus-file-action="project-files"]')?.addEventListener('click',()=>{closePanels();clickExistingNav('DOCS')});
     ['recent','unmatched','pending'].forEach(filter=>{
       document.querySelector(`[data-nexus-file-action="${filter}"]`)?.addEventListener('click',()=>{
