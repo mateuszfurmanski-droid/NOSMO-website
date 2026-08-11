@@ -25,6 +25,15 @@
     return;
   }
 
+  document.addEventListener('click',event=>{
+    const target=event.target instanceof Element?event.target.closest('[data-nexus-action="file-loader"]'):null;
+    if(!target)return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    window.location.assign('/apps/nexus-file-loader/');
+  },true);
+
   window.addEventListener('DOMContentLoaded',()=>{
     const projectTile=document.getElementById('nexusTopProject');
     const scrim=document.getElementById('nexusShellScrim');
