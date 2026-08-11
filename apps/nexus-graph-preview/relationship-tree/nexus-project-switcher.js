@@ -1,4 +1,4 @@
-// NEXUS_PROJECT_SWITCHER_V4_ONE_SHELL
+// NEXUS_PROJECT_SWITCHER_V5_WORLD_CANONICAL
 (()=>{
   const bootLocal=(flag,path)=>{
     if(window[flag])return;
@@ -16,7 +16,7 @@
 
   // Shared runtime first: uploads/trades remain available in every Project World.
   bootLocal('__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__','./nexus-trade-graph-runtime.js?v=1');
-  bootLocal('__NEXUS_ONE_SHELL_FIXES_INSTALLED__','./nexus-one-shell-fixes.js?v=1');
+  bootLocal('__NEXUS_ONE_SHELL_FIXES_INSTALLED__','./nexus-one-shell-fixes.js?v=2');
 
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
   if(world==='esafe-demo')bootLocal('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=1');
@@ -42,7 +42,7 @@
       {id:'esafe',label:'e-SAFE Catania',sub:'Project World · real pilot dataset',icon:'E',href:'/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo',world:'esafe-demo'}
     ];
 
-    // URL Project World is canonical. Stored state is only a convenience after navigation.
+    // Loaded Project World is the single source of truth. Never use stale localStorage to label the UI.
     const active=world==='esafe-demo'?'esafe':'riverside';
     try{localStorage.setItem('nexus.activeProject',active)}catch{}
 
@@ -85,12 +85,16 @@
       if(panel.classList.contains('open'))close();else open();
     },true);
     panel.querySelector('.nexus-project-switcher-close')?.addEventListener('click',close);
-    panel.querySelectorAll('[data-project-id]').forEach(link=>link.addEventListener('click',()=>{
+    panel.querySelectorAll('[data-project-id]').forEach(link=>link.addEventListener('click',event=>{
+      event.preventDefault();
       const id=link.getAttribute('data-project-id');
       if(!id)return;
-      try{localStorage.setItem('nexus.activeProject',id)}catch{}
       const project=projects.find(item=>item.id===id);
-      window.dispatchEvent(new CustomEvent('nexus:project-change',{detail:{projectId:id,worldId:project?.world||'dev',href:project?.href||''}}));
+      if(!project)return;
+      try{localStorage.setItem('nexus.activeProject',id)}catch{}
+      window.dispatchEvent(new CustomEvent('nexus:project-change',{detail:{projectId:id,worldId:project.world,href:project.href}}));
+      // Full navigation guarantees the graph runtime is rebuilt for the selected Project World.
+      window.location.assign(project.href);
     }));
     scrim?.addEventListener('click',close);
     ['nexusTopMenu','nexusTopTime','nexusTopFiles'].forEach(id=>document.getElementById(id)?.addEventListener('click',close,true));
