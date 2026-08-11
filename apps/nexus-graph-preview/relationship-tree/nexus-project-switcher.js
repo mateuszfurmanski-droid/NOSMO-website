@@ -1,4 +1,4 @@
-// NEXUS_PROJECT_SWITCHER_V5_WORLD_CANONICAL
+// NEXUS_PROJECT_SWITCHER_V6_ESAFE_RUNTIME
 (()=>{
   const bootLocal=(flag,path)=>{
     if(window[flag])return;
@@ -19,7 +19,7 @@
   bootLocal('__NEXUS_ONE_SHELL_FIXES_INSTALLED__','./nexus-one-shell-fixes.js?v=2');
 
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
-  if(world==='esafe-demo')bootLocal('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=1');
+  if(world==='esafe-demo')bootLocal('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=2');
 
   // Legacy embedded e-SAFE page remains supported as a backup only.
   if(document.documentElement.dataset.nexusEmbedded==='true'){
@@ -94,7 +94,7 @@
       try{localStorage.setItem('nexus.activeProject',id)}catch{}
       window.dispatchEvent(new CustomEvent('nexus:project-change',{detail:{projectId:id,worldId:project.world,href:project.href}}));
       // Full navigation guarantees the graph runtime is rebuilt for the selected Project World.
-      window.location.assign(project.href);
+      window.location.assign(`${project.href}&runtime=2`);
     }));
     scrim?.addEventListener('click',close);
     ['nexusTopMenu','nexusTopTime','nexusTopFiles'].forEach(id=>document.getElementById(id)?.addEventListener('click',close,true));
