@@ -8,9 +8,40 @@
 <meta http-equiv="expires" content="0">
 <title>NOSMO Nexus — Kamil Person Card</title>
 <link rel="canonical" href="person-card-kamil-v41.html">
-<meta http-equiv="refresh" content="0; url=person-card-kamil-v41.html?v=v41graph1">
-<style>html,body{margin:0;min-height:100%;background:#020713;color:#f5f8ff;font-family:Inter,Arial,sans-serif;display:grid;place-items:center;overflow-x:hidden}a{color:#8ec0ff}.card{max-width:360px;border:1px solid rgba(73,137,224,.42);border-radius:22px;background:linear-gradient(180deg,#071421,#030a14);padding:22px;text-align:center;box-shadow:0 18px 58px #000a}.logo{font-weight:900;letter-spacing:.12em;color:#8ec0ff;margin-bottom:12px}</style>
-<script>window.location.replace('person-card-kamil-v41.html?v=v41graph1');</script>
+<style>
+html,body{margin:0;min-height:100%;background:#020713;color:#f5f8ff;font-family:Inter,Arial,sans-serif;overflow-x:hidden}body{display:grid;place-items:center}.card{max-width:360px;border:1px solid rgba(73,137,224,.42);border-radius:22px;background:linear-gradient(180deg,#071421,#030a14);padding:22px;text-align:center;box-shadow:0 18px 58px #000a}.logo{font-weight:900;letter-spacing:.12em;color:#8ec0ff;margin-bottom:12px}.err{color:#ff91a6}a{color:#8ec0ff}
+</style>
 </head>
-<body><div class="card"><div class="logo">NOSMO NEXUS</div><p>Opening Kamil Person Card v41...</p><p><a href="person-card-kamil-v41.html?v=v41graph1">Open manually</a></p></div></body>
+<body>
+<div class="card" id="loading"><div class="logo">NOSMO NEXUS</div><p>Opening Kamil Person Card…</p></div>
+<script>
+(async()=>{
+  const baseCard='/person-card-kamil-v41.html?v=v41blue1';
+  const blueLogoSource='/assets/NEXUS_Logo_UI_Blue.png?v=blueui1';
+  try{
+    const [cardResponse,logoResponse]=await Promise.all([
+      fetch(baseCard,{cache:'no-store'}),
+      fetch(blueLogoSource,{cache:'no-store'})
+    ]);
+    if(!cardResponse.ok)throw new Error('Card HTML unavailable');
+    let html=await cardResponse.text();
+    if(logoResponse.ok){
+      const base64=(await logoResponse.text()).replace(/\s+/g,'').trim();
+      if(base64.startsWith('iVBORw0KGgo')){
+        html=html.replace(/assets\/NEXUS_Logo\.png/g,`data:image/png;base64,${base64}`);
+      }
+    }
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(error){
+    const root=document.getElementById('loading');
+    if(root){
+      root.innerHTML='<div class="logo">NOSMO NEXUS</div><p class="err">Person Card could not load.</p><p><a href="/person-card-kamil-v41.html?v=v41graph1">Open original card</a></p>';
+    }
+    console.error('[NOSMO] Person Card blue logo loader failed',error);
+  }
+})();
+</script>
+</body>
 </html>
