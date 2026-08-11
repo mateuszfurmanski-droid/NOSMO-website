@@ -1,6 +1,6 @@
 {
   "id": "person-kamil-karaszewski",
-  "version": "v44connected1",
+  "version": "v45click1",
   "type": "person-card",
   "updatedAt": "2026-08-11",
   "person": {
@@ -24,17 +24,17 @@
     "relationship": "Person Card linked to active Nexus Project Graph"
   },
   "links": {
-    "personCard": "/person-card-kamil.html?v=v44connected1",
-    "versionedPersonCard": "/person-card-kamil-v44.html?v=v44connected1",
-    "relationshipTree": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v44connected1",
-    "dataFetcher": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v44connected1",
-    "registry": "/apps/nexus/person-cards/?v=v44connected1",
+    "personCard": "/person-card-kamil.html?v=v45click1",
+    "versionedPersonCard": "/person-card-kamil-v45.html?v=v45click1",
+    "relationshipTree": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v45click1",
+    "dataFetcher": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v45click1",
+    "registry": "/apps/nexus/person-cards/?v=v45click1",
     "sections": {
-      "cv": "/person-card-kamil-section.html?section=cv&v=v44connected1",
-      "certs": "/person-card-kamil-section.html?section=certs&v=v44connected1",
-      "refs": "/person-card-kamil-section.html?section=refs&v=v44connected1",
-      "availability": "/person-card-kamil-section.html?section=availability&v=v44connected1",
-      "vault": "/person-card-kamil-section.html?section=vault&v=v44connected1"
+      "cv": "/person-card-kamil-section.html?section=cv&v=v45click1",
+      "certs": "/person-card-kamil-section.html?section=certs&v=v45click1",
+      "refs": "/person-card-kamil-section.html?section=refs&v=v45click1",
+      "availability": "/person-card-kamil-section.html?section=availability&v=v45click1",
+      "vault": "/person-card-kamil-section.html?section=vault&v=v45click1"
     },
     "communications": {
       "whatsapp": "https://wa.me/?text=Kamil%20Karaszewski%20NOSMO%20Person%20Card",
