@@ -16,6 +16,14 @@ const progress = el('progress');
 const progressBar = el('progressBar');
 const serviceStatus = el('serviceStatus');
 
+const params = new URLSearchParams(window.location.search);
+const linkedPerson = params.get('person') || '';
+const linkedCard = params.get('card') || '/person-card-kamil.html?v=v41graph1';
+const linkedDataUrl = linkedPerson ? '/data/person-card-kamil.json?v=v41graph1' : '';
+const requestedProjectKey = params.get('projectKey');
+
+if (requestedProjectKey) projectKey.value = requestedProjectKey;
+
 let selected = [];
 let currentRegistry = null;
 
@@ -34,6 +42,55 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
 function setMessage(text = '', error = false) {
   message.textContent = text;
   message.classList.toggle('error', error);
+}
+
+function renderPersonBridge(data = null) {
+  if (!linkedPerson) return;
+  const existing = document.getElementById('personBridgeCard');
+  const p = data?.person || {};
+  const graph = data?.graph || {};
+  const displayName = p.displayName || graph.label || 'Kamil Karaszewski';
+  const sublabel = graph.sublabel || [p.role, p.trade].filter(Boolean).join(' · ') || 'Person Card context';
+  const nodeId = graph.nodeId || 'p-kamil';
+  const treeUrl = data?.links?.relationshipTree || `/apps/nexus-graph-preview/relationship-tree/?focus=${encodeURIComponent(nodeId)}&person=${encodeURIComponent(linkedPerson)}&v=v41graph1`;
+  const cardUrl = data?.links?.personCard || linkedCard;
+  const html = `
+    <div class="section-head">
+      <div><div class="eyebrow">PERSON CARD CONTEXT</div><h2>${esc(displayName)}</h2></div>
+      <span class="status ok">LINKED</span>
+    </div>
+    <div class="person-bridge-grid">
+      <div class="person-bridge-node"><strong>${esc(nodeId)}</strong><span>${esc(sublabel)}</span></div>
+      <div class="person-bridge-node"><strong>${esc(projectKey.value.trim())}</strong><span>Active project data context</span></div>
+    </div>
+    <div class="person-bridge-actions">
+      <a class="ghost" href="${esc(cardUrl)}">Open Person Card</a>
+      <a class="ghost" href="${esc(treeUrl)}">Open in Relationship Tree</a>
+    </div>
+  `;
+  if (existing) {
+    existing.innerHTML = html;
+    return;
+  }
+  const section = document.createElement('section');
+  section.className = 'card person-bridge';
+  section.id = 'personBridgeCard';
+  section.innerHTML = html;
+  document.querySelector('.shell')?.insertBefore(section, document.querySelector('.card'));
+}
+
+async function loadPersonBridge() {
+  if (!linkedDataUrl) return;
+  renderPersonBridge();
+  try {
+    const r = await fetch(linkedDataUrl, { cache: 'no-store' });
+    if (!r.ok) throw new Error('Person bridge offline');
+    const data = await r.json();
+    renderPersonBridge(data);
+    window.__NEXUS_PERSON_CARD_DATA__ = data;
+  } catch (err) {
+    console.warn('[NOSMO] Person Card data bridge unavailable', err);
+  }
 }
 
 function setSelected(files) {
@@ -75,6 +132,8 @@ async function uploadFiles() {
 
   const body = new FormData();
   body.append('projectKey', key);
+  if (linkedPerson) body.append('person', linkedPerson);
+  if (linkedCard) body.append('personCard', linkedCard);
   selected.forEach(file => body.append('files', file, file.name));
 
   try {
@@ -98,12 +157,13 @@ async function uploadFiles() {
 function fileRow(record) {
   const meta = record.metadata || {};
   const metaBits = [meta.level && `Level ${meta.level}`, meta.revision && `Rev ${meta.revision}`, meta.documentDate, meta.trade].filter(Boolean);
+  const personBit = record.person || record.personCard ? ' · linked person context' : '';
   return `
     <div class="registry-row ${esc(record.status)}">
       <span class="file-badge kind-${esc(record.kind)}">${esc(record.kind.toUpperCase().slice(0, 5))}</span>
       <span class="file-main">
         <strong>${esc(record.originalName)}</strong>
-        <small>${fmtBytes(record.size)} · ${esc(record.status)}${metaBits.length ? ` · ${esc(metaBits.join(' · '))}` : ''}</small>
+        <small>${fmtBytes(record.size)} · ${esc(record.status)}${metaBits.length ? ` · ${esc(metaBits.join(' · '))}` : ''}${personBit}</small>
         <small class="hash">SHA-256 ${esc(record.sha256.slice(0, 16))}…</small>
       </span>
       <a class="download" href="/api/projects/${encodeURIComponent(record.projectKey)}/files/${encodeURIComponent(record.id)}/download">↓</a>
@@ -124,7 +184,8 @@ async function loadRegistry() {
     const pending = files.filter(f => f.status === 'pending_review').length;
     const imported = files.filter(f => f.status === 'imported').length;
     const bytes = files.reduce((sum, f) => sum + Number(f.size || 0), 0);
-    summary.textContent = `${files.length} files · ${fmtBytes(bytes)} · ${pending} pending review · ${imported} confirmed`;
+    const personContext = linkedPerson ? ` · person ${linkedPerson}` : '';
+    summary.textContent = `${files.length} files · ${fmtBytes(bytes)} · ${pending} pending review · ${imported} confirmed${personContext}`;
     registry.innerHTML = files.length ? files.slice().reverse().map(fileRow).join('') : '<div class="empty">No project files yet.</div>';
   } catch (err) {
     currentRegistry = null;
@@ -138,7 +199,7 @@ async function confirmPending() {
   if (!key) return;
   try {
     const r = await fetch(`/api/projects/${encodeURIComponent(key)}/confirm`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({})
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ person: linkedPerson || undefined, personCard: linkedCard || undefined })
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Confirmation failed');
@@ -156,7 +217,7 @@ manifestBtn.addEventListener('click', () => {
   const key = projectKey.value.trim();
   if (key) window.location.href = `/api/projects/${encodeURIComponent(key)}/manifest`;
 });
-projectKey.addEventListener('change', loadRegistry);
+projectKey.addEventListener('change', () => { loadRegistry(); renderPersonBridge(window.__NEXUS_PERSON_CARD_DATA__); });
 
 for (const event of ['dragenter', 'dragover']) {
   dropzone.addEventListener(event, e => { e.preventDefault(); dropzone.classList.add('dragging'); });
@@ -166,5 +227,6 @@ for (const event of ['dragleave', 'drop']) {
 }
 dropzone.addEventListener('drop', e => setSelected(e.dataTransfer.files));
 
+loadPersonBridge();
 checkHealth();
 loadRegistry();
