@@ -1,0 +1,41 @@
+name: Verify Nexus Project And People Live
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-nexus-project-people-live.yml
+permissions:
+  contents: write
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Verify public shell assets
+        run: |
+          set -e
+          base='https://nosmotechnology.co.uk/apps/nexus-graph-preview/relationship-tree'
+          for i in $(seq 1 12); do
+            html="$(curl -fsSL "$base/?v=project-people-4713094" || true)"
+            if echo "$html" | grep -q 'nexus-project-switcher.js' && echo "$html" | grep -q 'nexus-people-panel.js'; then break; fi
+            sleep 10
+          done
+          echo "$html" | grep -q 'nexus-project-switcher.js'
+          echo "$html" | grep -q 'nexus-project-switcher.css'
+          echo "$html" | grep -q 'nexus-people-panel.js'
+          echo "$html" | grep -q 'nexus-people-panel.css'
+          curl -fsSL "$base/nexus-project-switcher.js?v=7cbb742" | grep -q 'NEXUS_PROJECT_SWITCHER_V1'
+          curl -fsSL "$base/nexus-people-panel.js?v=4713094" | grep -q 'NEXUS_PEOPLE_PANEL_V1'
+          curl -fsSL 'https://nosmotechnology.co.uk/person-card-kamil.html?v=people-link-test' | grep -qi 'Kamil Person Card'
+          printf 'project_switcher=HTTP_OK\npeople_panel=HTTP_OK\nperson_card=HTTP_OK\n' > apps/nexus-graph-preview/relationship-tree/PROJECT_PEOPLE_LIVE_VERIFIED.txt
+      - name: Save verification and cleanup
+        run: |
+          rm .github/workflows/verify-nexus-project-people-live.yml
+          git config user.name "NOSMO Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add apps/nexus-graph-preview/relationship-tree/PROJECT_PEOPLE_LIVE_VERIFIED.txt .github/workflows/verify-nexus-project-people-live.yml
+          git commit -m "Verify Nexus project and people panels live"
+          git push origin HEAD:main
