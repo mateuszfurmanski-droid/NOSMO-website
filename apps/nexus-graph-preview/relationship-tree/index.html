@@ -4,136 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>NOSMO Nexus™</title>
-    <meta name="description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta name="description" content="NOSMO Nexus™ — construction operating layer." />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="NOSMO Nexus™" />
-    <meta property="og:description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta property="og:description" content="NOSMO Nexus™ — construction operating layer." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="NOSMO Nexus™" />
-    <meta name="twitter:description" content="NOSMO Nexus™ — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:description" content="NOSMO Nexus™ — construction operating layer." />
     <link rel="icon" type="image/svg+xml" href="/apps/nexus-graph-preview/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --nexus-top-rail-h: 82px;
-        --nexus-ui-line: rgba(164, 193, 227, 0.19);
-        --nexus-ui-text: #eef6ff;
-        --nexus-ui-muted: #86a8c2;
-      }
-
-      .nexus-top-rail {
-        position: fixed;
-        z-index: 2000;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: var(--nexus-top-rail-h);
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 8px;
-        padding: 8px max(10px, env(safe-area-inset-left)) 8px max(10px, env(safe-area-inset-right));
-        background: linear-gradient(180deg, rgba(7, 17, 30, 0.99), rgba(6, 14, 25, 0.98));
-        border-bottom: 1px solid var(--nexus-ui-line);
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
-        -webkit-backdrop-filter: blur(18px);
-        backdrop-filter: blur(18px);
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-      }
-
-      .nexus-top-tile {
-        min-width: 0;
-        border: 1px solid rgba(80, 174, 236, 0.25);
-        border-radius: 16px;
-        background: linear-gradient(180deg, rgba(16, 51, 78, 0.78), rgba(7, 30, 49, 0.92));
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        grid-template-rows: 1fr 1fr;
-        column-gap: 8px;
-        align-items: center;
-        padding: 7px 10px;
-        cursor: pointer;
-        color: var(--nexus-ui-text);
-        box-shadow: inset 0 0 0 1px rgba(54, 163, 255, 0.04);
-        touch-action: manipulation;
-      }
-
-      .nexus-top-tile.active {
-        border-color: rgba(54, 163, 255, 0.55);
-        background: linear-gradient(180deg, rgba(17, 83, 124, 0.88), rgba(7, 45, 72, 0.94));
-        box-shadow: inset 0 0 22px rgba(54, 163, 255, 0.12);
-      }
-
-      .nexus-top-tile:active { transform: translateY(1px); }
-
-      .nexus-top-icon {
-        grid-row: 1 / 3;
-        display: grid;
-        place-items: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 11px;
-        background: rgba(10, 26, 43, 0.88);
-        border: 1px solid rgba(104, 199, 255, 0.25);
-        font-weight: 900;
-        font-size: 17px;
-        color: #4fd2ef;
-      }
-
-      #nexusTopNexus .nexus-top-icon {
-        background: linear-gradient(145deg, #1789ed, #5bb8ff);
-        color: white;
-        border-color: transparent;
-      }
-
-      .nexus-top-label {
-        align-self: end;
-        font-size: 11px;
-        font-weight: 850;
-        letter-spacing: 0.08em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .nexus-top-sub {
-        align-self: start;
-        font-size: 8px;
-        font-weight: 750;
-        letter-spacing: 0.06em;
-        color: var(--nexus-ui-muted);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      html[data-nexus-embedded="true"] .nexus-top-rail { display: none; }
-
-      @media (max-width: 760px) {
-        :root { --nexus-top-rail-h: 76px; }
-        .nexus-top-rail { gap: 6px; padding: 7px 6px; }
-        .nexus-top-tile {
-          border-radius: 14px;
-          grid-template-columns: 1fr;
-          grid-template-rows: 32px 14px 11px;
-          gap: 0;
-          padding: 4px 3px;
-          text-align: center;
-        }
-        .nexus-top-icon {
-          grid-row: auto;
-          width: 32px;
-          height: 32px;
-          border-radius: 10px;
-          justify-self: center;
-          font-size: 15px;
-        }
-        .nexus-top-label { align-self: center; font-size: 9px; letter-spacing: 0.06em; }
-        .nexus-top-sub { align-self: center; font-size: 7px; letter-spacing: 0.04em; }
-      }
-    </style>
+    <link rel="stylesheet" href="./nexus-shell-v2.css" />
     <script>
       (() => {
         const initialUrl = new URL(window.location.href);
@@ -144,6 +27,11 @@
         window.__NEXUS_EMBEDDED__ = embedded;
         document.documentElement.dataset.nexusWorld = world;
         if (embedded) document.documentElement.dataset.nexusEmbedded = 'true';
+        try {
+          document.documentElement.dataset.nexusTheme = localStorage.getItem('nexus.theme') || 'dark';
+        } catch {
+          document.documentElement.dataset.nexusTheme = 'dark';
+        }
 
         window.addEventListener('message', (event) => {
           if (event.origin !== window.location.origin) return;
@@ -154,172 +42,19 @@
           document.documentElement.dataset.nexusTimeMode = payload.mode || '';
           window.dispatchEvent(new CustomEvent('nexus:project-time-change', { detail: payload }));
         });
-
-        const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
-
-        if (embedded) {
-          const hideEmbeddedChrome = () => {
-            document.querySelectorAll('button,a').forEach((el) => {
-              const label = norm(el.textContent);
-              if (label.includes('nexus menu')) {
-                el.style.display = 'none';
-                el.setAttribute('aria-hidden', 'true');
-                el.dataset.nexusEmbeddedHidden = 'nexus-menu';
-              }
-            });
-
-            const workflowControls = Array.from(document.querySelectorAll('button,[role="button"],div'))
-              .filter((el) => norm(el.textContent).includes('workflow'));
-
-            workflowControls.forEach((workflowControl) => {
-              let node = workflowControl;
-              let toolbar = null;
-              for (let depth = 0; node && depth < 8; depth += 1, node = node.parentElement) {
-                const text = norm(node.innerText || node.textContent);
-                const rect = node.getBoundingClientRect();
-                const looksLikeToolbar =
-                  text.includes('workflow') &&
-                  text.includes('objects') &&
-                  text.includes('links') &&
-                  rect.width >= 240 &&
-                  rect.height >= 50 &&
-                  rect.height <= 220;
-                if (looksLikeToolbar) {
-                  toolbar = node;
-                  break;
-                }
-              }
-              if (toolbar) {
-                toolbar.style.display = 'none';
-                toolbar.setAttribute('aria-hidden', 'true');
-                toolbar.dataset.nexusEmbeddedHidden = 'tree-toolbar';
-              }
-            });
-          };
-
-          window.addEventListener('DOMContentLoaded', () => {
-            hideEmbeddedChrome();
-            requestAnimationFrame(hideEmbeddedChrome);
-            window.setTimeout(hideEmbeddedChrome, 250);
-            window.setTimeout(hideEmbeddedChrome, 1000);
-            const observer = new MutationObserver(hideEmbeddedChrome);
-            observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-            window.setTimeout(() => observer.disconnect(), 30000);
-          });
-          return;
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-          let controlsOpen = false;
-          let toolbar = null;
-
-          const rail = document.getElementById('nexusTopRail');
-          const nexusTile = document.getElementById('nexusTopNexus');
-          const projectTile = document.getElementById('nexusTopProject');
-          const timeTile = document.getElementById('nexusTopTime');
-          const sourcesTile = document.getElementById('nexusTopSources');
-          const timeSub = document.getElementById('nexusTopTimeSub');
-
-          const setActive = (tile) => {
-            [nexusTile, projectTile, timeTile, sourcesTile].forEach((entry) => entry?.classList.remove('active'));
-            tile?.classList.add('active');
-          };
-
-          const findToolbar = () => Array.from(document.querySelectorAll('[data-control]')).find((el) => {
-            const text = norm(el.textContent);
-            return text.includes('workflow') && text.includes('objects') && text.includes('links');
-          });
-
-          const placeToolbar = () => {
-            const candidate = findToolbar();
-            if (!candidate) return;
-            toolbar = candidate;
-            toolbar.dataset.nexusTopPanel = 'controls';
-            toolbar.style.setProperty('position', 'fixed', 'important');
-            toolbar.style.setProperty('left', '8px', 'important');
-            toolbar.style.setProperty('right', '8px', 'important');
-            toolbar.style.setProperty('top', 'calc(var(--nexus-top-rail-h) + 8px)', 'important');
-            toolbar.style.setProperty('width', 'auto', 'important');
-            toolbar.style.setProperty('max-width', 'none', 'important');
-            toolbar.style.setProperty('z-index', '1900', 'important');
-            toolbar.style.setProperty('border-radius', '18px', 'important');
-            toolbar.style.setProperty('box-shadow', '0 18px 48px rgba(0,0,0,.38)', 'important');
-            toolbar.style.setProperty('display', controlsOpen ? 'flex' : 'none', 'important');
-            toolbar.setAttribute('aria-hidden', String(!controlsOpen));
-          };
-
-          const closeControls = () => {
-            controlsOpen = false;
-            nexusTile?.classList.remove('active');
-            placeToolbar();
-          };
-
-          const clickToolbarButton = (needle) => {
-            placeToolbar();
-            const button = toolbar && Array.from(toolbar.querySelectorAll('button')).find((el) => norm(el.textContent).includes(needle));
-            if (button) button.click();
-            return button;
-          };
-
-          nexusTile?.addEventListener('click', () => {
-            controlsOpen = !controlsOpen;
-            setActive(controlsOpen ? nexusTile : null);
-            placeToolbar();
-          });
-
-          projectTile?.addEventListener('click', () => {
-            closeControls();
-            setActive(projectTile);
-            document.querySelector('[data-node-id="proj"] button')?.click();
-            window.setTimeout(() => projectTile.classList.remove('active'), 450);
-          });
-
-          timeTile?.addEventListener('click', () => {
-            closeControls();
-            setActive(timeTile);
-            const button = clickToolbarButton('timeline');
-            window.setTimeout(() => {
-              const pressed = button?.getAttribute('aria-pressed') === 'true';
-              if (timeSub) timeSub.textContent = pressed ? 'ON' : 'OFF';
-              if (!pressed) timeTile.classList.remove('active');
-            }, 50);
-          });
-
-          sourcesTile?.addEventListener('click', () => {
-            closeControls();
-            setActive(sourcesTile);
-            const target = Array.from(document.querySelectorAll('button,a')).find((el) => norm(el.textContent) === 'docs');
-            target?.click();
-            window.setTimeout(() => sourcesTile.classList.remove('active'), 450);
-          });
-
-          document.addEventListener('pointerdown', (event) => {
-            if (!controlsOpen || !toolbar) return;
-            const target = event.target;
-            if (!(target instanceof Node)) return;
-            if (toolbar.contains(target) || rail?.contains(target)) return;
-            closeControls();
-          }, true);
-
-          placeToolbar();
-          requestAnimationFrame(placeToolbar);
-          window.setTimeout(placeToolbar, 250);
-          window.setTimeout(placeToolbar, 1000);
-          const observer = new MutationObserver(placeToolbar);
-          observer.observe(document.getElementById('root'), { childList: true, subtree: true, characterData: true });
-        });
       })();
     </script>
+    <script defer src="./nexus-shell-v2.js"></script>
     <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css">
     <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus project navigation">
-      <button class="nexus-top-tile" id="nexusTopNexus" type="button" aria-label="Open Nexus view controls">
-        <span class="nexus-top-icon">N</span>
-        <span class="nexus-top-label">NEXUS</span>
-        <span class="nexus-top-sub">CONTROLS</span>
+      <button class="nexus-top-tile nexus-top-menu" id="nexusTopMenu" type="button" aria-label="Open Nexus menu">
+        <span class="nexus-top-icon">☰</span>
+        <span class="nexus-top-label">MENU</span>
+        <span class="nexus-top-sub">NEXUS</span>
       </button>
       <button class="nexus-top-tile" id="nexusTopProject" type="button" aria-label="Open active project">
         <span class="nexus-top-icon">▣</span>
@@ -331,12 +66,68 @@
         <span class="nexus-top-label">TIME</span>
         <span class="nexus-top-sub" id="nexusTopTimeSub">OFF</span>
       </button>
-      <button class="nexus-top-tile" id="nexusTopSources" type="button" aria-label="Open project documents">
+      <button class="nexus-top-tile" id="nexusTopFiles" type="button" aria-label="Open project files">
         <span class="nexus-top-icon">▤</span>
-        <span class="nexus-top-label">SOURCES</span>
-        <span class="nexus-top-sub">DOCS</span>
+        <span class="nexus-top-label">FILES</span>
+        <span class="nexus-top-sub">UPLOAD + DOCS</span>
       </button>
     </nav>
+
+    <div class="nexus-shell-scrim" id="nexusShellScrim" aria-hidden="true"></div>
+
+    <aside class="nexus-shell-panel left" id="nexusMenuPanel" aria-label="Nexus menu">
+      <div class="nexus-shell-panel-head">
+        <strong>NEXUS MENU</strong>
+        <button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close menu">×</button>
+      </div>
+      <div class="nexus-shell-section-title">NAVIGATION</div>
+      <div class="nexus-shell-list">
+        <button class="nexus-shell-action" type="button" data-nexus-action="home"><span class="nexus-shell-action-icon">⌂</span><span class="nexus-shell-action-copy"><strong>Home</strong><small>Relationship Tree</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-action="projects"><span class="nexus-shell-action-icon">▣</span><span class="nexus-shell-action-copy"><strong>Projects</strong><small>Active project and project worlds</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-action="people"><span class="nexus-shell-action-icon">◎</span><span class="nexus-shell-action-copy"><strong>People</strong><small>Person Cards and project people</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-action="trades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Profession and trade tools</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-action="modules"><span class="nexus-shell-action-icon">▦</span><span class="nexus-shell-action-copy"><strong>Modules</strong><small>Nexus workflow modules</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-action="connections"><span class="nexus-shell-action-icon">↔</span><span class="nexus-shell-action-copy"><strong>Connections</strong><small>External systems and connectors</small></span></button>
+      </div>
+      <div class="nexus-shell-section-title">SYSTEM</div>
+      <div class="nexus-shell-list">
+        <button class="nexus-shell-action" type="button" data-nexus-action="controls"><span class="nexus-shell-action-icon">⌘</span><span class="nexus-shell-action-copy"><strong>View controls</strong><small>Zoom, workflow, timeline and graph tools</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-action="settings"><span class="nexus-shell-action-icon">⚙</span><span class="nexus-shell-action-copy"><strong>Settings</strong><small id="nexusMenuThemeSub">DARK</small></span></button>
+      </div>
+    </aside>
+
+    <aside class="nexus-shell-panel right" id="nexusFilesPanel" aria-label="Project files">
+      <div class="nexus-shell-panel-head">
+        <strong>FILES</strong>
+        <button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close files">×</button>
+      </div>
+      <input class="nexus-file-picker" id="nexusFileInput" type="file" multiple />
+      <div class="nexus-shell-list">
+        <button class="nexus-shell-action" type="button" data-nexus-file-action="upload"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>Upload files</strong><small>Send files to the Nexus File Loader</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-file-action="project-files"><span class="nexus-shell-action-icon">▤</span><span class="nexus-shell-action-copy"><strong>Project files</strong><small>Documents already linked to this project</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-file-action="recent"><span class="nexus-shell-action-icon">◷</span><span class="nexus-shell-action-copy"><strong>Recent</strong><small>Recently added files</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-file-action="unmatched"><span class="nexus-shell-action-icon">?</span><span class="nexus-shell-action-copy"><strong>Unmatched</strong><small>Files that need project context</small></span></button>
+        <button class="nexus-shell-action" type="button" data-nexus-file-action="pending"><span class="nexus-shell-action-icon">✓</span><span class="nexus-shell-action-copy"><strong>Pending review</strong><small>Classified files awaiting confirmation</small></span></button>
+      </div>
+      <div class="nexus-file-selection" id="nexusFileSelection">No files selected</div>
+    </aside>
+
+    <aside class="nexus-shell-panel right" id="nexusSettingsPanel" aria-label="Nexus settings">
+      <div class="nexus-shell-panel-head">
+        <strong>SETTINGS</strong>
+        <button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close settings">×</button>
+      </div>
+      <div class="nexus-shell-section-title">APPEARANCE</div>
+      <div class="nexus-setting-row">
+        <span class="nexus-setting-copy"><strong>Light mode</strong><small>Switch the Nexus interface between dark and white themes</small></span>
+        <label class="nexus-theme-switch" aria-label="Toggle light mode">
+          <input id="nexusThemeToggle" type="checkbox" />
+          <span class="nexus-theme-track"></span>
+        </label>
+      </div>
+      <div class="nexus-theme-note">Theme preference is saved on this device and exposed globally as <code>nexus:theme-change</code> so every Nexus module can use the same setting.</div>
+    </aside>
+
     <div id="root"></div>
   </body>
 </html>
