@@ -1,4 +1,4 @@
-// NEXUS_ONE_SHELL_FIXES_V1
+// NEXUS_ONE_SHELL_FIXES_V2
 (()=>{
   if(window.__NEXUS_ONE_SHELL_FIXES_INSTALLED__)return;
   window.__NEXUS_ONE_SHELL_FIXES_INSTALLED__=true;
@@ -10,8 +10,28 @@
     const fileInput=document.getElementById('nexusFileInput');
     const filesTile=document.getElementById('nexusTopFiles');
 
-    // Upload belongs to FILES, not to the global System menu.
-    menuPanel?.querySelector('[data-nexus-action="file-loader"]')?.remove();
+    // File Loader is a real Nexus module and remains available from ☰ → SYSTEM.
+    // FILES keeps its quick upload action as a separate shortcut.
+    const systemTitle=Array.from(menuPanel?.querySelectorAll('.nexus-shell-section-title')||[])
+      .find(el=>String(el.textContent||'').trim().toLowerCase()==='system');
+    const systemList=systemTitle?.nextElementSibling;
+    let fileLoader=menuPanel?.querySelector('[data-nexus-action="file-loader"]');
+    if(!fileLoader&&systemList){
+      fileLoader=document.createElement('button');
+      fileLoader.className='nexus-shell-action';
+      fileLoader.type='button';
+      fileLoader.dataset.nexusAction='file-loader';
+      fileLoader.innerHTML='<span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span>';
+      systemList.insertBefore(fileLoader,systemList.firstChild);
+    }
+    if(fileLoader&&!fileLoader.dataset.fileLoaderModuleWired){
+      fileLoader.dataset.fileLoaderModuleWired='true';
+      fileLoader.addEventListener('click',event=>{
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.location.assign('/apps/nexus-file-loader/');
+      },true);
+    }
 
     const list=filesPanel?.querySelector('.nexus-shell-list');
     if(list&&!list.querySelector('[data-nexus-file-action="upload"]')){
