@@ -1,5 +1,20 @@
-// NEXUS_PROJECT_SWITCHER_V2
+// NEXUS_PROJECT_SWITCHER_V3
 (()=>{
+  if(!window.__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__){
+    try{
+      const request=new XMLHttpRequest();
+      request.open('GET','./nexus-trade-graph-runtime.js?v=1',false);
+      request.send(null);
+      if(request.status>=200&&request.status<300){
+        (0,eval)(`${request.responseText}\n//# sourceURL=nexus-trade-graph-runtime.js`);
+      }else{
+        console.warn('[NOSMO] Trade graph runtime bootstrap failed',request.status);
+      }
+    }catch(error){
+      console.error('[NOSMO] Trade graph runtime bootstrap failed',error);
+    }
+  }
+
   if(document.documentElement.dataset.nexusEmbedded==='true'){
     if((window.__NEXUS_PROJECT_WORLD__||'')==='esafe-demo'){
       const script=document.createElement('script');
