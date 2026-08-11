@@ -1,0 +1,52 @@
+name: Wire Nexus Project Context
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/wire-nexus-project-context.yml
+permissions:
+  contents: write
+jobs:
+  wire:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Wire shared project return context
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          targets=[
+            Path('apps/doorflow/index.html'),
+            Path('apps/fire-door-register/index.html'),
+            Path('apps/nexus-graph-preview/electrical-commissioning/index.html'),
+          ]
+          script='<script defer src="/apps/nexus/shared/project-context.js"></script>'
+          for path in targets:
+              text=path.read_text(encoding='utf-8')
+              if script not in text:
+                  text=text.replace('</head>',f'  {script}\n</head>',1)
+                  path.write_text(text,encoding='utf-8')
+
+          esafe=Path('apps/nexus-esafe-demo/index.html')
+          text=esafe.read_text(encoding='utf-8')
+          marker='<script>try{localStorage.setItem("nexus.activeProject","esafe")}catch{}</script>'
+          if marker not in text:
+              text=text.replace('</head>',f'  {marker}\n</head>',1)
+              esafe.write_text(text,encoding='utf-8')
+          PY
+          node --check apps/nexus/shared/project-context.js
+          grep -q '/apps/nexus/shared/project-context.js' apps/doorflow/index.html
+          grep -q '/apps/nexus/shared/project-context.js' apps/fire-door-register/index.html
+          grep -q '/apps/nexus/shared/project-context.js' apps/nexus-graph-preview/electrical-commissioning/index.html
+          grep -q 'nexus.activeProject' apps/nexus-esafe-demo/index.html
+      - name: Commit wiring and cleanup
+        run: |
+          rm .github/workflows/wire-nexus-project-context.yml
+          git config user.name "NOSMO Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add apps/doorflow/index.html apps/fire-door-register/index.html apps/nexus-graph-preview/electrical-commissioning/index.html apps/nexus-esafe-demo/index.html .github/workflows/wire-nexus-project-context.yml
+          git commit -m "Connect Nexus modules back to active Project World"
+          git push origin HEAD:main
