@@ -34,6 +34,16 @@
     return [category,preview];
   }));
 
+  const coreRecords=records.filter(record=>record.core).map(record=>({
+    id:record.id,
+    title:record.title,
+    date:record.date,
+    category:record.category,
+    core:true,
+    fileCount:Array.isArray(record.files)?record.files.length:0,
+    url:record.url||''
+  }));
+
   function sync(){
     const p=Number(slider.value)/Number(slider.max);
     const mode=document.querySelector('.mode-switch button.active')?.dataset.mode||'simulation';
@@ -54,7 +64,8 @@
           visibleRecordIds:visible.map(record=>record.id),
           phase:currentPhase,
           categoryCounts:categoryCounts(visible),
-          categoryPreviews:categoryPreviews(visible)
+          categoryPreviews:categoryPreviews(visible),
+          coreRecords
         },window.location.origin);
       }catch(_){ }
     }
