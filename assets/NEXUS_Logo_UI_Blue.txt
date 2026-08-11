@@ -1,0 +1,1 @@
+NEXUS UI Blue logo asset placeholder. The binary PNG is intended to be assets/NEXUS_Logo_UI_Blue.png. If this file exists, ignore it; the real asset is the PNG.
