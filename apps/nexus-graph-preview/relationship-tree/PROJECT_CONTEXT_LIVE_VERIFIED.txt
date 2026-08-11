@@ -1,0 +1,6 @@
+project_switcher=HTTP_OK
+people_panel=HTTP_OK
+person_card=HTTP_OK
+doorflow_context=HTTP_OK
+fire_register_context=HTTP_OK
+electrical_context=HTTP_OK
