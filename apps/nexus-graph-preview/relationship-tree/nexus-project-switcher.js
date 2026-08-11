@@ -1,4 +1,4 @@
-// NEXUS_PROJECT_SWITCHER_V6_ESAFE_RUNTIME
+// NEXUS_PROJECT_SWITCHER_V7_WORKMODE_ESAFE_RUNTIME
 (()=>{
   const bootLocal=(flag,path)=>{
     if(window[flag])return;
@@ -18,8 +18,13 @@
   bootLocal('__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__','./nexus-trade-graph-runtime.js?v=1');
   bootLocal('__NEXUS_ONE_SHELL_FIXES_INSTALLED__','./nexus-one-shell-fixes.js?v=2');
 
+  const url=new URL(window.location.href);
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
+  const workModeProject=(url.searchParams.get('project')||'Mobile Work Context').trim().slice(0,80)||'Mobile Work Context';
+  const workModeSignals=Math.max(0,Math.min(parseInt(url.searchParams.get('signals')||'0',10)||0,999));
+
   if(world==='esafe-demo')bootLocal('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=2');
+  if(world==='workmode')bootLocal('__NEXUS_WORKMODE_WORLD_INSTALLED__','./nexus-workmode-world.js?v=1');
 
   // Legacy embedded e-SAFE page remains supported as a backup only.
   if(document.documentElement.dataset.nexusEmbedded==='true'){
@@ -37,13 +42,24 @@
     const scrim=document.getElementById('nexusShellScrim');
     if(!projectTile)return;
 
-    const projects=[
+    const projects=[];
+    if(world==='workmode'){
+      projects.push({
+        id:'workmode',
+        label:workModeProject,
+        sub:`Android Work Mode · ${workModeSignals} approved signals · local context`,
+        icon:'W',
+        href:window.location.pathname+window.location.search,
+        world:'workmode'
+      });
+    }
+    projects.push(
       {id:'riverside',label:'Riverside',sub:'Canonical Relationship Tree · development project',icon:'▣',href:'/apps/nexus-graph-preview/relationship-tree/?world=dev',world:'dev'},
       {id:'esafe',label:'e-SAFE Catania',sub:'Project World · real pilot dataset',icon:'E',href:'/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo',world:'esafe-demo'}
-    ];
+    );
 
     // Loaded Project World is the single source of truth. Never use stale localStorage to label the UI.
-    const active=world==='esafe-demo'?'esafe':'riverside';
+    const active=world==='workmode'?'workmode':world==='esafe-demo'?'esafe':'riverside';
     try{localStorage.setItem('nexus.activeProject',active)}catch{}
 
     const panel=document.createElement('aside');
@@ -59,7 +75,9 @@
     document.body.appendChild(panel);
 
     const sub=projectTile.querySelector('.nexus-top-sub');
-    if(sub)sub.textContent=active==='esafe'?'e-SAFE':'RIVERSIDE';
+    if(sub){
+      sub.textContent=active==='workmode'?workModeProject.toUpperCase().slice(0,14):active==='esafe'?'e-SAFE':'RIVERSIDE';
+    }
 
     const close=()=>{
       panel.classList.remove('open');
