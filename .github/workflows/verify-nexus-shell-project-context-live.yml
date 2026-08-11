@@ -1,0 +1,43 @@
+name: Verify Nexus Shell Project Context Live
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/verify-nexus-shell-project-context-live.yml
+permissions:
+  contents: write
+jobs:
+  verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Verify public project shell and module context
+        run: |
+          set -e
+          tree='https://nosmotechnology.co.uk/apps/nexus-graph-preview/relationship-tree'
+          for i in $(seq 1 12); do
+            html="$(curl -fsSL "$tree/?v=project-context-live" || true)"
+            if echo "$html" | grep -q 'nexus-project-switcher.js' && echo "$html" | grep -q 'nexus-people-panel.js'; then break; fi
+            sleep 10
+          done
+          echo "$html" | grep -q 'nexus-project-switcher.js'
+          echo "$html" | grep -q 'nexus-people-panel.js'
+          curl -fsSL "$tree/nexus-project-switcher.js?v=project-context-live" | grep -q 'NEXUS_PROJECT_SWITCHER_V1'
+          curl -fsSL "$tree/nexus-people-panel.js?v=project-context-live" | grep -q 'NEXUS_PEOPLE_PANEL_V1'
+          curl -fsSL 'https://nosmotechnology.co.uk/person-card-kamil.html?v=project-context-live' | grep -qi 'Kamil Person Card'
+          curl -fsSL 'https://nosmotechnology.co.uk/apps/doorflow/?v=project-context-live' | grep -q '/apps/nexus/shared/project-context.js'
+          curl -fsSL 'https://nosmotechnology.co.uk/apps/fire-door-register/?v=project-context-live' | grep -q '/apps/nexus/shared/project-context.js'
+          curl -fsSL 'https://nosmotechnology.co.uk/apps/nexus-graph-preview/electrical-commissioning/?v=project-context-live' | grep -q '/apps/nexus/shared/project-context.js'
+          curl -fsSL 'https://nosmotechnology.co.uk/apps/nexus/shared/project-context.js?v=project-context-live' | grep -q 'NEXUS_PROJECT_CONTEXT_V1'
+          printf 'project_switcher=HTTP_OK\npeople_panel=HTTP_OK\nperson_card=HTTP_OK\ndoorflow_context=HTTP_OK\nfire_register_context=HTTP_OK\nelectrical_context=HTTP_OK\n' > apps/nexus-graph-preview/relationship-tree/PROJECT_CONTEXT_LIVE_VERIFIED.txt
+      - name: Save verification and cleanup
+        run: |
+          rm .github/workflows/verify-nexus-shell-project-context-live.yml
+          git config user.name "NOSMO Build Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add apps/nexus-graph-preview/relationship-tree/PROJECT_CONTEXT_LIVE_VERIFIED.txt .github/workflows/verify-nexus-shell-project-context-live.yml
+          git commit -m "Verify Nexus project context live"
+          git push origin HEAD:main
