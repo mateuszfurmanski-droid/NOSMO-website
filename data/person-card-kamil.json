@@ -1,6 +1,6 @@
 {
   "id": "person-kamil-karaszewski",
-  "version": "v46logo1",
+  "version": "v47top1",
   "type": "person-card",
   "updatedAt": "2026-08-11",
   "person": {
@@ -24,17 +24,17 @@
     "relationship": "Person Card linked to active Nexus Project Graph"
   },
   "links": {
-    "personCard": "/person-card-kamil.html?v=v46logo1",
-    "versionedPersonCard": "/person-card-kamil-v46.html?v=v46logo1",
-    "relationshipTree": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v46logo1",
-    "dataFetcher": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v46logo1",
-    "registry": "/apps/nexus/person-cards/?v=v46logo1",
+    "personCard": "/person-card-kamil.html?v=v47top1",
+    "versionedPersonCard": "/person-card-kamil-v47.html?v=v47top1",
+    "relationshipTree": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v47top1",
+    "dataFetcher": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v47top1",
+    "registry": "/apps/nexus/person-cards/?v=v47top1",
     "sections": {
-      "cv": "/person-card-kamil-section.html?section=cv&v=v46logo1",
-      "certs": "/person-card-kamil-section.html?section=certs&v=v46logo1",
-      "refs": "/person-card-kamil-section.html?section=refs&v=v46logo1",
-      "availability": "/person-card-kamil-section.html?section=availability&v=v46logo1",
-      "vault": "/person-card-kamil-section.html?section=vault&v=v46logo1"
+      "cv": "/person-card-kamil-section.html?section=cv&v=v47top1",
+      "certs": "/person-card-kamil-section.html?section=certs&v=v47top1",
+      "refs": "/person-card-kamil-section.html?section=refs&v=v47top1",
+      "availability": "/person-card-kamil-section.html?section=availability&v=v47top1",
+      "vault": "/person-card-kamil-section.html?section=vault&v=v47top1"
     },
     "communications": {
       "whatsapp": "https://wa.me/?text=Kamil%20Karaszewski%20NOSMO%20Person%20Card",
