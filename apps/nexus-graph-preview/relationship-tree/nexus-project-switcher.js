@@ -1,6 +1,15 @@
-// NEXUS_PROJECT_SWITCHER_V1
+// NEXUS_PROJECT_SWITCHER_V2
 (()=>{
-  if(document.documentElement.dataset.nexusEmbedded==='true')return;
+  if(document.documentElement.dataset.nexusEmbedded==='true'){
+    if((window.__NEXUS_PROJECT_WORLD__||'')==='esafe-demo'){
+      const script=document.createElement('script');
+      script.src='./esafe-embedded-adapter.js?v=1';
+      script.defer=true;
+      document.head.appendChild(script);
+    }
+    return;
+  }
+
   window.addEventListener('DOMContentLoaded',()=>{
     const projectTile=document.getElementById('nexusTopProject');
     const scrim=document.getElementById('nexusShellScrim');
