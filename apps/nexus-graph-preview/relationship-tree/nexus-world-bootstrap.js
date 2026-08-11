@@ -1,4 +1,4 @@
-// NEXUS_WORLD_BOOTSTRAP_V2_MANAGER_TRADES
+// NEXUS_WORLD_BOOTSTRAP_V1_RESTORED
 (()=>{
   if(window.__NEXUS_WORLD_BOOTSTRAPPED__)return;
   window.__NEXUS_WORLD_BOOTSTRAPPED__=true;
@@ -16,6 +16,4 @@
   };
   load('__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__','./nexus-trade-graph-runtime.js?v=2');
   if(world==='esafe-demo')load('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=2');
-  // Manager visibility wrapper must be installed last, after Project World and trade graph patches.
-  load('__NEXUS_MANAGER_TRADES_VIEW_INSTALLED__','./nexus-manager-trades-view.js?v=1');
 })();
