@@ -1,0 +1,15 @@
+/* e-SAFE CORE child-node layout. Visual layer only; canonical graph gestures stay untouched. */
+.esafe-core-children{--core-gap:14px;--core-line:rgba(122,198,255,.28)}
+.esafe-core-children::before{content:"";position:absolute;top:50%;width:var(--core-gap);height:1px;background:var(--core-line);pointer-events:none}
+.esafe-core-children[data-side="right"]::before{right:100%}
+.esafe-core-children[data-side="left"]::before{left:100%}
+.esafe-core-card{position:relative;width:clamp(142px,18vw,190px)}
+.esafe-core-card::before{content:"";position:absolute;top:50%;width:8px;height:1px;background:var(--core-line);pointer-events:none}
+.esafe-core-children[data-side="right"] .esafe-core-card::before{right:100%}
+.esafe-core-children[data-side="left"] .esafe-core-card::before{left:100%}
+@media(max-width:760px){
+  .esafe-core-children{--core-gap:10px;gap:6px!important;max-width:148px}
+  .esafe-core-card{width:136px!important;padding:7px 8px!important}
+  .esafe-core-card strong{font-size:9px!important;line-height:1.2!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .esafe-core-card small{font-size:8px!important}
+}
