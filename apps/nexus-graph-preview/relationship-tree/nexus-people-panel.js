@@ -1,7 +1,8 @@
-// NEXUS_PEOPLE_PANEL_V2_KAMIL_BRIDGE
+// NEXUS_PEOPLE_PANEL_V3_PERSON_CARD_REGISTRY
 (()=>{
   if(document.documentElement.dataset.nexusEmbedded==='true')return;
   const DATA_URL='/data/person-card-kamil.json?v=v41graph1';
+  const REGISTRY_URL='/apps/nexus/person-cards/?v=personcards1';
   const CARD_URL='/person-card-kamil.html?v=v41graph1';
   const TREE_URL='/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v41graph1';
   const FETCHER_URL='/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v41graph1';
@@ -45,7 +46,7 @@
     panel.className='nexus-people-panel';
     panel.setAttribute('aria-label','People in active project');
     panel.setAttribute('aria-hidden','true');
-    panel.innerHTML='<div class="nexus-people-head"><strong>PEOPLE</strong><button class="nexus-people-close" type="button" aria-label="Close people">×</button></div><div class="nexus-people-context" id="nexusPeopleContext">ACTIVE PROJECT</div><div class="nexus-people-list" id="nexusPeopleList"></div><div class="nexus-people-note">People are read from the active Relationship Tree and from linked Person Card data bridges. Kamil is connected to the shared Person Card data file, Data Fetcher context and Relationship Tree route.</div>';
+    panel.innerHTML='<div class="nexus-people-head"><strong>PEOPLE</strong><span class="nexus-people-head-actions"><a class="nexus-people-registry" href="/apps/nexus/person-cards/?v=personcards1">PERSON CARDS</a><button class="nexus-people-close" type="button" aria-label="Close people">×</button></span></div><div class="nexus-people-context" id="nexusPeopleContext">ACTIVE PROJECT</div><div class="nexus-people-list" id="nexusPeopleList"></div><div class="nexus-people-note">People are read from the active Relationship Tree and from linked Person Card data bridges. The Person Cards registry is the system-level entry point for shared identity records.</div>';
     document.body.appendChild(panel);
 
     const list=panel.querySelector('#nexusPeopleList');
@@ -114,6 +115,7 @@
 
     peopleAction.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();open()},true);
     panel.querySelector('.nexus-people-close')?.addEventListener('click',close);
+    panel.querySelector('.nexus-people-registry')?.addEventListener('click',()=>close());
     scrim?.addEventListener('click',close);
     window.addEventListener('nexus:person-data-bridge-ready',()=>{if(panel.classList.contains('open'))render()});
     ['nexusTopProject','nexusTopTime','nexusTopFiles'].forEach(id=>document.getElementById(id)?.addEventListener('click',close,true));
