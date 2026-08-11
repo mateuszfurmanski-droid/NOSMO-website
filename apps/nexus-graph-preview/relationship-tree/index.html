@@ -18,71 +18,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./nexus-shell-v2.css" />
     <link rel="stylesheet" href="./nexus-timeline-panel.css" />
-    <style id="nosmo-electrical-tree-style">
-      #nosmo-electrical-tree-node {
-        position: absolute;
-        left: 0;
-        top: 0;
-        z-index: 28;
-        transform: translate(260px, 220px) translate(-50%, -50%);
-        pointer-events: auto;
-      }
-
-      #nosmo-electrical-tree-node .nosmo-electrical-tree-card {
-        display: flex;
-        width: 132px;
-        flex-direction: column;
-        align-items: center;
-        gap: 7px;
-        color: hsl(var(--foreground));
-        text-decoration: none;
-        outline: none;
-      }
-
-      #nosmo-electrical-tree-node .nosmo-electrical-tree-icon {
-        position: relative;
-        display: flex;
-        width: 82px;
-        height: 82px;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid rgba(34, 211, 238, .72);
-        border-radius: 18px;
-        background: hsl(var(--card));
-        color: rgb(103, 232, 249);
-        font-size: 32px;
-        font-weight: 800;
-        box-shadow: 0 14px 38px rgba(0, 0, 0, .38), 0 0 30px rgba(34, 211, 238, .12);
-        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
-      }
-
-      #nosmo-electrical-tree-node .nosmo-electrical-tree-card:hover .nosmo-electrical-tree-icon,
-      #nosmo-electrical-tree-node .nosmo-electrical-tree-card:focus-visible .nosmo-electrical-tree-icon {
-        transform: scale(1.05);
-        border-color: rgb(103, 232, 249);
-        box-shadow: 0 14px 38px rgba(0, 0, 0, .38), 0 0 36px rgba(34, 211, 238, .25);
-      }
-
-      #nosmo-electrical-tree-node .nosmo-electrical-tree-label {
-        max-width: 132px;
-        text-align: center;
-        font-size: 11px;
-        font-weight: 700;
-        line-height: 1.15;
-      }
-
-      #nosmo-electrical-tree-node .nosmo-electrical-tree-type {
-        border: 1px solid hsl(var(--border));
-        border-radius: 999px;
-        background: hsl(var(--background) / .82);
-        padding: 2px 8px;
-        color: hsl(var(--muted-foreground));
-        font-size: 8px;
-        font-weight: 800;
-        letter-spacing: .12em;
-        text-transform: uppercase;
-      }
-    </style>
     <script>
       (() => {
         const initialUrl = new URL(window.location.href);
@@ -112,77 +47,72 @@
     </script>
     <script defer src="./nexus-shell-v2.js"></script>
     <script defer src="./nexus-timeline-panel.js"></script>
-    <script>
-      (() => {
-        const electricalUrl = '/apps/nexus-graph-preview/electrical-commissioning/';
-        const legacyElectricalUrl = '/apps/nexus/electrical-commissioning/';
-        const nodeId = 'nosmo-electrical-tree-node';
-        const overlayId = 'nosmo-electrical-tree-link-overlay';
+    <script type="module">
+      const bundleUrl = '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js';
+      const electricalUrl = '/apps/nexus-graph-preview/electrical-commissioning/';
 
-        function mountElectricalNode() {
-          const root = document.getElementById('root');
-          if (!root) return;
-          const projectNode = root.querySelector('[data-node-id="proj"]');
-          if (!projectNode) return;
-          const scene = projectNode.parentElement;
-          if (!scene) return;
+      const replacements = [
+        {
+          name: 'graph nodes',
+          from: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},',
+          to: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},{id:"m-electrical",label:"Electrical",sublabel:"Trade system",type:"module",Icon:jc},{id:"m-electrical-commissioning",label:"Electrical Commissioning",sublabel:"Open module",type:"module",Icon:jc,href:"/apps/nexus-graph-preview/electrical-commissioning/"},{id:"e-cables",label:"Cables",sublabel:"LV distribution",type:"module",Icon:jc},{id:"e-certificates",label:"Certificates",sublabel:"Apartment testing",type:"module",Icon:jc},{id:"e-communal",label:"Communal",sublabel:"Systems & areas",type:"module",Icon:jc},{id:"e-snags",label:"Electrical Snags",sublabel:"Open defects",type:"module",Icon:jc},'
+        },
+        {
+          name: 'module visual type',
+          from: 'gc={project:{chip:"bg-primary/15 text-primary",centerBorder:"border-primary"},person:{chip:"bg-blue-500/15 text-blue-400",centerBorder:"border-blue-500"},task:{chip:"bg-emerald-500/15 text-emerald-400",centerBorder:"border-emerald-500"},document:{chip:"bg-amber-500/15 text-amber-400",centerBorder:"border-amber-500"},issue:{chip:"bg-red-500/15 text-red-400",centerBorder:"border-red-500"}},Ow={issue:-1,person:0,task:1,document:2,project:3}',
+          to: 'gc={project:{chip:"bg-primary/15 text-primary",centerBorder:"border-primary"},person:{chip:"bg-blue-500/15 text-blue-400",centerBorder:"border-blue-500"},task:{chip:"bg-emerald-500/15 text-emerald-400",centerBorder:"border-emerald-500"},document:{chip:"bg-amber-500/15 text-amber-400",centerBorder:"border-amber-500"},issue:{chip:"bg-red-500/15 text-red-400",centerBorder:"border-red-500"},module:{chip:"bg-cyan-500/15 text-cyan-300",centerBorder:"border-cyan-400"}},Ow={issue:-1,person:0,module:1,task:2,document:3,project:4}'
+        },
+        {
+          name: 'native graph hierarchy',
+          from: 'for(const i of ns)i.id!==ts&&t(ts,i.id);for(const[i,{people:l,docs:d}]of Object.entries(rc))',
+          to: 'const elChildren=new Set(["m-electrical-commissioning","e-cables","e-certificates","e-communal","e-snags"]);for(const i of ns)i.id!==ts&&!elChildren.has(i.id)&&t(ts,i.id);for(const id of elChildren)t("m-electrical",id);for(const[i,{people:l,docs:d}]of Object.entries(rc))'
+        },
+        {
+          name: 'module open action',
+          from: 'M=B=>{if($.current===B.id){$.current=null;return}',
+          to: 'M=B=>{if(B.href){window.location.href=B.href;return}if($.current===B.id){$.current=null;return}'
+        },
+        {
+          name: 'folder dock electrical route',
+          from: '"/apps/nexus/electrical-commissioning/"',
+          to: '"/apps/nexus-graph-preview/electrical-commissioning/"'
+        }
+      ];
 
-          if (!scene.querySelector('#' + overlayId)) {
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.id = overlayId;
-            svg.setAttribute('aria-hidden', 'true');
-            svg.style.position = 'absolute';
-            svg.style.left = '0';
-            svg.style.top = '0';
-            svg.style.overflow = 'visible';
-            svg.style.pointerEvents = 'none';
-            svg.style.zIndex = '1';
+      try {
+        const response = await fetch(bundleUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Bundle fetch failed: ${response.status}`);
+        let code = await response.text();
 
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', '0');
-            line.setAttribute('y1', '0');
-            line.setAttribute('x2', '260');
-            line.setAttribute('y2', '220');
-            line.setAttribute('stroke', 'rgba(34, 211, 238, .48)');
-            line.setAttribute('stroke-width', '2');
-            line.setAttribute('stroke-dasharray', '7 5');
-            svg.appendChild(line);
-            scene.appendChild(svg);
-          }
-
-          if (!scene.querySelector('#' + nodeId)) {
-            const node = document.createElement('div');
-            node.id = nodeId;
-            node.setAttribute('data-control', 'true');
-            node.setAttribute('data-nosmo-module-node', 'electrical');
-            node.innerHTML = `
-              <a class="nosmo-electrical-tree-card" href="${electricalUrl}" aria-label="Open Electrical Commissioning">
-                <span class="nosmo-electrical-tree-icon" aria-hidden="true">⚡</span>
-                <span class="nosmo-electrical-tree-label">Electrical Commissioning</span>
-                <span class="nosmo-electrical-tree-type">NOSMO module</span>
-              </a>`;
-            scene.appendChild(node);
-          }
+        for (const patch of replacements) {
+          const first = code.indexOf(patch.from);
+          const last = code.lastIndexOf(patch.from);
+          if (first < 0) throw new Error(`Native graph patch missing: ${patch.name}`);
+          if (first !== last) throw new Error(`Native graph patch ambiguous: ${patch.name}`);
+          code = code.replace(patch.from, patch.to);
         }
 
-        document.addEventListener('click', (event) => {
-          const target = event.target instanceof Element ? event.target.closest(`a[href="${legacyElectricalUrl}"]`) : null;
-          if (!target) return;
-          event.preventDefault();
-          window.location.href = electricalUrl;
-        }, true);
+        window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = {
+          enabled: true,
+          root: 'm-electrical',
+          children: ['m-electrical-commissioning', 'e-cables', 'e-certificates', 'e-communal', 'e-snags'],
+          href: electricalUrl
+        };
 
-        window.addEventListener('DOMContentLoaded', () => {
-          mountElectricalNode();
-          const root = document.getElementById('root');
-          if (!root) return;
-          const observer = new MutationObserver(mountElectricalNode);
-          observer.observe(root, { childList: true, subtree: true });
-        });
-        window.addEventListener('load', mountElectricalNode);
-      })();
+        const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+        try {
+          await import(blobUrl);
+        } finally {
+          URL.revokeObjectURL(blobUrl);
+        }
+      } catch (error) {
+        console.error('[NOSMO] Native Electrical graph failed to load', error);
+        const root = document.getElementById('root');
+        if (root) {
+          root.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#08111f;color:#eaf5ff;font:14px Inter,sans-serif;padding:24px;text-align:center">Nexus graph could not start. Refresh the page or open the previous backup build.</div>';
+        }
+      }
     </script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css">
     <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
   </head>
