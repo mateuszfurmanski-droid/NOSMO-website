@@ -1,13 +1,13 @@
-// NEXUS_ESAFE_EMBEDDED_ADAPTER_V2
+// NEXUS_ESAFE_EMBEDDED_ADAPTER_V3
 (()=>{
   if(document.documentElement.dataset.nexusEmbedded!=='true')return;
   if((window.__NEXUS_PROJECT_WORLD__||'')!=='esafe-demo')return;
 
   const CATEGORY_ORDER=['Survey','BIM','Design','Production','Construction','Testing','Research','Communication'];
   const norm=value=>String(value||'').replace(/\s+/g,' ').trim();
-
   const categoryState=new Map(CATEGORY_ORDER.map(name=>[name,{visible:0,total:0}]));
   const categoryPreviews=new Map(CATEGORY_ORDER.map(name=>[name,[]]));
+  let coreRecords=[];
   let mapped=false;
   let categoryNodes=[];
   let selectedCategory='';
@@ -22,6 +22,44 @@
     if(contentSpans[0])contentSpans[0].textContent=label;
     if(contentSpans[1])contentSpans[1].textContent=sublabel;
     node.dataset.esafeCategory=label;
+  }
+
+  function ensureCoreHost(node){
+    let host=node.querySelector(':scope > .esafe-core-children');
+    if(host)return host;
+    host=document.createElement('div');
+    host.className='esafe-core-children';
+    host.style.cssText='position:absolute;left:calc(100% + 16px);top:50%;transform:translateY(-50%);display:grid;gap:8px;min-width:168px;z-index:5;pointer-events:auto';
+    node.style.overflow='visible';
+    node.appendChild(host);
+    return host;
+  }
+
+  function renderCoreChildren(detail){
+    if(Array.isArray(detail?.coreRecords))coreRecords=detail.coreRecords;
+    const visibleIds=new Set(Array.isArray(detail?.visibleRecordIds)?detail.visibleRecordIds.map(String):[]);
+    if(!mapped||!coreRecords.length)return;
+
+    CATEGORY_ORDER.forEach((category,index)=>{
+      const node=categoryNodes[index];
+      if(!node)return;
+      const records=coreRecords.filter(record=>record.category===category);
+      const host=ensureCoreHost(node);
+      host.innerHTML='';
+      records.forEach(record=>{
+        const visible=visibleIds.has(String(record.id));
+        const card=document.createElement(record.url?'a':'div');
+        if(record.url){card.href=record.url;card.target='_blank';card.rel='noopener'}
+        card.dataset.nodeId=`esafe-core-${record.id}`;
+        card.dataset.esafeParentCategory=category;
+        card.dataset.esafeCore='true';
+        card.style.cssText=`display:block;text-decoration:none;color:#eef6ff;border:1px solid ${visible?'rgba(122,198,255,.44)':'rgba(164,193,227,.15)'};border-radius:12px;background:${visible?'rgba(16,40,66,.94)':'rgba(8,18,32,.74)'};padding:8px 10px;box-shadow:0 10px 24px rgba(0,0,0,.28);opacity:${visible?'1':'.34'};transition:.16s;white-space:normal`;
+        const title=String(record.title||record.id);
+        card.innerHTML=`<div style="font-size:8px;letter-spacing:.12em;color:#7ac6ff;font-weight:800;margin-bottom:3px">CORE PILOT · ${record.date||'—'}</div><strong style="display:block;font-size:10px;line-height:1.25;max-width:180px">${title}</strong><small style="display:block;margin-top:3px;color:#9bb0c8">${record.fileCount||0} file${record.fileCount===1?'':'s'}${visible?' · ACTIVE NOW':' · FUTURE'}</small>`;
+        host.appendChild(card);
+      });
+      host.style.display=records.length?'grid':'none';
+    });
   }
 
   function ensurePanel(){
@@ -69,11 +107,7 @@
     const all=Array.from(document.querySelectorAll('[data-node-id]'));
     if(!all.length)return false;
     const project=all.find(node=>node.getAttribute('data-node-id')==='proj')||all[0];
-    if(project){
-      setNodeText(project,'e-SAFE Catania Real Pilot','Active Project World');
-      project.dataset.esafeProject='true';
-    }
-
+    if(project){setNodeText(project,'e-SAFE Catania Real Pilot','Active Project World');project.dataset.esafeProject='true'}
     const candidates=all.filter(node=>node!==project).slice(0,CATEGORY_ORDER.length);
     if(candidates.length<CATEGORY_ORDER.length)return false;
     categoryNodes=candidates;
@@ -82,28 +116,16 @@
       const node=candidates[index];
       setNodeText(node,category,`${state.visible} / ${state.total} records`);
       node.dataset.esafeCategory=category;
-      const button=node.querySelector('button');
-      button?.addEventListener('click',event=>{
-        event.preventDefault();
-        event.stopPropagation();
-        openCategory(category);
-      },true);
+      node.querySelector('button')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openCategory(category)},true);
     });
     mapped=true;
     document.documentElement.dataset.esafeGraphHydrated='true';
     return true;
   }
 
-  function renderCounts(detail){
-    if(detail?.categoryCounts){
-      CATEGORY_ORDER.forEach(category=>{
-        const next=detail.categoryCounts[category]||{};
-        categoryState.set(category,{visible:Number(next.visible||0),total:Number(next.total||0)});
-      });
-    }
-    if(detail?.categoryPreviews){
-      CATEGORY_ORDER.forEach(category=>categoryPreviews.set(category,Array.isArray(detail.categoryPreviews[category])?detail.categoryPreviews[category]:[]));
-    }
+  function render(detail){
+    if(detail?.categoryCounts){CATEGORY_ORDER.forEach(category=>{const next=detail.categoryCounts[category]||{};categoryState.set(category,{visible:Number(next.visible||0),total:Number(next.total||0)})})}
+    if(detail?.categoryPreviews){CATEGORY_ORDER.forEach(category=>categoryPreviews.set(category,Array.isArray(detail.categoryPreviews[category])?detail.categoryPreviews[category]:[]))}
     if(!mapCanonicalNodes())return;
     CATEGORY_ORDER.forEach((category,index)=>{
       const state=categoryState.get(category)||{visible:0,total:0};
@@ -113,14 +135,11 @@
       node.classList.toggle('nexus-time-future',future);
       node.style.opacity=future?'0.34':'1';
     });
+    renderCoreChildren(detail||{});
     if(selectedCategory)openCategory(selectedCategory);
   }
 
-  const scan=()=>{
-    if(mapCanonicalNodes())renderCounts(window.__NEXUS_PROJECT_TIME__||{});
-    else window.setTimeout(scan,180);
-  };
-
-  window.addEventListener('nexus:project-time-change',event=>renderCounts(event.detail||{}));
+  const scan=()=>{if(mapCanonicalNodes())render(window.__NEXUS_PROJECT_TIME__||{});else window.setTimeout(scan,180)};
+  window.addEventListener('nexus:project-time-change',event=>render(event.detail||{}));
   window.addEventListener('DOMContentLoaded',()=>window.setTimeout(scan,120));
 })();
