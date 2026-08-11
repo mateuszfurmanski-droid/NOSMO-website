@@ -8,25 +8,26 @@
   const fileSize=f=>typeof f==='string'?0:(f?.size||0);
   const fileUrl=(r,f)=>typeof f==='string'?r.url:(f?.url||r.url);
   const fileKind=f=>/\.(mp4|webm|mov|m4v|avi)$/i.test(fileName(f))?'VIDEO':'PDF';
+  const setText=(el,value)=>{if(el&&el.textContent!==value)el.textContent=value};
 
   function syncFilesChrome(){
     const tile=document.getElementById('sourcesTile');
     if(tile){
       const label=tile.querySelector('.tile-label');
       const sub=tile.querySelector('.tile-sub');
-      if(label)label.textContent='FILES';
+      setText(label,'FILES');
       if(sub){
         const n=(sub.textContent.match(/\d+/)||[])[0];
-        sub.textContent=`${n||IMPORT_SUMMARY.files} FILES`;
+        setText(sub,`${n||IMPORT_SUMMARY.files} FILES`);
       }
-      tile.setAttribute('aria-label','Open project files');
+      if(tile.getAttribute('aria-label')!=='Open project files')tile.setAttribute('aria-label','Open project files');
     }
     const panel=document.getElementById('sourceLibrary');
     if(panel){
       const kicker=panel.querySelector('.world-panel-kicker');
       const heading=panel.querySelector('h2');
-      if(kicker)kicker.textContent='PROJECT FILES';
-      if(heading)heading.textContent='e-SAFE project files';
+      setText(kicker,'PROJECT FILES');
+      setText(heading,'e-SAFE project files');
       const body=panel.querySelector('.world-panel-body');
       if(body&&!body.querySelector('.file-loader-import-band')){
         const band=document.createElement('div');
@@ -36,7 +37,7 @@
       }
     }
     const search=document.getElementById('sourceSearch');
-    if(search)search.placeholder='Search 106 project files…';
+    if(search&&search.placeholder!=='Search 106 project files…')search.placeholder='Search 106 project files…';
   }
 
   function wireSourceItems(){
