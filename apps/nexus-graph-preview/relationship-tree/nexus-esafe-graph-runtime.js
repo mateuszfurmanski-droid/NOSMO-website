@@ -1,4 +1,4 @@
-// NEXUS_ESAFE_GRAPH_RUNTIME_V2
+// NEXUS_ESAFE_GRAPH_RUNTIME_V3_ISOLATED_TRADES
 (()=>{
   if(window.__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__)return;
   if((window.__NEXUS_PROJECT_WORLD__||'')!=='esafe-demo')return;
@@ -6,17 +6,30 @@
 
   const bundlePath='/apps/nexus-graph-preview/assets/index-CWI-Glgh.js';
   const indexKey='nexus.tradeFileIndex.v1';
-  const categories=[
-    ['Survey','esafe-survey'],['BIM','esafe-bim'],['Design','esafe-design'],['Production','esafe-production'],
-    ['Construction','esafe-construction'],['Testing','esafe-testing'],['Research','esafe-research'],['Communication','esafe-communication']
+  const tradeGroups=[
+    ['Structural / Seismic','esafe-trade-structural'],
+    ['MEP / Energy','esafe-trade-mep'],
+    ['Electrical / Controls','esafe-trade-electrical'],
+    ['BIM / Digital','esafe-trade-bim'],
+    ['Fabrication / Installation','esafe-trade-fabrication'],
+    ['Survey / QA','esafe-trade-survey'],
+    ['Project / General','esafe-trade-general']
   ];
-  const fallbackCategoryIds={Survey:'p-mateusz',BIM:'p-sitemgr',Design:'p-architect',Production:'p-client',Construction:'p-team',Testing:'d-groundfloor',Research:'d-doorschedule',Communication:'d-siteinstructions'};
+  const fallbackCategoryIds={
+    'Structural / Seismic':'p-mateusz',
+    'MEP / Energy':'p-sitemgr',
+    'Electrical / Controls':'p-architect',
+    'BIM / Digital':'p-client',
+    'Fabrication / Installation':'p-team',
+    'Survey / QA':'d-groundfloor',
+    'Project / General':'d-doorschedule'
+  };
   const coreDocs=[
-    {id:'esafe-core-6260847',label:'D5.1 · Detailed survey of the real pilot',date:'2022-02-24',category:'Survey'},
-    {id:'esafe-core-6497142',label:'D2.2 · 3D physical and digital models',date:'2022-04-27',category:'BIM'},
-    {id:'esafe-core-19114712',label:'D5.5 · Monitoring activities',date:'2026-03-19',category:'Testing'},
-    {id:'esafe-core-19126519',label:'D5.4 · Production and delivery',date:'2026-03-20',category:'Production'},
-    {id:'esafe-core-19126674',label:'D5.3 · Detailed design for renovation',date:'2026-03-20',category:'Design'}
+    {id:'esafe-core-6260847',label:'D5.1 · Detailed survey of the real pilot',date:'2022-02-24',category:'Survey',trade:'Survey / QA'},
+    {id:'esafe-core-6497142',label:'D2.2 · 3D physical and digital models',date:'2022-04-27',category:'BIM',trade:'BIM / Digital'},
+    {id:'esafe-core-19114712',label:'D5.5 · Monitoring activities',date:'2026-03-19',category:'Testing',trade:'Survey / QA'},
+    {id:'esafe-core-19126519',label:'D5.4 · Production and delivery',date:'2026-03-20',category:'Production',trade:'Fabrication / Installation'},
+    {id:'esafe-core-19126674',label:'D5.3 · Detailed design for renovation',date:'2026-03-20',category:'Design',trade:'Structural / Seismic'}
   ];
   const fallbackDocs=[
     ['d-snaglist','D5.1 · Detailed survey of the real pilot','document'],
@@ -24,8 +37,7 @@
     ['t-install','D5.5 · Monitoring activities','document'],
     ['t-snag','D5.4 · Production and delivery','document'],
     ['t-fire','D5.3 · Detailed design for renovation','document'],
-    ['t-walkthrough','Pilot Actions','task'],
-    ['t-doorkits','Source Library','document']
+    ['t-walkthrough','Pilot Actions','task']
   ];
 
   const hash=value=>{
@@ -39,6 +51,17 @@
     try{const parsed=JSON.parse(localStorage.getItem(indexKey)||'[]');return Array.isArray(parsed)?parsed.slice(-60):[]}catch{return[]}
   };
 
+  function inferTrade(record){
+    const text=`${record?.title||''} ${record?.category||''}`.toLowerCase();
+    if(/electrical|control|sensor|monitoring system|wiring|cable/.test(text))return 'Electrical / Controls';
+    if(/bim|digital|model|3d|scan|laser|point cloud|ifc/.test(text))return 'BIM / Digital';
+    if(/mep|energy|hvac|mechanical|plant|duct|thermal|heat/.test(text))return 'MEP / Energy';
+    if(/fabrication|production|delivery|installation|construction|site works|assembly/.test(text))return 'Fabrication / Installation';
+    if(/survey|testing|test|monitoring|qa|quality|inspection|assessment/.test(text))return 'Survey / QA';
+    if(/structural|seismic|masonry|wall|reinforcement|design/.test(text))return 'Structural / Seismic';
+    return 'Project / General';
+  }
+
   function loadData(){
     if(Array.isArray(window.ESAFE_RECORDS)&&window.ESAFE_RECORDS.length)return;
     try{
@@ -51,31 +74,49 @@
   loadData();
 
   function uploadedDocEdges(){
+    const generalId='esafe-trade-general';
     return readIndex().map((file,index)=>{
       const id=`u-doc-${hash(`${file.name}|${file.size}|${file.lastModified}|${index}`)}`;
-      return `[${js('esafe-construction')},${js(id)}]`;
+      return `[${js(generalId)},${js(id)}]`;
     });
   }
 
+  function patchVisualTypes(source){
+    const from='gc={project:{chip:"bg-primary/15 text-primary",centerBorder:"border-primary"},person:{chip:"bg-blue-500/15 text-blue-400",centerBorder:"border-blue-500"},task:{chip:"bg-emerald-500/15 text-emerald-400",centerBorder:"border-emerald-500"},document:{chip:"bg-amber-500/15 text-amber-400",centerBorder:"border-amber-500"},issue:{chip:"bg-red-500/15 text-red-400",centerBorder:"border-red-500"}},Ow={issue:-1,person:0,task:1,document:2,project:3}';
+    const to='gc={project:{chip:"bg-primary/15 text-primary",centerBorder:"border-primary"},person:{chip:"bg-blue-500/15 text-blue-400",centerBorder:"border-blue-500"},task:{chip:"bg-emerald-500/15 text-emerald-400",centerBorder:"border-emerald-500"},document:{chip:"bg-amber-500/15 text-amber-400",centerBorder:"border-amber-500"},issue:{chip:"bg-red-500/15 text-red-400",centerBorder:"border-red-500"},module:{chip:"bg-cyan-500/15 text-cyan-300",centerBorder:"border-cyan-400"}},Ow={issue:-1,person:0,module:1,task:2,document:3,project:4}';
+    return source.includes(from)?source.replace(from,to):source;
+  }
+
   function patchBundle(source){
-    const projectMarker='const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},';
-    const taskMarker='{id:"t-doorkits",label:"Prepare Level 1 Door Kits",sublabel:"Awaiting assignment",type:"task",Icon:mn}';
-    const start=source.indexOf(projectMarker);
-    const task=source.indexOf(taskMarker,start+projectMarker.length);
-    if(start<0||task<0){console.warn('[NOSMO] e-SAFE graph marker not found');return source}
+    source=patchVisualTypes(source);
+    const listMarker='const ts="proj",Zr="p-sitemgr",ns=[';
+    const start=source.indexOf(listMarker);
+    const rcStart=start>=0?source.indexOf('],rc={',start):-1;
+    const dUStart=rcStart>=0?source.indexOf('},dU=',rcStart):-1;
+    if(start<0||rcStart<0||dUStart<0){
+      console.warn('[NOSMO] e-SAFE graph list marker not found; DOM fallback will isolate the world');
+      return source;
+    }
 
-    const categoryNodes=categories.map(([label,id])=>`{id:${js(id)},label:${js(label)},sublabel:"e-SAFE project system",type:"module",Icon:jc}`);
+    const tradeNodes=tradeGroups.map(([label,id])=>`{id:${js(id)},label:${js(label)},sublabel:"e-SAFE trade group",type:"module",Icon:jc}`);
     const coordinator='{id:"p-sitemgr",label:"e-SAFE Pilot Coordinator",sublabel:"Project coordination",type:"person",Icon:ws,company:"e-SAFE H2020"}';
-    const docNodes=coreDocs.map(doc=>`{id:${js(doc.id)},label:${js(doc.label)},sublabel:"CORE PILOT RECORD",type:"document",Icon:Rh,receivedAt:${js(`${doc.date}T00:00:00Z`)}}`);
-    const replacement=[coordinator,...categoryNodes,...docNodes].join(',')+',';
-    source=source.slice(0,start+projectMarker.length)+replacement+source.slice(task);
+    const docNodes=coreDocs.map(doc=>`{id:${js(doc.id)},label:${js(doc.label)},sublabel:${js(`${doc.trade} · ${doc.category}`)},type:"document",Icon:Rh,receivedAt:${js(`${doc.date}T00:00:00Z`)}}`);
+    const actionNode='{id:"esafe-pilot-actions",label:"Pilot Actions",sublabel:"Timeline-controlled project actions",type:"task",Icon:mn}';
+    const nodes=[
+      '{id:"proj",label:"e-SAFE Catania Real Pilot",sublabel:"Active Project World",type:"project",Icon:Dt}',
+      coordinator,
+      ...tradeNodes,
+      ...docNodes,
+      actionNode
+    ];
+    source=source.slice(0,start)+listMarker+nodes.join(',')+'],rc={}'+source.slice(dUStart+1);
 
-    source=source.replace(taskMarker,'{id:"t-doorkits",label:"Pilot Actions",sublabel:"Project coordination",type:"module",Icon:jc}');
-    source=source.replace(/\],rc=\{[\s\S]*?\},dU=/,' ],rc={},dU=');
-    const categoryMap=Object.fromEntries(categories);
-    const coreEdges=coreDocs.map(doc=>`[${js(categoryMap[doc.category])},${js(doc.id)}]`);
-    source=source.replace(/dU=\[[\s\S]*?\],gc=/,`dU=[${[...coreEdges,...uploadedDocEdges()].join(',')}],gc=`);
-    window.__NEXUS_ESAFE_GRAPH__={categories:categories.map(([label,id])=>({label,id})),coreDocs};
+    const tradeIdByLabel=Object.fromEntries(tradeGroups);
+    const coreEdges=coreDocs.map(doc=>`[${js(tradeIdByLabel[doc.trade]||tradeIdByLabel['Project / General'])},${js(doc.id)}]`);
+    const tradeEdges=tradeGroups.map(([,id])=>`["proj",${js(id)}]`);
+    const personEdges=['["proj","p-sitemgr"]','["proj","esafe-pilot-actions"]'];
+    source=source.replace(/dU=\[[\s\S]*?\],gc=/,`dU=[${[...tradeEdges,...personEdges,...coreEdges,...uploadedDocEdges()].join(',')}],gc=`);
+    window.__NEXUS_ESAFE_GRAPH__={trades:tradeGroups.map(([label,id])=>({label,id})),coreDocs};
     return source;
   }
 
@@ -141,14 +182,18 @@
   }
 
   function hydrateFallback(){
-    // If the bundle interceptor ran, canonical e-SAFE ids exist and nothing is remapped.
-    if(document.querySelector('[data-node-id="esafe-survey"]'))return false;
+    if(document.querySelector('[data-node-id="esafe-trade-structural"]'))return false;
     let changed=false;
-    categories.forEach(([label])=>{
+    tradeGroups.forEach(([label])=>{
       const id=fallbackCategoryIds[label];
-      changed=setNodePresentation(id,label,'module','e-SAFE project system')||changed;
+      changed=setNodePresentation(id,label,'module','e-SAFE trade group')||changed;
     });
     fallbackDocs.forEach(([id,label,type])=>{changed=setNodePresentation(id,label,type,'e-SAFE project record')||changed});
+    const oldRiversideLabels=['Riverside Heights Demo','Prepare Level 1 Door Kits','Ground Floor Plan','Door Schedule','Site Instructions'];
+    document.querySelectorAll('[data-node-id]').forEach(node=>{
+      const text=node.textContent||'';
+      if(oldRiversideLabels.some(label=>text.includes(label)))node.dataset.esafeHidden='true';
+    });
     if(changed)document.documentElement.dataset.esafeFallbackHydrated='true';
     return changed;
   }
@@ -171,7 +216,7 @@
   function renderWorld(progress=1){
     applyWorldIdentity();
     hydrateFallback();
-    const all=records();
+    const all=records().map(record=>({...record,trade:inferTrade(record)}));
     if(!all.length){
       const filesSub=document.querySelector('#nexusTopFiles .nexus-top-sub');
       if(filesSub)filesSub.textContent='e-SAFE FILES';
@@ -183,10 +228,10 @@
     const cutoff=first+(last-first)*p;
     const visible=all.filter(record=>Date.parse(`${record.date}T23:59:59Z`)<=cutoff);
     const counts={},totals={};
-    categories.forEach(([label])=>{counts[label]=0;totals[label]=0});
-    all.forEach(record=>{totals[record.category]=(totals[record.category]||0)+1});
-    visible.forEach(record=>{counts[record.category]=(counts[record.category]||0)+1});
-    categories.forEach(([label,id])=>{
+    tradeGroups.forEach(([label])=>{counts[label]=0;totals[label]=0});
+    all.forEach(record=>{totals[record.trade]=(totals[record.trade]||0)+1});
+    visible.forEach(record=>{counts[record.trade]=(counts[record.trade]||0)+1});
+    tradeGroups.forEach(([label,id])=>{
       const targetId=document.querySelector(`[data-node-id="${id}"]`)?id:fallbackCategoryIds[label];
       setCountBadge(targetId,`${counts[label]||0} / ${totals[label]||0} records`);
     });
@@ -200,7 +245,7 @@
 
   const scan=(attempt=0)=>{
     if(document.querySelector('[data-node-id="proj"]')){renderWorld(1);return}
-    if(attempt<60)setTimeout(()=>scan(attempt+1),120);
+    if(attempt<80)setTimeout(()=>scan(attempt+1),120);
   };
   window.addEventListener('nexus:project-time-change',event=>renderWorld(event.detail?.progress??1));
   window.addEventListener('DOMContentLoaded',()=>scan());
