@@ -1,0 +1,1 @@
+Backup marker before wiring native trade document graph runtime into the Relationship Tree bootstrap. The repository branch backup-before-native-trade-doc-graph-20260811 points to the pre-wiring state.
