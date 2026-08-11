@@ -18,6 +18,22 @@
     }
   ]));
 
+  const categoryPreviews=visible=>Object.fromEntries(categories.map(category=>{
+    const current=visible.filter(record=>record.category===category);
+    const fallback=records.filter(record=>record.category===category);
+    const source=current.length?current:fallback;
+    const preview=source.slice(-3).reverse().map(record=>({
+      id:record.id,
+      title:record.title,
+      date:record.date,
+      category:record.category,
+      core:Boolean(record.core),
+      fileCount:Array.isArray(record.files)?record.files.length:0,
+      url:record.url||''
+    }));
+    return [category,preview];
+  }));
+
   function sync(){
     const p=Number(slider.value)/Number(slider.max);
     const mode=document.querySelector('.mode-switch button.active')?.dataset.mode||'simulation';
@@ -37,7 +53,8 @@
           sourceDate:cutoff.toISOString(),
           visibleRecordIds:visible.map(record=>record.id),
           phase:currentPhase,
-          categoryCounts:categoryCounts(visible)
+          categoryCounts:categoryCounts(visible),
+          categoryPreviews:categoryPreviews(visible)
         },window.location.origin);
       }catch(_){ }
     }
