@@ -1,4 +1,4 @@
-// NEXUS_WORLD_BOOTSTRAP_V1_RESTORED
+// NEXUS_WORLD_BOOTSTRAP_V2_ESAFE_ISOLATED
 (()=>{
   if(window.__NEXUS_WORLD_BOOTSTRAPPED__)return;
   window.__NEXUS_WORLD_BOOTSTRAPPED__=true;
@@ -15,5 +15,5 @@
     }catch(error){console.error('[NOSMO] World bootstrap failed',path,error)}
   };
   load('__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__','./nexus-trade-graph-runtime.js?v=2');
-  if(world==='esafe-demo')load('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=2');
+  if(world==='esafe-demo')load('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=3-isolated');
 })();
