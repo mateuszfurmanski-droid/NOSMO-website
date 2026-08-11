@@ -1,5 +1,5 @@
 {
-  "version": "v45click1",
+  "version": "v46logo1",
   "updatedAt": "2026-08-11",
   "system": "NOSMO Nexus Person Cards",
   "description": "Shared Person Card registry used by Nexus, Relationship Tree, People panel and data/file context bridges.",
@@ -13,17 +13,17 @@
       "status": "Available",
       "verification": "Verified",
       "projectKey": "NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA",
-      "cardUrl": "/person-card-kamil.html?v=v45click1",
-      "versionedCardUrl": "/person-card-kamil-v45.html?v=v45click1",
-      "dataUrl": "/data/person-card-kamil.json?v=v45click1",
-      "treeUrl": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v45click1",
-      "fileLoaderUrl": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v45click1",
+      "cardUrl": "/person-card-kamil.html?v=v46logo1",
+      "versionedCardUrl": "/person-card-kamil-v46.html?v=v46logo1",
+      "dataUrl": "/data/person-card-kamil.json?v=v46logo1",
+      "treeUrl": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v46logo1",
+      "fileLoaderUrl": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v46logo1",
       "sectionUrls": {
-        "cv": "/person-card-kamil-section.html?section=cv&v=v45click1",
-        "certs": "/person-card-kamil-section.html?section=certs&v=v45click1",
-        "refs": "/person-card-kamil-section.html?section=refs&v=v45click1",
-        "availability": "/person-card-kamil-section.html?section=availability&v=v45click1",
-        "vault": "/person-card-kamil-section.html?section=vault&v=v45click1"
+        "cv": "/person-card-kamil-section.html?section=cv&v=v46logo1",
+        "certs": "/person-card-kamil-section.html?section=certs&v=v46logo1",
+        "refs": "/person-card-kamil-section.html?section=refs&v=v46logo1",
+        "availability": "/person-card-kamil-section.html?section=availability&v=v46logo1",
+        "vault": "/person-card-kamil-section.html?section=vault&v=v46logo1"
       },
       "communicationUrls": {
         "whatsapp": "https://wa.me/?text=Kamil%20Karaszewski%20NOSMO%20Person%20Card",
