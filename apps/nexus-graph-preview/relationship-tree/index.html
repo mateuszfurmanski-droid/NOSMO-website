@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="./nexus-shell-v2.css" />
     <link rel="stylesheet" href="./nexus-timeline-panel.css" />
     <link rel="stylesheet" href="./nexus-project-switcher.css" />
-    <link rel="stylesheet" href="./nexus-people-panel.css?v=4-kamil" />
+    <link rel="stylesheet" href="./nexus-people-panel.css?v=5-personcard-v47" />
     <script>
       (() => {
         const initialUrl = new URL(window.location.href);
@@ -51,7 +51,7 @@
     <script defer src="./nexus-shell-v2.js?v=3"></script>
     <script defer src="./nexus-timeline-panel.js?v=3"></script>
     <script defer src="./nexus-project-switcher.js?v=7-workmode"></script>
-    <script defer src="./nexus-people-panel.js?v=4-kamil"></script>
+    <script defer src="./nexus-people-panel.js?v=5-personcard-v47"></script>
     <script defer src="./nexus-trade-content-ai.js?v=3"></script>
     <script type="module">
       const bundleUrl = '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js';
@@ -62,7 +62,7 @@
         {
           name: 'graph nodes',
           from: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},',
-          to: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},{id:"p-kamil",label:"Kamil Karaszewski",sublabel:"Technical Advisor · Welding & Fabrication",type:"person",Icon:jc,href:"/person-card-kamil.html?v=v41graph1"},{id:"m-electrical",label:"Electrical",sublabel:"Trade system",type:"module",Icon:jc},{id:"m-electrical-commissioning",label:"Electrical Commissioning",sublabel:"Open module",type:"module",Icon:jc,href:"/apps/nexus-graph-preview/electrical-commissioning/"},{id:"e-cables",label:"Cables",sublabel:"LV distribution",type:"module",Icon:jc},{id:"e-certificates",label:"Certificates",sublabel:"Apartment testing",type:"module",Icon:jc},{id:"e-communal",label:"Communal",sublabel:"Systems & areas",type:"module",Icon:jc},{id:"e-snags",label:"Electrical Snags",sublabel:"Open defects",type:"module",Icon:jc},'
+          to: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},{id:"p-kamil",label:"Kamil Karaszewski",sublabel:"Technical Advisor · Welding & Fabrication",type:"person",Icon:jc,href:"/person-card-kamil.html?v=v47top1"},{id:"m-electrical",label:"Electrical",sublabel:"Trade system",type:"module",Icon:jc},{id:"m-electrical-commissioning",label:"Electrical Commissioning",sublabel:"Open module",type:"module",Icon:jc,href:"/apps/nexus-graph-preview/electrical-commissioning/"},{id:"e-cables",label:"Cables",sublabel:"LV distribution",type:"module",Icon:jc},{id:"e-certificates",label:"Certificates",sublabel:"Apartment testing",type:"module",Icon:jc},{id:"e-communal",label:"Communal",sublabel:"Systems & areas",type:"module",Icon:jc},{id:"e-snags",label:"Electrical Snags",sublabel:"Open defects",type:"module",Icon:jc},'
         },
         {
           name: 'module visual type',
@@ -109,8 +109,8 @@
           window.__NEXUS_PERSON_CARD_GRAPH__ = {
             enabled: true,
             nodeId: 'p-kamil',
-            personCard: '/person-card-kamil.html?v=v41graph1',
-            data: '/data/person-card-kamil.json?v=v41graph1'
+            personCard: '/person-card-kamil.html?v=v47top1',
+            data: '/data/person-card-kamil.json?v=v47top1'
           };
         } else {
           window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = { enabled: false, reason: 'esafe-project-world' };
@@ -118,100 +118,17 @@
         }
 
         const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
-        try {
-          await import(blobUrl);
-        } finally {
-          URL.revokeObjectURL(blobUrl);
-        }
+        await import(blobUrl);
       } catch (error) {
-        console.error('[NOSMO] Nexus graph failed to load', error);
         const root = document.getElementById('root');
         if (root) {
-          root.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#08111f;color:#eaf5ff;font:14px Inter,sans-serif;padding:24px;text-align:center">Nexus graph could not start. Refresh the page or open the previous backup build.</div>';
+          root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;padding:24px;text-align:center"><section style="max-width:520px;border:1px solid rgba(96,165,250,.35);border-radius:24px;background:rgba(15,23,42,.78);padding:24px"><h1 style="margin:0 0 10px">Nexus graph could not load</h1><p style="color:#b8c4d6">The runtime bridge failed to mount the editable Relationship Tree. Refresh, then check the browser console.</p></section></main>';
         }
+        console.error('[NOSMO] graph runtime bridge failed', error);
       }
     </script>
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css">
   </head>
   <body>
-    <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus project navigation">
-      <button class="nexus-top-tile nexus-top-menu" id="nexusTopMenu" type="button" aria-label="Open Nexus menu">
-        <span class="nexus-top-icon">☰</span>
-        <span class="nexus-top-label">MENU</span>
-        <span class="nexus-top-sub">NEXUS</span>
-      </button>
-      <button class="nexus-top-tile" id="nexusTopProject" type="button" aria-label="Open active project">
-        <span class="nexus-top-icon">▣</span>
-        <span class="nexus-top-label">PROJECT</span>
-        <span class="nexus-top-sub">RIVERSIDE</span>
-      </button>
-      <button class="nexus-top-tile" id="nexusTopTime" type="button" aria-label="Toggle radial timeline">
-        <span class="nexus-top-icon">◷</span>
-        <span class="nexus-top-label">TIME</span>
-        <span class="nexus-top-sub" id="nexusTopTimeSub">OFF</span>
-      </button>
-      <button class="nexus-top-tile" id="nexusTopFiles" type="button" aria-label="Open project files">
-        <span class="nexus-top-icon">▤</span>
-        <span class="nexus-top-label">FILES</span>
-        <span class="nexus-top-sub">UPLOAD + DOCS</span>
-      </button>
-    </nav>
-
-    <div class="nexus-shell-scrim" id="nexusShellScrim" aria-hidden="true"></div>
-
-    <aside class="nexus-shell-panel left" id="nexusMenuPanel" aria-label="Nexus menu">
-      <div class="nexus-shell-panel-head">
-        <strong>NEXUS MENU</strong>
-        <button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close menu">×</button>
-      </div>
-      <div class="nexus-shell-section-title">NAVIGATION</div>
-      <div class="nexus-shell-list">
-        <button class="nexus-shell-action" type="button" data-nexus-action="home"><span class="nexus-shell-action-icon">⌂</span><span class="nexus-shell-action-copy"><strong>Home</strong><small>Relationship Tree</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-action="projects"><span class="nexus-shell-action-icon">▣</span><span class="nexus-shell-action-copy"><strong>Projects</strong><small>Active project and project worlds</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-action="people"><span class="nexus-shell-action-icon">◎</span><span class="nexus-shell-action-copy"><strong>People</strong><small>Person Cards and project people</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-action="trades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Profession and trade tools</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-action="modules"><span class="nexus-shell-action-icon">▦</span><span class="nexus-shell-action-copy"><strong>Modules</strong><small>Nexus workflow modules</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-action="connections"><span class="nexus-shell-action-icon">↔</span><span class="nexus-shell-action-copy"><strong>Connections</strong><small>External systems and connectors</small></span></button>
-      </div>
-      <div class="nexus-shell-section-title">SYSTEM</div>
-      <div class="nexus-shell-list">
-        <button class="nexus-shell-action" type="button" data-nexus-action="controls"><span class="nexus-shell-action-icon">⌘</span><span class="nexus-shell-action-copy"><strong>View controls</strong><small>Zoom, workflow, timeline and graph tools</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-action="settings"><span class="nexus-shell-action-icon">⚙</span><span class="nexus-shell-action-copy"><strong>Settings</strong><small id="nexusMenuThemeSub">DARK</small></span></button>
-      </div>
-    </aside>
-
-    <aside class="nexus-shell-panel right" id="nexusFilesPanel" aria-label="Project files">
-      <div class="nexus-shell-panel-head">
-        <strong>FILES</strong>
-        <button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close files">×</button>
-      </div>
-      <input class="nexus-file-picker" id="nexusFileInput" type="file" multiple />
-      <div class="nexus-shell-list">
-        <button class="nexus-shell-action" type="button" data-nexus-file-action="upload"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>Upload files</strong><small>Send files to the Nexus File Loader</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-file-action="project-files"><span class="nexus-shell-action-icon">▤</span><span class="nexus-shell-action-copy"><strong>Project files</strong><small>Documents already linked to this project</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-file-action="recent"><span class="nexus-shell-action-icon">◷</span><span class="nexus-shell-action-copy"><strong>Recent</strong><small>Recently added files</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-file-action="unmatched"><span class="nexus-shell-action-icon">?</span><span class="nexus-shell-action-copy"><strong>Unmatched</strong><small>Files that need project context</small></span></button>
-        <button class="nexus-shell-action" type="button" data-nexus-file-action="pending"><span class="nexus-shell-action-icon">✓</span><span class="nexus-shell-action-copy"><strong>Pending review</strong><small>Classified files awaiting confirmation</small></span></button>
-      </div>
-      <div class="nexus-file-selection" id="nexusFileSelection">No files selected</div>
-    </aside>
-
-    <aside class="nexus-shell-panel right" id="nexusSettingsPanel" aria-label="Nexus settings">
-      <div class="nexus-shell-panel-head">
-        <strong>SETTINGS</strong>
-        <button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close settings">×</button>
-      </div>
-      <div class="nexus-shell-section-title">APPEARANCE</div>
-      <div class="nexus-setting-row">
-        <span class="nexus-setting-copy"><strong>Light mode</strong><small>Switch the Nexus interface between dark and white themes</small></span>
-        <label class="nexus-theme-switch" aria-label="Toggle light mode">
-          <input id="nexusThemeToggle" type="checkbox" />
-          <span class="nexus-theme-track"></span>
-        </label>
-      </div>
-      <div class="nexus-theme-note">Theme preference is saved on this device and exposed globally as <code>nexus:theme-change</code> so every Nexus module can use the same setting.</div>
-    </aside>
-
     <div id="root"></div>
   </body>
 </html>
