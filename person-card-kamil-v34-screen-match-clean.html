@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020813">
+<title>NOSMO Nexus — Kamil Person Card v34</title>
+<style>
+:root{--bg:#020711;--panel:#06152a;--panel2:#071a34;--line:#0d3b7a;--line2:#1458b8;--blue:#1478ff;--blue2:#2d8dff;--text:#f5f7ff;--muted:#a7b2c8;--green:#13d96b;--purple:#8b37ff;--shadow:0 20px 80px rgba(0,0,0,.55)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;width:100%;overflow-x:hidden;background:radial-gradient(circle at 50% -8%,#0b57ff33 0,transparent 240px),linear-gradient(180deg,#020712,#01040a 65%,#020814);color:var(--text);font-family:Inter,Arial,Helvetica,sans-serif}body{display:block}.page{width:100%;max-width:430px;margin:0 auto;padding:16px 14px 32px;overflow:hidden}.top{height:62px;display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{min-width:0;display:flex;align-items:center;gap:10px;flex:1;justify-content:center}.mark{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#1383ff,#0246c7);display:grid;place-items:center;font-weight:1000;box-shadow:0 0 24px #1478ff66}.word{font-weight:1000;letter-spacing:.16em;font-size:24px;white-space:nowrap}.word b{color:#fff}.word span{color:var(--blue);margin-left:8px}.navBtn{flex:0 0 auto;width:52px;height:52px;border:1px solid #174a92;border-radius:16px;background:linear-gradient(180deg,#07182f,#041021);color:white;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #5fa6ff10,0 0 22px #0b61ff22}.navBtn.back{font-size:34px;text-decoration:none;line-height:1}.hamb{position:relative;border:0;background:transparent;width:30px;height:22px}.hamb:before,.hamb:after,.hamb i{content:"";position:absolute;left:0;width:30px;height:4px;border-radius:6px;background:#fff}.hamb:before{top:0}.hamb i{top:9px}.hamb:after{bottom:0}.blueDot{position:absolute;right:-4px;top:-6px;width:12px;height:12px;background:#1478ff;border-radius:50%;box-shadow:0 0 16px #1478ff}.frame{border:1px solid #0d3977;border-radius:24px;background:linear-gradient(180deg,rgba(7,24,48,.82),rgba(2,10,23,.92));box-shadow:var(--shadow),inset 0 0 0 1px rgba(69,139,255,.08);overflow:hidden}.profile{padding:22px 18px 18px}.hero{display:grid;grid-template-columns:156px minmax(0,1fr);gap:20px;align-items:center}.photoCol{display:flex;flex-direction:column;align-items:center}.photoRing{width:150px;height:150px;border-radius:50%;padding:7px;background:radial-gradient(circle,#0c5dff33 52%,#1177ff 63%,#8cc4ff 66%,#0b52ff 70%,#020812 75%);box-shadow:0 0 28px #0b69ffbb,0 0 70px #0b69ff55}.photoRing img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 15%;border-radius:50%;background:white}.comms{margin-top:16px;width:148px;display:flex;align-items:center;justify-content:space-between}.comms a{width:35px;height:35px;display:grid;place-items:center;text-decoration:none}.comms img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(20,120,255,.28))}.shareIcon{width:34px;height:34px}.info{min-width:0}.name{margin:0 0 9px;line-height:.96;text-transform:uppercase;letter-spacing:.035em;font-weight:1000}.name .first{display:block;color:#f8f9ff;font-size:clamp(34px,8.2vw,48px)}.name .last{display:block;color:var(--blue);font-size:clamp(30px,7.3vw,44px);text-shadow:0 0 18px #096eff44}.role{font-size:clamp(18px,4.5vw,25px);font-weight:1000;letter-spacing:.13em;color:var(--blue);text-transform:uppercase;margin-top:13px}.trade{font-size:clamp(17px,4.15vw,23px);letter-spacing:.06em;color:#f5f5ff;margin-top:5px;text-transform:uppercase}.meta{margin-top:24px;display:grid;gap:12px;color:#cbd3e8;font-size:16px}.metaLine{display:flex;align-items:center;gap:11px;min-width:0}.miniIcon{width:23px;height:23px;color:var(--blue);flex:0 0 auto}.status{margin-top:20px;border:1px solid #174079;border-radius:16px;display:grid;grid-template-columns:1fr 1fr 1.1fr;overflow:hidden;background:rgba(2,11,24,.66)}.status div{min-height:55px;padding:8px 6px;display:flex;align-items:center;justify-content:center;gap:10px;border-right:1px solid #174079;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#dfe6f7;font-size:14px}.status div:last-child{border-right:0}.sDot{width:18px;height:18px;border-radius:50%;background:var(--green);box-shadow:0 0 18px #11d870}.shield,.clip{width:24px;height:24px;color:var(--blue)}.clip{color:var(--purple)}.section{margin-top:14px;padding:16px 16px;border:1px solid #0d3977;border-radius:20px;background:linear-gradient(180deg,rgba(4,19,39,.76),rgba(2,11,24,.84));box-shadow:inset 0 0 0 1px rgba(69,139,255,.06)}.sectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;color:var(--blue);font-weight:1000;letter-spacing:.12em;text-transform:uppercase;font-size:16px}.view{white-space:nowrap;color:var(--blue);font-size:15px}.history{position:relative;padding-left:32px}.history:before{content:"";position:absolute;left:11px;top:12px;bottom:14px;width:3px;border-radius:6px;background:#0b62dc}.job{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;margin-bottom:21px}.job:last-child{margin-bottom:0}.job:before{content:"";position:absolute;left:-31px;top:2px;width:18px;height:18px;border-radius:50%;border:4px solid #0d65e5;background:#061329;box-shadow:0 0 12px #0a72ff}.job strong{display:block;font-size:17px;font-weight:750;color:#fff;line-height:1.1}.job span{display:block;margin-top:6px;color:var(--blue);font-size:15px;line-height:1.1}.date{white-space:nowrap;color:#b9c0d4;font-size:15px}.tiles{margin-top:14px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.tile{min-height:82px;border:1px solid #123f7f;border-radius:15px;background:linear-gradient(180deg,#071b38,#041124);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-decoration:none;color:#fff;box-shadow:inset 0 0 0 1px #61a2ff09}.tile svg{width:31px;height:31px;color:var(--blue);fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.tile span{font-size:14px;line-height:1.05;text-align:center}.bottomGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.skills .sectionHead,.training .sectionHead{font-size:14px;letter-spacing:.10em}.skillRow{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:center;margin:13px 0}.skillText{min-width:0;display:flex;align-items:center;gap:8px;color:#f1f5ff;font-size:13px;line-height:1.05}.bullet{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:var(--blue)}.bar{height:8px;border-radius:10px;background:#13284d;overflow:hidden}.bar i{display:block;height:100%;width:72%;border-radius:10px;background:linear-gradient(90deg,#1478ff,#2d8dff)}.trainBox{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px;align-items:center}.ring{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#1478ff 0 75%,#10264a 75% 100%);position:relative}.ring:after{content:"";position:absolute;inset:10px;border-radius:50%;background:#061327}.ring span{position:relative;z-index:2;color:var(--blue);font-size:25px;font-weight:1000}.trainText strong{font-size:15px;line-height:1.15;display:block}.trainText p{margin:7px 0 0;color:#aeb8ce;font-size:13px;line-height:1.22}.trainText b{display:block;margin-top:6px;color:var(--blue);font-size:13px}.menu{position:fixed;z-index:20;top:82px;right:max(14px,calc((100vw - 430px)/2 + 14px));width:min(290px,calc(100vw - 38px));display:none;border:1px solid #1960c3;border-radius:18px;background:linear-gradient(180deg,rgba(8,24,48,.97),rgba(3,12,28,.98));box-shadow:0 28px 90px rgba(0,0,0,.75),0 0 30px rgba(20,120,255,.22);padding:8px 12px}.menu.open{display:block}.menu:before{content:"";position:absolute;right:20px;top:-9px;width:16px;height:16px;border-left:1px solid #1960c3;border-top:1px solid #1960c3;background:#07172f;transform:rotate(45deg)}.mi{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(42,112,216,.24);text-decoration:none;color:white}.mi:last-child{border-bottom:0}.mi svg{width:26px;height:26px;color:var(--blue);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.mi strong{display:block;font-size:16px}.mi span{display:block;color:#aeb8ce;font-size:12px;margin-top:1px}.footer{margin:17px 0 0;text-align:center;color:#2e80ff;font-size:15px}.sr{position:absolute;left:-9999px}@media(max-width:389px){.page{padding-left:10px;padding-right:10px}.top{height:58px}.navBtn{width:46px;height:46px}.word{font-size:21px;letter-spacing:.13em}.hero{grid-template-columns:136px minmax(0,1fr);gap:13px}.profile{padding:18px 14px 16px}.photoRing{width:132px;height:132px}.comms{width:132px}.name .first{font-size:31px}.name .last{font-size:27px}.role{font-size:17px}.trade{font-size:16px}.meta{font-size:14px;margin-top:17px}.status div{font-size:12px;gap:7px}.section{padding:14px 12px}.tiles{gap:7px}.tile{min-height:76px}.tile span{font-size:12px}.bottomGrid{gap:8px}.skillRow{grid-template-columns:minmax(0,1fr) 66px}.skillText{font-size:12px}.trainBox{grid-template-columns:66px minmax(0,1fr)}.ring{width:66px;height:66px}.ring span{font-size:20px}.menu{top:76px}}
+</style>
+</head>
+<body>
+<main class="page" id="page">
+<header class="top">
+<a class="navBtn back" href="nexus-preview.html?v=clouds6" aria-label="Back">‹</a>
+<div class="brand"><div class="mark">N</div><div class="word"><b>NOSMO</b> <span>NEXUS</span></div></div>
+<button class="navBtn" id="menuBtn" aria-label="Menu" aria-expanded="false"><span class="hamb"><i></i></span><span class="blueDot"></span></button>
+</header>
+<section class="frame profile">
+<div class="hero">
+<div class="photoCol">
+<div class="photoRing"><img src="assets/KamilKaraszewski.jpeg" alt="Kamil Karaszewski"></div>
+<div class="comms" aria-label="Communication shortcuts">
+<a href="https://wa.me/" aria-label="WhatsApp"><img src="https://cdn.simpleicons.org/whatsapp/25D366" alt=""></a>
+<a href="mailto:" aria-label="Email"><img src="https://www.gstatic.com/images/branding/product/1x/gmail_2020q4_48dp.png" alt=""></a>
+<a href="#share" aria-label="Share"><svg class="shareIcon" viewBox="0 0 48 48"><circle cx="36" cy="12" r="6" fill="#1478ff"/><circle cx="12" cy="24" r="6" fill="#1478ff"/><circle cx="36" cy="36" r="6" fill="#1478ff"/><path d="M17 22l14-8M17 26l14 8" stroke="#1478ff" stroke-width="5" stroke-linecap="round"/></svg></a>
+</div>
+</div>
+<div class="info">
+<h1 class="name"><span class="first">Kamil</span><span class="last">Karaszewski</span></h1>
+<div class="role">Technical Advisor</div>
+<div class="trade">Welding &amp; Fabrication</div>
+<div class="meta">
+<div class="metaLine"><svg class="miniIcon" viewBox="0 0 24 24"><path d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Eindhoven, Netherlands</span></div>
+<div class="metaLine"><svg class="miniIcon" viewBox="0 0 24 24"><path d="M9 6V4h6v2M4 8h16v11H4zM4 12h16" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>15+ yrs experience</span></div>
+</div>
+</div>
+</div>
+<div class="status">
+<div><i class="sDot"></i>Available</div>
+<div><svg class="shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="currentColor"/><path d="M8.5 12l2 2 5-5" fill="none" stroke="#fff" stroke-width="2"/></svg>Verified</div>
+<div><svg class="clip" viewBox="0 0 24 24"><path d="M8 5h8v3H8zM6 8h12v12H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2"/></svg>Current Project</div>
+</div>
+</section>
+<section class="section">
+<div class="sectionHead"><span>Work History</span><span class="view">View All ›</span></div>
+<div class="history">
+<div class="job"><div><strong>Technical Advisor</strong><span>NOSMO Technology Limited</span></div><div class="date">2022 – Present</div></div>
+<div class="job"><div><strong>Fabrication Engineer</strong><span>Custom Marine Projects</span></div><div class="date">2016 – 2022</div></div>
+<div class="job"><div><strong>Welding Supervisor</strong><span>Industrial Structures Ltd</span></div><div class="date">2012 – 2016</div></div>
+</div>
+</section>
+<nav class="tiles" aria-label="Work pack">
+<a class="tile" href="#cv"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM15 2v6h5M9 13h6M9 17h4"/></svg><span>My CV</span></a>
+<a class="tile" href="#certs"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3 8-8 10-5-2-8-5-8-10V7zM8.5 12l2.2 2.2L16 9"/></svg><span>Certs</span></a>
+<a class="tile" href="#refs"><svg viewBox="0 0 24 24"><path d="M8 14a4 4 0 1 1 8 0M3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"/></svg><span>Refs</span></a>
+<a class="tile" href="#availability"><svg viewBox="0 0 24 24"><path d="M7 3v4M17 3v4M4 8h16v13H4zM8 12h2M12 12h2M16 12h2M8 16h2M12 16h2"/></svg><span>Availability</span></a>
+<a class="tile" href="#vault"><svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z"/></svg><span>Vault</span></a>
+</nav>
+<div class="bottomGrid">
+<section class="section skills">
+<div class="sectionHead"><span>Core Skills</span><span class="view">View All</span></div>
+<div class="skillRow"><div class="skillText"><i class="bullet"></i><span>Welding &amp; Fabrication</span></div><div class="bar"><i></i></div></div>
+<div class="skillRow"><div class="skillText"><i class="bullet"></i><span>Technical Advisory</span></div><div class="bar"><i></i></div></div>
+<div class="skillRow"><div class="skillText"><i class="bullet"></i><span>Project Management</span></div><div class="bar"><i></i></div></div>
+<div class="skillRow"><div class="skillText"><i class="bullet"></i><span>Quality &amp; Compliance</span></div><div class="bar"><i></i></div></div>
+</section>
+<section class="section training">
+<div class="sectionHead"><span>Certifications &amp; Training</span><span class="view">View All</span></div>
+<div class="trainBox"><div class="ring"><span>8/12</span></div><div class="trainText"><strong>Completing Next</strong><p>ISO 3834 Welding Coordinator</p><b>75% Complete</b></div></div>
+</section>
+</div>
+<div class="footer">🛡 Trusted · Skilled · Ready to Build the Future</div>
+</main>
+<nav class="menu" id="menu" aria-label="Person menu">
+<a class="mi" href="#history"><svg viewBox="0 0 24 24"><path d="M12 3v18M8 5a4 4 0 1 0 8 0M8 19a4 4 0 1 1 8 0"/></svg><span><strong>Work History</strong><span>Projects &amp; Experience</span></span></a>
+<a class="mi" href="#cv"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM15 2v6h5M9 13h6M9 17h4"/></svg><span><strong>My CV</strong><span>View or download CV</span></span></a>
+<a class="mi" href="#certs"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3 8-8 10-5-2-8-5-8-10V7zM8.5 12l2.2 2.2L16 9"/></svg><span><strong>Certificates</strong><span>Verified training &amp; qualifications</span></span></a>
+<a class="mi" href="#refs"><svg viewBox="0 0 24 24"><path d="M8 14a4 4 0 1 1 8 0M3 20a5 5 0 0 1 10 0M11 20a5 5 0 0 1 10 0"/></svg><span><strong>References</strong><span>Professional references</span></span></a>
+<a class="mi" href="#availability"><svg viewBox="0 0 24 24"><path d="M7 3v4M17 3v4M4 8h16v13H4zM8 12h2M12 12h2M16 12h2"/></svg><span><strong>Availability</strong><span>Work calendar &amp; status</span></span></a>
+<a class="mi" href="#vault"><svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z"/></svg><span><strong>Docs Vault</strong><span>Documents &amp; records</span></span></a>
+<a class="mi" href="#share"><svg viewBox="0 0 24 24"><path d="M18 8a3 3 0 1 0-3-3M6 15a3 3 0 1 0 0 6M18 22a3 3 0 1 0-3-3M8.8 14.2l6.4-5.4M8.8 18.8l6.4 2.4"/></svg><span><strong>Share Profile</strong><span>Send person card</span></span></a>
+<a class="mi" href="#sharecv"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM15 2v6h5M12 18V10M9 13l3-3 3 3"/></svg><span><strong>Share CV</strong><span>PDF profile / work pack</span></span></a>
+<a class="mi" href="#request"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM15 2v6h5M12 10v8M9 15l3 3 3-3"/></svg><span><strong>Request Docs</strong><span>Missing documents</span></span></a>
+<a class="mi" href="#agency"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM9 7V5h6v2"/></svg><span><strong>Agency / Applications</strong><span>Recruiters &amp; applications</span></span></a>
+<a class="mi" href="#settings"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM3 12h3M18 12h3M12 3v3M12 18v3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span><strong>Settings</strong><span>Preferences</span></span></a>
+</nav>
+<script>
+const btn=document.getElementById('menuBtn');const menu=document.getElementById('menu');btn.addEventListener('click',e=>{e.stopPropagation();menu.classList.toggle('open');btn.setAttribute('aria-expanded',menu.classList.contains('open'))});document.addEventListener('click',e=>{if(!menu.contains(e.target)&&e.target!==btn&&!btn.contains(e.target)){menu.classList.remove('open');btn.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.classList.remove('open');btn.setAttribute('aria-expanded','false')}});
+</script>
+</body>
+</html>
