@@ -62,7 +62,7 @@
         {
           name: 'graph nodes',
           from: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},',
-          to: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},{id:"m-electrical",label:"Electrical",sublabel:"Trade system",type:"module",Icon:jc},{id:"m-electrical-commissioning",label:"Electrical Commissioning",sublabel:"Open module",type:"module",Icon:jc,href:"/apps/nexus-graph-preview/electrical-commissioning/"},{id:"e-cables",label:"Cables",sublabel:"LV distribution",type:"module",Icon:jc},{id:"e-certificates",label:"Certificates",sublabel:"Apartment testing",type:"module",Icon:jc},{id:"e-communal",label:"Communal",sublabel:"Systems & areas",type:"module",Icon:jc},{id:"e-snags",label:"Electrical Snags",sublabel:"Open defects",type:"module",Icon:jc},'
+          to: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},{id:"p-kamil",label:"Kamil Karaszewski",sublabel:"Technical Advisor · Welding & Fabrication",type:"person",Icon:jc,href:"/person-card-kamil.html?v=v41graph1"},{id:"m-electrical",label:"Electrical",sublabel:"Trade system",type:"module",Icon:jc},{id:"m-electrical-commissioning",label:"Electrical Commissioning",sublabel:"Open module",type:"module",Icon:jc,href:"/apps/nexus-graph-preview/electrical-commissioning/"},{id:"e-cables",label:"Cables",sublabel:"LV distribution",type:"module",Icon:jc},{id:"e-certificates",label:"Certificates",sublabel:"Apartment testing",type:"module",Icon:jc},{id:"e-communal",label:"Communal",sublabel:"Systems & areas",type:"module",Icon:jc},{id:"e-snags",label:"Electrical Snags",sublabel:"Open defects",type:"module",Icon:jc},'
         },
         {
           name: 'module visual type',
@@ -106,8 +106,15 @@
             children: ['m-electrical-commissioning', 'e-cables', 'e-certificates', 'e-communal', 'e-snags'],
             href: electricalUrl
           };
+          window.__NEXUS_PERSON_CARD_GRAPH__ = {
+            enabled: true,
+            nodeId: 'p-kamil',
+            personCard: '/person-card-kamil.html?v=v41graph1',
+            data: '/data/person-card-kamil.json?v=v41graph1'
+          };
         } else {
           window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = { enabled: false, reason: 'esafe-project-world' };
+          window.__NEXUS_PERSON_CARD_GRAPH__ = { enabled: false, reason: 'esafe-project-world' };
         }
 
         const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
