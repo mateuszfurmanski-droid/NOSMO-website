@@ -17,6 +17,71 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./nexus-shell-v2.css" />
+    <style id="nosmo-electrical-tree-style">
+      #nosmo-electrical-tree-node {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 28;
+        transform: translate(260px, 220px) translate(-50%, -50%);
+        pointer-events: auto;
+      }
+
+      #nosmo-electrical-tree-node .nosmo-electrical-tree-card {
+        display: flex;
+        width: 132px;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        color: hsl(var(--foreground));
+        text-decoration: none;
+        outline: none;
+      }
+
+      #nosmo-electrical-tree-node .nosmo-electrical-tree-icon {
+        position: relative;
+        display: flex;
+        width: 82px;
+        height: 82px;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(34, 211, 238, .72);
+        border-radius: 18px;
+        background: hsl(var(--card));
+        color: rgb(103, 232, 249);
+        font-size: 32px;
+        font-weight: 800;
+        box-shadow: 0 14px 38px rgba(0, 0, 0, .38), 0 0 30px rgba(34, 211, 238, .12);
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      }
+
+      #nosmo-electrical-tree-node .nosmo-electrical-tree-card:hover .nosmo-electrical-tree-icon,
+      #nosmo-electrical-tree-node .nosmo-electrical-tree-card:focus-visible .nosmo-electrical-tree-icon {
+        transform: scale(1.05);
+        border-color: rgb(103, 232, 249);
+        box-shadow: 0 14px 38px rgba(0, 0, 0, .38), 0 0 36px rgba(34, 211, 238, .25);
+      }
+
+      #nosmo-electrical-tree-node .nosmo-electrical-tree-label {
+        max-width: 132px;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.15;
+      }
+
+      #nosmo-electrical-tree-node .nosmo-electrical-tree-type {
+        border: 1px solid hsl(var(--border));
+        border-radius: 999px;
+        background: hsl(var(--background) / .82);
+        padding: 2px 8px;
+        color: hsl(var(--muted-foreground));
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+    </style>
     <script>
       (() => {
         const initialUrl = new URL(window.location.href);
@@ -45,6 +110,76 @@
       })();
     </script>
     <script defer src="./nexus-shell-v2.js"></script>
+    <script>
+      (() => {
+        const electricalUrl = '/apps/nexus-graph-preview/electrical-commissioning/';
+        const legacyElectricalUrl = '/apps/nexus/electrical-commissioning/';
+        const nodeId = 'nosmo-electrical-tree-node';
+        const overlayId = 'nosmo-electrical-tree-link-overlay';
+
+        function mountElectricalNode() {
+          const root = document.getElementById('root');
+          if (!root) return;
+          const projectNode = root.querySelector('[data-node-id="proj"]');
+          if (!projectNode) return;
+          const scene = projectNode.parentElement;
+          if (!scene) return;
+
+          if (!scene.querySelector('#' + overlayId)) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = overlayId;
+            svg.setAttribute('aria-hidden', 'true');
+            svg.style.position = 'absolute';
+            svg.style.left = '0';
+            svg.style.top = '0';
+            svg.style.overflow = 'visible';
+            svg.style.pointerEvents = 'none';
+            svg.style.zIndex = '1';
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', '0');
+            line.setAttribute('y1', '0');
+            line.setAttribute('x2', '260');
+            line.setAttribute('y2', '220');
+            line.setAttribute('stroke', 'rgba(34, 211, 238, .48)');
+            line.setAttribute('stroke-width', '2');
+            line.setAttribute('stroke-dasharray', '7 5');
+            svg.appendChild(line);
+            scene.appendChild(svg);
+          }
+
+          if (!scene.querySelector('#' + nodeId)) {
+            const node = document.createElement('div');
+            node.id = nodeId;
+            node.setAttribute('data-control', 'true');
+            node.setAttribute('data-nosmo-module-node', 'electrical');
+            node.innerHTML = `
+              <a class="nosmo-electrical-tree-card" href="${electricalUrl}" aria-label="Open Electrical Commissioning">
+                <span class="nosmo-electrical-tree-icon" aria-hidden="true">⚡</span>
+                <span class="nosmo-electrical-tree-label">Electrical Commissioning</span>
+                <span class="nosmo-electrical-tree-type">NOSMO module</span>
+              </a>`;
+            scene.appendChild(node);
+          }
+        }
+
+        document.addEventListener('click', (event) => {
+          const target = event.target instanceof Element ? event.target.closest(`a[href="${legacyElectricalUrl}"]`) : null;
+          if (!target) return;
+          event.preventDefault();
+          window.location.href = electricalUrl;
+        }, true);
+
+        window.addEventListener('DOMContentLoaded', () => {
+          mountElectricalNode();
+          const root = document.getElementById('root');
+          if (!root) return;
+          const observer = new MutationObserver(mountElectricalNode);
+          observer.observe(root, { childList: true, subtree: true });
+        });
+        window.addEventListener('load', mountElectricalNode);
+      })();
+    </script>
     <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js"></script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css">
     <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
