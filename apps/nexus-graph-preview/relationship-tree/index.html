@@ -47,15 +47,16 @@
         });
       })();
     </script>
-    <script src="./nexus-world-bootstrap.js?v=1"></script>
-    <script defer src="./nexus-shell-v2.js"></script>
-    <script defer src="./nexus-timeline-panel.js"></script>
-    <script defer src="./nexus-project-switcher.js"></script>
-    <script defer src="./nexus-people-panel.js"></script>
-    <script defer src="./nexus-trade-content-ai.js"></script>
+    <script src="./nexus-world-bootstrap.js?v=3"></script>
+    <script defer src="./nexus-shell-v2.js?v=3"></script>
+    <script defer src="./nexus-timeline-panel.js?v=3"></script>
+    <script defer src="./nexus-project-switcher.js?v=6"></script>
+    <script defer src="./nexus-people-panel.js?v=3"></script>
+    <script defer src="./nexus-trade-content-ai.js?v=3"></script>
     <script type="module">
       const bundleUrl = '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js';
       const electricalUrl = '/apps/nexus-graph-preview/electrical-commissioning/';
+      const esafeWorld = window.__NEXUS_PROJECT_WORLD__ === 'esafe-demo';
 
       const replacements = [
         {
@@ -90,20 +91,24 @@
         if (!response.ok) throw new Error(`Bundle fetch failed: ${response.status}`);
         let code = await response.text();
 
-        for (const patch of replacements) {
-          const first = code.indexOf(patch.from);
-          const last = code.lastIndexOf(patch.from);
-          if (first < 0) throw new Error(`Native graph patch missing: ${patch.name}`);
-          if (first !== last) throw new Error(`Native graph patch ambiguous: ${patch.name}`);
-          code = code.replace(patch.from, patch.to);
-        }
+        if (!esafeWorld) {
+          for (const patch of replacements) {
+            const first = code.indexOf(patch.from);
+            const last = code.lastIndexOf(patch.from);
+            if (first < 0) throw new Error(`Native graph patch missing: ${patch.name}`);
+            if (first !== last) throw new Error(`Native graph patch ambiguous: ${patch.name}`);
+            code = code.replace(patch.from, patch.to);
+          }
 
-        window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = {
-          enabled: true,
-          root: 'm-electrical',
-          children: ['m-electrical-commissioning', 'e-cables', 'e-certificates', 'e-communal', 'e-snags'],
-          href: electricalUrl
-        };
+          window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = {
+            enabled: true,
+            root: 'm-electrical',
+            children: ['m-electrical-commissioning', 'e-cables', 'e-certificates', 'e-communal', 'e-snags'],
+            href: electricalUrl
+          };
+        } else {
+          window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = { enabled: false, reason: 'esafe-project-world' };
+        }
 
         const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
         try {
@@ -112,7 +117,7 @@
           URL.revokeObjectURL(blobUrl);
         }
       } catch (error) {
-        console.error('[NOSMO] Native Electrical graph failed to load', error);
+        console.error('[NOSMO] Nexus graph failed to load', error);
         const root = document.getElementById('root');
         if (root) {
           root.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#08111f;color:#eaf5ff;font:14px Inter,sans-serif;padding:24px;text-align:center">Nexus graph could not start. Refresh the page or open the previous backup build.</div>';
@@ -120,7 +125,6 @@
       }
     </script>
     <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css">
-    <script>history.replaceState(null,"","/apps/nexus-graph-preview/relationship-tree");</script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus project navigation">
