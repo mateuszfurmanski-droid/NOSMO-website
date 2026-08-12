@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>NOSMO Nexus™</title>
+    <title>NOSMO Nexus™ — Relationship Tree</title>
     <meta name="description" content="NOSMO Nexus™ — construction operating layer." />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="NOSMO Nexus™" />
@@ -13,13 +13,42 @@
     <meta name="twitter:title" content="NOSMO Nexus™" />
     <meta name="twitter:description" content="NOSMO Nexus™ — construction operating layer." />
     <link rel="icon" type="image/svg+xml" href="/apps/nexus-graph-preview/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./nexus-shell-v2.css" />
-    <link rel="stylesheet" href="./nexus-timeline-panel.css" />
-    <link rel="stylesheet" href="./nexus-project-switcher.css" />
-    <link rel="stylesheet" href="./nexus-people-panel.css?v=5-personcard-v47" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Required Vite/Tailwind bundle CSS. Without this the graph mounts as raw text on mobile. -->
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=treefix-20260812b" />
+
+    <link rel="stylesheet" href="./nexus-shell-v2.css?v=treefix-20260812b" />
+    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=treefix-20260812b" />
+    <link rel="stylesheet" href="./nexus-project-switcher.css?v=treefix-20260812b" />
+    <link rel="stylesheet" href="./nexus-people-panel.css?v=treefix-20260812b" />
+
+    <style>
+      html,
+      body,
+      #root {
+        min-height: 100%;
+        margin: 0;
+        background: #020713;
+        color: #f5f7fb;
+        font-family: Inter, Arial, sans-serif;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root:empty::before {
+        content: "Loading Nexus Relationship Tree…";
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        color: rgba(226, 232, 240, 0.72);
+        font-size: 14px;
+        letter-spacing: 0.02em;
+      }
+    </style>
+
     <script>
       (() => {
         const initialUrl = new URL(window.location.href);
@@ -47,82 +76,27 @@
         });
       })();
     </script>
-    <script src="./nexus-world-bootstrap.js?v=4-restored"></script>
-    <script defer src="./nexus-shell-v2.js?v=3"></script>
-    <script defer src="./nexus-timeline-panel.js?v=3"></script>
-    <script defer src="./nexus-project-switcher.js?v=7-workmode"></script>
-    <script defer src="./nexus-people-panel.js?v=5-personcard-v47"></script>
-    <script defer src="./nexus-trade-content-ai.js?v=3"></script>
-    <script type="module">
-      const bundleUrl = '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js';
-      const electricalUrl = '/apps/nexus-graph-preview/electrical-commissioning/';
-      const esafeWorld = window.__NEXUS_PROJECT_WORLD__ === 'esafe-demo';
 
-      const replacements = [
-        {
-          name: 'graph nodes',
-          from: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},',
-          to: 'const ts="proj",Zr="p-sitemgr",ns=[{id:"proj",label:"Riverside Heights Demo",sublabel:"Active Synthetic Project",type:"project",Icon:Dt},{id:"p-kamil",label:"Kamil Karaszewski",sublabel:"Technical Advisor · Welding & Fabrication",type:"person",Icon:jc,href:"/person-card-kamil.html?v=v47top1"},{id:"m-electrical",label:"Electrical",sublabel:"Trade system",type:"module",Icon:jc},{id:"m-electrical-commissioning",label:"Electrical Commissioning",sublabel:"Open module",type:"module",Icon:jc,href:"/apps/nexus-graph-preview/electrical-commissioning/"},{id:"e-cables",label:"Cables",sublabel:"LV distribution",type:"module",Icon:jc},{id:"e-certificates",label:"Certificates",sublabel:"Apartment testing",type:"module",Icon:jc},{id:"e-communal",label:"Communal",sublabel:"Systems & areas",type:"module",Icon:jc},{id:"e-snags",label:"Electrical Snags",sublabel:"Open defects",type:"module",Icon:jc},'
-        },
-        {
-          name: 'module visual type',
-          from: 'gc={project:{chip:"bg-primary/15 text-primary",centerBorder:"border-primary"},person:{chip:"bg-blue-500/15 text-blue-400",centerBorder:"border-blue-500"},task:{chip:"bg-emerald-500/15 text-emerald-400",centerBorder:"border-emerald-500"},document:{chip:"bg-amber-500/15 text-amber-400",centerBorder:"border-amber-500"},issue:{chip:"bg-red-500/15 text-red-400",centerBorder:"border-red-500"}},Ow={issue:-1,person:0,task:1,document:2,project:3}',
-          to: 'gc={project:{chip:"bg-primary/15 text-primary",centerBorder:"border-primary"},person:{chip:"bg-blue-500/15 text-blue-400",centerBorder:"border-blue-500"},task:{chip:"bg-emerald-500/15 text-emerald-400",centerBorder:"border-emerald-500"},document:{chip:"bg-amber-500/15 text-amber-400",centerBorder:"border-amber-500"},issue:{chip:"bg-red-500/15 text-red-400",centerBorder:"border-red-500"},module:{chip:"bg-cyan-500/15 text-cyan-300",centerBorder:"border-cyan-400"}},Ow={issue:-1,person:0,module:1,task:2,document:3,project:4}'
-        },
-        {
-          name: 'native graph hierarchy',
-          from: 'for(const i of ns)i.id!==ts&&t(ts,i.id);for(const[i,{people:l,docs:d}]of Object.entries(rc))',
-          to: 'const elChildren=new Set(["m-electrical-commissioning","e-cables","e-certificates","e-communal","e-snags"]);for(const i of ns)i.id!==ts&&!elChildren.has(i.id)&&t(ts,i.id);for(const id of elChildren)t("m-electrical",id);for(const[i,{people:l,docs:d}]of Object.entries(rc))'
-        },
-        {
-          name: 'module open action',
-          from: 'M=B=>{if($.current===B.id){$.current=null;return}',
-          to: 'M=B=>{if(B.href){window.location.href=B.href;return}if($.current===B.id){$.current=null;return}'
-        },
-        {
-          name: 'folder dock electrical route',
-          from: '"/apps/nexus/electrical-commissioning/"',
-          to: '"/apps/nexus-graph-preview/electrical-commissioning/"'
-        }
-      ];
+    <script src="./nexus-world-bootstrap.js?v=treefix-20260812b"></script>
+    <script defer src="./nexus-shell-v2.js?v=treefix-20260812b"></script>
+    <script defer src="./nexus-timeline-panel.js?v=treefix-20260812b"></script>
+    <script defer src="./nexus-project-switcher.js?v=treefix-20260812b"></script>
+    <script defer src="./nexus-people-panel.js?v=treefix-20260812b"></script>
+    <script defer src="./nexus-trade-content-ai.js?v=treefix-20260812b"></script>
+
+    <script type="module">
+      const bundleUrl = '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=treefix-20260812b';
 
       try {
         const response = await fetch(bundleUrl, { cache: 'no-store' });
         if (!response.ok) throw new Error(`Bundle fetch failed: ${response.status}`);
-        let code = await response.text();
-
-        if (!esafeWorld) {
-          for (const patch of replacements) {
-            const first = code.indexOf(patch.from);
-            const last = code.lastIndexOf(patch.from);
-            if (first < 0) throw new Error(`Native graph patch missing: ${patch.name}`);
-            if (first !== last) throw new Error(`Native graph patch ambiguous: ${patch.name}`);
-            code = code.replace(patch.from, patch.to);
-          }
-
-          window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = {
-            enabled: true,
-            root: 'm-electrical',
-            children: ['m-electrical-commissioning', 'e-cables', 'e-certificates', 'e-communal', 'e-snags'],
-            href: electricalUrl
-          };
-          window.__NEXUS_PERSON_CARD_GRAPH__ = {
-            enabled: true,
-            nodeId: 'p-kamil',
-            personCard: '/person-card-kamil.html?v=v47top1',
-            data: '/data/person-card-kamil.json?v=v47top1'
-          };
-        } else {
-          window.__NEXUS_NATIVE_ELECTRICAL_GRAPH__ = { enabled: false, reason: 'esafe-project-world' };
-          window.__NEXUS_PERSON_CARD_GRAPH__ = { enabled: false, reason: 'esafe-project-world' };
-        }
-
+        const code = await response.text();
         const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
         await import(blobUrl);
       } catch (error) {
         const root = document.getElementById('root');
         if (root) {
-          root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;padding:24px;text-align:center"><section style="max-width:520px;border:1px solid rgba(96,165,250,.35);border-radius:24px;background:rgba(15,23,42,.78);padding:24px"><h1 style="margin:0 0 10px">Nexus graph could not load</h1><p style="color:#b8c4d6">The runtime bridge failed to mount the editable Relationship Tree. Refresh, then check the browser console.</p></section></main>';
+          root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;padding:24px;text-align:center"><section style="max-width:520px;border:1px solid rgba(96,165,250,.35);border-radius:24px;background:rgba(15,23,42,.78);padding:24px"><h1 style="margin:0 0 10px">Nexus graph could not load</h1><p style="color:#b8c4d6">The Relationship Tree runtime failed to mount. Refresh once; if this persists, report the current URL.</p></section></main>';
         }
         console.error('[NOSMO] graph runtime bridge failed', error);
       }
