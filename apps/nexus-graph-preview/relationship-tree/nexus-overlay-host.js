@@ -1,8 +1,9 @@
 // NEXUS_OVERLAY_HOST_V1_PERSISTENT_GRAPH_20260813
 (()=>{
   if(document.documentElement.dataset.nexusEmbedded==='true')return;
+  if(window.NexusOverlayHost?.openOverlay)return;
 
-  const CACHE='overlay-20260813a';
+  const CACHE='overlay-20260813b';
   const PERSON_CARD='/person-card-kamil.html?v=v47top1';
   const FILE_LOADER_PROJECTS={
     'esafe-demo':'NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA',
