@@ -4,7 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>NOSMO Nexus File Loader</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('overlay') === '1') {
+        document.documentElement.dataset.nexusOverlay = 'true';
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="./styles.css?v=overlay-20260813b" />
 </head>
 <body>
   <main class="shell">
@@ -49,6 +57,6 @@
       </div>
     </section>
   </main>
-  <script src="./app.js"></script>
+  <script src="./app.js?v=overlay-20260813b"></script>
 </body>
 </html>
