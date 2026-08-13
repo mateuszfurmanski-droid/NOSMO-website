@@ -5,33 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>NOSMO Nexus™ — Relationship Tree</title>
     <meta name="description" content="NOSMO Nexus™ — construction operating layer." />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="NOSMO Nexus™" />
+    <meta property="og:description" content="NOSMO Nexus™ — construction operating layer." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NOSMO Nexus™" />
+    <meta name="twitter:description" content="NOSMO Nexus™ — construction operating layer." />
     <link rel="icon" type="image/svg+xml" href="/apps/nexus-graph-preview/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=stable-shell-20260813a" />
-    <link rel="stylesheet" href="./nexus-shell-v2.css?v=stable-shell-20260813a" />
-    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=stable-shell-20260813a" />
-    <link rel="stylesheet" href="./nexus-project-switcher.css?v=stable-shell-20260813a" />
-    <link rel="stylesheet" href="./nexus-people-panel.css?v=stable-shell-20260813a" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=stable-direct-20260813a" />
+    <link rel="stylesheet" href="./nexus-shell-v2.css?v=stable-direct-20260813a" />
+    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=stable-direct-20260813a" />
+    <link rel="stylesheet" href="./nexus-project-switcher.css?v=stable-direct-20260813a" />
+    <link rel="stylesheet" href="./nexus-people-panel.css?v=stable-direct-20260813a" />
     <style>
-      html, body, #root { min-height: 100%; margin: 0; font-family: Inter, Arial, sans-serif; }
-      body { overflow: hidden; background: #020713; color: #f5f7fb; }
-      #root { min-height: 100vh; background: #020713; }
-      #root:empty::before { content: "Loading Nexus Relationship Tree…"; min-height: 100vh; display: grid; place-items: center; color: rgba(226,232,240,.45); font-size: 14px; }
+      html, body { min-height: 100%; margin: 0; background: #020713; color: #f5f7fb; font-family: Inter, Arial, sans-serif; }
+      body { overflow: hidden; }
+      #root { min-height: 100vh; margin: 0; background: #020713; color: #f5f7fb; }
+      #root:empty::before { content: "Loading Nexus Relationship Tree…"; min-height: 100vh; display: grid; place-items: center; color: rgba(226, 232, 240, 0.62); font-size: 14px; letter-spacing: 0.02em; }
       .nexus-top-rail { display: grid !important; z-index: 9000 !important; }
       .nexus-shell-panel, .nexus-shell-scrim, .nexus-time-panel { z-index: 9010 !important; }
       @media (max-width: 760px) {
-        .nexus-top-rail { height: 74px !important; grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+        .nexus-top-rail { height: 74px !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+        .nexus-top-tile { min-width: 0 !important; }
         .nexus-top-label { font-size: 8px !important; }
         .nexus-top-sub { font-size: 6px !important; }
       }
     </style>
     <script>
       (() => {
-        const url = new URL(window.location.href);
-        const world = url.searchParams.get('world') || 'dev';
-        const embedded = url.searchParams.get('embed') === '1';
+        const initialUrl = new URL(window.location.href);
+        const world = initialUrl.searchParams.get('world') || 'dev';
+        const embedded = initialUrl.searchParams.get('embed') === '1';
         window.__NEXUS_PROJECT_WORLD__ = world;
         window.__NEXUS_PROJECT_TIME__ = null;
         window.__NEXUS_EMBEDDED__ = embedded;
@@ -50,20 +58,14 @@
         });
       })();
     </script>
-    <script src="./nexus-world-bootstrap.js?v=stable-shell-20260813a"></script>
-    <script defer src="./nexus-shell-v2.js?v=stable-shell-20260813a"></script>
-    <script defer src="./nexus-timeline-panel.js?v=stable-shell-20260813a"></script>
-    <script defer src="./nexus-project-switcher.js?v=stable-shell-20260813a"></script>
-    <script defer src="./nexus-people-panel.js?v=stable-shell-20260813a"></script>
-    <script defer src="./nexus-trade-content-ai.js?v=stable-shell-20260813a"></script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
       <button class="nexus-top-tile nexus-top-menu" id="nexusTopMenu" type="button" aria-label="Open Nexus menu"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></button>
-      <button class="nexus-top-tile" id="nexusTopProject" type="button" aria-label="Open project menu"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub" id="nexusTopProjectSub">PROJECT</span></button>
+      <button class="nexus-top-tile" id="nexusTopProject" type="button" aria-label="Open project and trades"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub" id="nexusTopProjectSub">PROJECT</span></button>
       <button class="nexus-top-tile" id="nexusTopTime" type="button" aria-label="Open project timeline"><span class="nexus-top-icon">◷</span><span class="nexus-top-label">TIME</span><span class="nexus-top-sub" id="nexusTopTimeSub">LIVE</span></button>
       <button class="nexus-top-tile" id="nexusTopFiles" type="button" aria-label="Open project files"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">DOCS</span></button>
-      <button class="nexus-top-tile" id="nexusTopTools" type="button" aria-label="Open tools"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">MORE</span></button>
+      <button class="nexus-top-tile" id="nexusTopTools" type="button" aria-label="Open Nexus tools"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">MORE</span></button>
     </nav>
 
     <div class="nexus-shell-scrim" id="nexusShellScrim" aria-hidden="true"></div>
@@ -72,15 +74,14 @@
       <div class="nexus-shell-panel-head"><strong>NEXUS MENU</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close menu">×</button></div>
       <div class="nexus-shell-section-title">PROJECT WORLDS</div>
       <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=stable-shell-20260813a"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Current Project World</small></span></a>
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=stable-shell-20260813a"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Second Project World</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=stable-direct-20260813a"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Project World</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=stable-direct-20260813a"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Project World</small></span></a>
       </div>
       <div class="nexus-shell-section-title">MODULES</div>
       <div class="nexus-shell-list">
-        <button class="nexus-shell-action" type="button" id="nexusOpenTrades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Manager / Joiner / Electrician views</small></span></button>
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=stable-shell-20260813a"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
+        <button class="nexus-shell-action" type="button" id="nexusOpenTrades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Manager / Joiner / Electrician</small></span></button>
+        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=stable-direct-20260813a"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
         <a class="nexus-shell-action" href="/apps/nexus-graph-preview/electrical-commissioning/"><span class="nexus-shell-action-icon">⚡</span><span class="nexus-shell-action-copy"><strong>Electrical</strong><small>Commissioning module</small></span></a>
-        <a class="nexus-shell-action" href="/doorflow"><span class="nexus-shell-action-icon">D</span><span class="nexus-shell-action-copy"><strong>DoorFlow</strong><small>Fire door workflow</small></span></a>
       </div>
     </aside>
 
@@ -89,61 +90,66 @@
       <div class="nexus-shell-section-title">FILE LOADER</div>
       <div class="nexus-shell-list">
         <label class="nexus-shell-action" for="nexusFileInput"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>Select local files</strong><small>Preview-only classification</small></span></label>
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=stable-shell-20260813a"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
-        <a class="nexus-shell-action" href="https://docs.google.com/spreadsheets/d/1vZYrSX5kcgOH5izENzGwdL7wMLgbHIQNUJi9dfMuTEI/edit?usp=drivesdk"><span class="nexus-shell-action-icon">A</span><span class="nexus-shell-action-copy"><strong>Asset Index</strong><small>Google Sheet registry</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=stable-direct-20260813a"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
       </div>
       <input class="nexus-file-picker" id="nexusFileInput" type="file" multiple />
       <div class="nexus-file-selection" id="nexusFileSelection">No files selected</div>
     </aside>
 
-    <aside class="nexus-shell-panel right" id="nexusSettingsPanel" aria-label="Tools" aria-hidden="true">
+    <aside class="nexus-shell-panel right" id="nexusSettingsPanel" aria-label="Nexus Settings" aria-hidden="true">
       <div class="nexus-shell-panel-head"><strong>TOOLS</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close tools">×</button></div>
       <div class="nexus-shell-section-title">VIEW</div>
       <div class="nexus-shell-list">
-        <button class="nexus-shell-action" type="button" id="nexusFitGraph"><span class="nexus-shell-action-icon">⌖</span><span class="nexus-shell-action-copy"><strong>Fit Graph</strong><small>Tap project node and refocus</small></span></button>
-        <button class="nexus-shell-action" type="button" id="nexusThemeLight"><span class="nexus-shell-action-icon">☀</span><span class="nexus-shell-action-copy"><strong>Light</strong><small>Bright preview</small></span></button>
-        <button class="nexus-shell-action" type="button" id="nexusThemeDark"><span class="nexus-shell-action-icon">☾</span><span class="nexus-shell-action-copy"><strong>Dark</strong><small>Dark preview</small></span></button>
+        <button class="nexus-shell-action" type="button" id="nexusDarkTheme"><span class="nexus-shell-action-icon">D</span><span class="nexus-shell-action-copy"><strong>Dark</strong><small>Dark preview</small></span></button>
+        <button class="nexus-shell-action" type="button" id="nexusLightTheme"><span class="nexus-shell-action-icon">L</span><span class="nexus-shell-action-copy"><strong>Light</strong><small>Light preview</small></span></button>
       </div>
     </aside>
 
     <div id="root"></div>
 
-    <script type="module">
-      const bundleUrl = '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=stable-shell-20260813a';
-      const root = document.getElementById('root');
-      try {
-        const response = await fetch(bundleUrl, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`Bundle fetch failed: ${response.status}`);
-        const code = await response.text();
-        const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
-        await import(blobUrl);
-      } catch (error) {
-        if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;padding:24px;text-align:center"><section style="max-width:520px;border:1px solid rgba(96,165,250,.35);border-radius:24px;background:rgba(15,23,42,.78);padding:24px"><h1 style="margin:0 0 10px">Nexus graph could not load</h1><p style="color:#b8c4d6">The Relationship Tree runtime failed to mount. Refresh once; if this persists, report the current URL.</p></section></main>';
-        console.error('[NOSMO] graph runtime bridge failed', error);
-      }
-    </script>
+    <script src="./nexus-world-bootstrap.js?v=stable-direct-20260813a"></script>
+    <script defer src="./nexus-shell-v2.js?v=stable-direct-20260813a"></script>
+    <script defer src="./nexus-timeline-panel.js?v=stable-direct-20260813a"></script>
+    <script defer src="./nexus-project-switcher.js?v=stable-direct-20260813a"></script>
+    <script defer src="./nexus-people-panel.js?v=stable-direct-20260813a"></script>
+    <script defer src="./nexus-trade-content-ai.js?v=stable-direct-20260813a"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=stable-direct-20260813a"></script>
 
     <script>
       (() => {
+        const openClass = 'open';
         const world = window.__NEXUS_PROJECT_WORLD__ || 'dev';
         const projectSub = document.getElementById('nexusTopProjectSub');
         if (projectSub) projectSub.textContent = world === 'esafe-demo' ? 'e-SAFE' : 'RIVERSIDE';
         const scrim = document.getElementById('nexusShellScrim');
         const tiles = Array.from(document.querySelectorAll('.nexus-top-tile'));
         const panels = { menu: document.getElementById('nexusMenuPanel'), files: document.getElementById('nexusFilesPanel'), settings: document.getElementById('nexusSettingsPanel') };
-        function closePanels() { Object.values(panels).forEach((panel) => { if (!panel) return; panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true'); }); document.querySelectorAll('.nexus-shell-panel.open').forEach((panel) => panel.classList.remove('open')); scrim?.classList.remove('open'); tiles.forEach((tile) => tile.classList.remove('active')); }
-        function openPanel(panel, tile) { if (!panel) return; const wasOpen = panel.classList.contains('open'); closePanels(); if (wasOpen) return; panel.classList.add('open'); panel.setAttribute('aria-hidden', 'false'); scrim?.classList.add('open'); tile?.classList.add('active'); }
-        document.getElementById('nexusTopMenu')?.addEventListener('click', (event) => { event.preventDefault(); openPanel(panels.menu, event.currentTarget); });
-        document.getElementById('nexusTopFiles')?.addEventListener('click', (event) => { event.preventDefault(); openPanel(panels.files, event.currentTarget); });
-        document.getElementById('nexusTopTools')?.addEventListener('click', (event) => { event.preventDefault(); openPanel(panels.settings, event.currentTarget); });
-        document.getElementById('nexusTopProject')?.addEventListener('click', (event) => { event.preventDefault(); const trades = document.getElementById('nexusTradesPanel'); openPanel(trades || panels.menu, event.currentTarget); });
-        document.getElementById('nexusOpenTrades')?.addEventListener('click', () => { const trades = document.getElementById('nexusTradesPanel'); openPanel(trades || panels.menu, document.getElementById('nexusTopProject')); });
-        document.getElementById('nexusFitGraph')?.addEventListener('click', () => { closePanels(); setTimeout(() => document.querySelector('[data-node-id="proj"] button')?.click(), 80); });
-        document.getElementById('nexusThemeLight')?.addEventListener('click', () => { document.documentElement.dataset.nexusTheme = 'light'; try { localStorage.setItem('nexus.theme','light'); } catch {} });
-        document.getElementById('nexusThemeDark')?.addEventListener('click', () => { document.documentElement.dataset.nexusTheme = 'dark'; try { localStorage.setItem('nexus.theme','dark'); } catch {} });
+        function closePanels() {
+          Object.values(panels).forEach((panel) => { if (!panel) return; panel.classList.remove(openClass); panel.setAttribute('aria-hidden', 'true'); });
+          document.querySelectorAll('.nexus-shell-panel.open').forEach((panel) => panel.classList.remove(openClass));
+          scrim?.classList.remove(openClass);
+          tiles.forEach((tile) => tile.classList.remove('active'));
+        }
+        function openPanel(panel, tile) {
+          if (!panel) return;
+          const wasOpen = panel.classList.contains(openClass);
+          closePanels();
+          if (wasOpen) return;
+          panel.classList.add(openClass);
+          panel.setAttribute('aria-hidden', 'false');
+          scrim?.classList.add(openClass);
+          tile?.classList.add('active');
+        }
+        document.getElementById('nexusTopMenu')?.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); openPanel(panels.menu, event.currentTarget); });
+        document.getElementById('nexusTopFiles')?.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); openPanel(panels.files, event.currentTarget); });
+        document.getElementById('nexusTopTools')?.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); openPanel(panels.settings, event.currentTarget); });
+        document.getElementById('nexusTopProject')?.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); const trades = document.getElementById('nexusTradesPanel'); if (trades) openPanel(trades, event.currentTarget); else openPanel(panels.menu, event.currentTarget); });
+        document.getElementById('nexusOpenTrades')?.addEventListener('click', () => { const trades = document.getElementById('nexusTradesPanel'); if (trades) openPanel(trades, document.getElementById('nexusTopProject')); });
         document.querySelectorAll('[data-nexus-close-panel]').forEach((button) => button.addEventListener('click', closePanels));
         scrim?.addEventListener('click', closePanels);
         document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closePanels(); });
+        document.getElementById('nexusDarkTheme')?.addEventListener('click', () => { document.documentElement.dataset.nexusTheme = 'dark'; try { localStorage.setItem('nexus.theme', 'dark'); } catch {} });
+        document.getElementById('nexusLightTheme')?.addEventListener('click', () => { document.documentElement.dataset.nexusTheme = 'light'; try { localStorage.setItem('nexus.theme', 'light'); } catch {} });
         const fileInput = document.getElementById('nexusFileInput');
         const fileSelection = document.getElementById('nexusFileSelection');
         fileInput?.addEventListener('change', () => { const count = fileInput.files?.length || 0; if (fileSelection) fileSelection.textContent = count ? `${count} file${count === 1 ? '' : 's'} selected` : 'No files selected'; });
