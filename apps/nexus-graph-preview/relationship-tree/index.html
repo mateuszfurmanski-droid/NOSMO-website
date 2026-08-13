@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=flat-top-20260813a" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=flat-top-20260813b" />
     <style>
       :root{--nexus-top-rail-h:76px;--nexus-ui-text:#102638;--nexus-ui-muted:#667985}
       html,body{width:100%;height:100%;min-height:100%;margin:0;background:#eaf3f6;color:#102638;font-family:Inter,Arial,sans-serif;overflow:hidden;overscroll-behavior:none}
@@ -38,16 +38,38 @@
         try{document.documentElement.dataset.nexusTheme=localStorage.getItem('nexus.theme')||'light'}catch{document.documentElement.dataset.nexusTheme='light'}
       })();
     </script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=flat-top-20260813a"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=flat-top-20260813b"></script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
-      <a class="nexus-top-tile nexus-top-menu" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813a"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></a>
-      <a class="nexus-top-tile" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813a"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub">GRAPH</span></a>
+      <a class="nexus-top-tile nexus-top-menu" id="nexusTopMenuLite" href="#"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></a>
+      <a class="nexus-top-tile" id="nexusTopProjectLite" href="#"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub" id="nexusTopProjectLiteSub">GRAPH</span></a>
       <span class="nexus-top-tile disabled" aria-disabled="true"><span class="nexus-top-icon">◷</span><span class="nexus-top-label">TIME</span><span class="nexus-top-sub">PAUSED</span></span>
-      <a class="nexus-top-tile" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=flat-top-20260813a"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">LOADER</span></a>
-      <a class="nexus-top-tile" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813a"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">RELOAD</span></a>
+      <a class="nexus-top-tile" id="nexusTopFilesLite" href="#"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">LOADER</span></a>
+      <a class="nexus-top-tile" id="nexusTopToolsLite" href="#"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">RELOAD</span></a>
     </nav>
     <div id="root"></div>
+    <script>
+      (()=>{
+        const stamp='flat-top-20260813b';
+        const current=new URL(window.location.href);
+        const world=current.searchParams.get('world')||'dev';
+        const otherWorld=world==='esafe-demo'?'dev':'esafe-demo';
+        const worldLabel=world==='esafe-demo'?'E-SAFE':'RIVERSIDE';
+        const otherLabel=otherWorld==='esafe-demo'?'E-SAFE':'RIVERSIDE';
+        const treeUrl=(targetWorld=world)=>`/apps/nexus-graph-preview/relationship-tree/?world=${targetWorld}&runtime=4-project-clean&v=${stamp}`;
+        const byId=id=>document.getElementById(id);
+        const menu=byId('nexusTopMenuLite');
+        const project=byId('nexusTopProjectLite');
+        const files=byId('nexusTopFilesLite');
+        const tools=byId('nexusTopToolsLite');
+        const projectSub=byId('nexusTopProjectLiteSub');
+        if(menu)menu.href=treeUrl(world);
+        if(project){project.href=treeUrl(otherWorld);project.title=`Switch to ${otherLabel}`;}
+        if(projectSub)projectSub.textContent=worldLabel;
+        if(files)files.href=`/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=${stamp}`;
+        if(tools)tools.href=treeUrl(world);
+      })();
+    </script>
   </body>
 </html>
