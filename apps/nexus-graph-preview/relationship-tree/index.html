@@ -10,71 +10,44 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=emergency-root-20260813b" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=flat-top-20260813a" />
     <style>
       :root{--nexus-top-rail-h:76px;--nexus-ui-text:#102638;--nexus-ui-muted:#667985}
       html,body{width:100%;height:100%;min-height:100%;margin:0;background:#eaf3f6;color:#102638;font-family:Inter,Arial,sans-serif;overflow:hidden;overscroll-behavior:none}
       body{position:fixed;inset:0;touch-action:manipulation}
       #root{position:fixed;left:0;right:0;top:var(--nexus-top-rail-h);bottom:0;min-height:0;margin:0;background:#eaf3f6;color:#102638;font-family:Inter,Arial,sans-serif;overflow:hidden;isolation:isolate}
       #root:empty::before{content:"Loading Nexus Relationship Tree…";height:100%;display:grid;place-items:center;background:#eaf3f6;color:rgba(43,73,91,.42);font-size:14px;letter-spacing:.02em}
-      .nexus-top-rail{display:grid!important;position:fixed;left:0;right:0;top:0;z-index:9000!important;height:var(--nexus-top-rail-h)!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;background:rgba(248,252,255,.97);border-bottom:1px solid rgba(31,112,139,.16);box-shadow:0 8px 22px rgba(5,31,45,.08);backdrop-filter:blur(12px)}
-      .nexus-top-tile{min-width:0!important;border:0;border-right:1px solid rgba(31,112,139,.09);background:transparent;color:#102638;display:grid;place-items:center;align-content:center;gap:3px;font-family:Inter,Arial,sans-serif;font-weight:900;letter-spacing:.04em;text-decoration:none;padding:0}
-      .nexus-top-tile.active{outline:1px solid rgba(20,151,190,.55);outline-offset:-3px;background:rgba(207,240,252,.45)}
+      .nexus-top-rail{display:grid!important;position:fixed;left:0;right:0;top:0;z-index:9000!important;height:var(--nexus-top-rail-h)!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;background:rgba(248,252,255,.96);border-bottom:1px solid rgba(31,112,139,.14);box-shadow:0 8px 18px rgba(5,31,45,.06);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+      .nexus-top-tile{min-width:0!important;border:0;border-right:1px solid rgba(31,112,139,.08);background:transparent;color:#102638;display:grid;place-items:center;align-content:center;gap:3px;font-family:Inter,Arial,sans-serif;font-weight:900;letter-spacing:.04em;text-decoration:none;-webkit-tap-highlight-color:transparent;outline:none!important;box-shadow:none!important}
+      .nexus-top-tile:focus,.nexus-top-tile:active{outline:none!important;box-shadow:none!important;background:rgba(220,241,248,.42)}
+      .nexus-top-tile.disabled{opacity:.62;pointer-events:none}
       .nexus-top-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:13px;background:#e9f6fb;color:#1289a8;font-size:18px;box-shadow:inset 0 0 0 1px rgba(22,126,155,.1)}
       .nexus-top-menu .nexus-top-icon{background:linear-gradient(145deg,#1789ed,#5bb8ff);color:#fff;border-color:transparent;font-size:21px}
       .nexus-top-label{font-size:9px!important;text-transform:uppercase;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .nexus-top-sub{font-size:7px!important;color:#667985;text-transform:uppercase;line-height:1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .nexus-emergency-note{position:fixed;right:8px;bottom:8px;z-index:9001;border:1px solid rgba(31,112,139,.14);border-radius:999px;background:rgba(255,255,255,.86);color:#667985;font-size:8px;font-weight:900;letter-spacing:.08em;padding:5px 8px;pointer-events:none}
-      .nexus-lite-scrim{position:fixed;inset:var(--nexus-top-rail-h) 0 0 0;z-index:9002;background:rgba(6,38,52,.14);opacity:0;pointer-events:none;transition:opacity .14s ease}
-      .nexus-lite-scrim.open{opacity:1;pointer-events:auto}
-      .nexus-lite-panel{position:fixed;z-index:9003;top:calc(var(--nexus-top-rail-h) + 8px);right:8px;left:8px;max-height:min(46dvh,360px);overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(31,112,139,.14);border-radius:18px;background:rgba(247,252,255,.97);box-shadow:0 18px 48px rgba(8,37,51,.2);color:#102638;opacity:0;transform:translateY(8px) scale(.985);pointer-events:none;transition:opacity .14s ease,transform .14s ease}
-      .nexus-lite-panel.open{opacity:1;transform:none;pointer-events:auto}
-      .nexus-lite-head{display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(240,249,252,.96));z-index:2;min-height:48px;padding:10px 12px;border-bottom:1px solid rgba(31,112,139,.1)}
-      .nexus-lite-head strong{font-size:13px;letter-spacing:.12em;color:#102638}.nexus-lite-close{width:36px;height:36px;border-radius:13px;border:1px solid rgba(31,112,139,.14);background:#fff;color:#102638;font-size:24px;font-weight:900}
-      .nexus-lite-list{display:grid;gap:7px;padding:10px}.nexus-lite-action{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:50px;border:1px solid rgba(31,112,139,.1);border-radius:14px;background:#fff;color:#102638;text-decoration:none;padding:7px 9px;font-family:Inter,Arial,sans-serif;text-align:left}
-      .nexus-lite-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(180deg,#e9f7fc,#dff2f8);color:#148eaa;font-size:13px;font-weight:950}.nexus-lite-copy{display:grid;gap:2px;min-width:0}.nexus-lite-copy strong{font-size:12px;line-height:1.15}.nexus-lite-copy small{font-size:9px;line-height:1.25;color:#667985}.nexus-lite-badge{font-size:8px;font-weight:900;color:#117b94;background:rgba(20,142,170,.11);border-radius:999px;padding:5px 8px}
+      @media(max-width:380px){:root{--nexus-top-rail-h:74px}.nexus-top-icon{width:32px;height:32px;border-radius:12px}.nexus-top-label{font-size:8px!important}.nexus-top-sub{font-size:6.5px!important}}
     </style>
     <script>
-      (()=>{const url=new URL(window.location.href);const world=url.searchParams.get('world')||'esafe-demo';window.__NEXUS_PROJECT_WORLD__=world;window.__NEXUS_PROJECT_TIME__=null;window.__NEXUS_EMBEDDED__=false;document.documentElement.dataset.nexusWorld=world;try{document.documentElement.dataset.nexusTheme=localStorage.getItem('nexus.theme')||'light'}catch{document.documentElement.dataset.nexusTheme='light'}})();
+      (()=>{
+        const url=new URL(window.location.href);
+        const world=url.searchParams.get('world')||'dev';
+        window.__NEXUS_PROJECT_WORLD__=world;
+        window.__NEXUS_PROJECT_TIME__=null;
+        window.__NEXUS_EMBEDDED__=false;
+        document.documentElement.dataset.nexusWorld=world;
+        try{document.documentElement.dataset.nexusTheme=localStorage.getItem('nexus.theme')||'light'}catch{document.documentElement.dataset.nexusTheme='light'}
+      })();
     </script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=emergency-root-20260813b"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=flat-top-20260813a"></script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
-      <button class="nexus-top-tile nexus-top-menu" type="button" data-lite-panel="menu"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></button>
-      <button class="nexus-top-tile" type="button" data-lite-panel="project"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub" id="nexusTopProjectSub">E-SAFE</span></button>
-      <button class="nexus-top-tile" type="button" data-lite-panel="time"><span class="nexus-top-icon">◷</span><span class="nexus-top-label">TIME</span><span class="nexus-top-sub">OFF</span></button>
-      <button class="nexus-top-tile" type="button" data-lite-panel="files"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">98 FILES</span></button>
-      <button class="nexus-top-tile" type="button" data-lite-panel="tools"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">MANAGER</span></button>
+      <a class="nexus-top-tile nexus-top-menu" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813a"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></a>
+      <a class="nexus-top-tile" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813a"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub">GRAPH</span></a>
+      <span class="nexus-top-tile disabled" aria-disabled="true"><span class="nexus-top-icon">◷</span><span class="nexus-top-label">TIME</span><span class="nexus-top-sub">PAUSED</span></span>
+      <a class="nexus-top-tile" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=flat-top-20260813a"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">LOADER</span></a>
+      <a class="nexus-top-tile" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813a"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">RELOAD</span></a>
     </nav>
-    <div class="nexus-lite-scrim" id="nexusLiteScrim" aria-hidden="true"></div>
-    <aside class="nexus-lite-panel" id="nexusLitePanel" aria-hidden="true" aria-label="Nexus lightweight shell"></aside>
     <div id="root"></div>
-    <div class="nexus-emergency-note">GRAPH SAFE MODE</div>
-    <script>
-      (()=>{
-        const panel=document.getElementById('nexusLitePanel');
-        const scrim=document.getElementById('nexusLiteScrim');
-        const tiles=Array.from(document.querySelectorAll('[data-lite-panel]'));
-        const world=window.__NEXUS_PROJECT_WORLD__||'esafe-demo';
-        const route=(nextWorld)=>`/apps/nexus-graph-preview/relationship-tree/?world=${encodeURIComponent(nextWorld)}&runtime=4-project-clean&v=lite-top-20260813a`;
-        const fileLoader='/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=lite-top-20260813a';
-        const close=()=>{panel.classList.remove('open');scrim.classList.remove('open');panel.setAttribute('aria-hidden','true');tiles.forEach(tile=>tile.classList.remove('active'))};
-        const action=(icon,title,sub,href,badge='OPEN')=>`<a class="nexus-lite-action" href="${href}"><span class="nexus-lite-icon">${icon}</span><span class="nexus-lite-copy"><strong>${title}</strong><small>${sub}</small></span><span class="nexus-lite-badge">${badge}</span></a>`;
-        const button=(icon,title,sub,onclick,badge='RUN')=>`<button class="nexus-lite-action" type="button" data-lite-action="${onclick}"><span class="nexus-lite-icon">${icon}</span><span class="nexus-lite-copy"><strong>${title}</strong><small>${sub}</small></span><span class="nexus-lite-badge">${badge}</span></button>`;
-        const content={
-          menu:()=>`${action('◎','Relationship Tree','Main persistent graph workspace',route(world),'ACTIVE')}${action('E','e-SAFE Catania','Real pilot Project World',route('esafe-demo'),'OPEN')}${action('R','Riverside','Development Project World',route('dev'),'OPEN')}`,
-          project:()=>`${action('E','e-SAFE Catania','Switch to e-SAFE Project World',route('esafe-demo'),world==='esafe-demo'?'ACTIVE':'OPEN')}${action('R','Riverside','Switch to Riverside Project World',route('dev'),world==='dev'?'ACTIVE':'OPEN')}`,
-          time:()=>`${button('◷','Timeline paused','Disabled in Graph Safe Mode until root is stable','noop','SAFE')}${action('T','Original Timeline Preview','Recovered e-SAFE Timeline Zone preview', '/apps/nexus-esafe-timeline-original-20260808/?v=lite-top-20260813a','VIEW')}`,
-          files:()=>`${action('＋','Upload files','Open Nexus File Loader',fileLoader,'OPEN')}${action('A','Asset Index','Open cloud registry sheet','https://docs.google.com/spreadsheets/d/1vZYrSX5kcgOH5izENzGwdL7wMLgbHIQNUJi9dfMuTEI/edit?usp=drivesdk','SHEET')}`,
-          tools:()=>`${button('↻','Reload clean view','Reload current Project World without touching graph runtime','reload','RUN')}${button('⌖','Focus graph','Close this panel and return to graph','close','CLOSE')}`
-        };
-        const title={menu:'NEXUS MENU',project:'PROJECT WORLD',time:'PROJECT TIME',files:'PROJECT FILES',tools:'TOOLS'};
-        const open=(name,tile)=>{if(panel.classList.contains('open')&&tile.classList.contains('active')){close();return}tiles.forEach(t=>t.classList.remove('active'));tile.classList.add('active');panel.innerHTML=`<div class="nexus-lite-head"><strong>${title[name]||'NEXUS'}</strong><button class="nexus-lite-close" type="button" data-lite-action="close">×</button></div><div class="nexus-lite-list">${content[name]?content[name]():''}</div>`;panel.classList.add('open');scrim.classList.add('open');panel.setAttribute('aria-hidden','false')};
-        tiles.forEach(tile=>tile.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();open(tile.dataset.litePanel,tile)}));
-        scrim.addEventListener('click',close);
-        panel.addEventListener('click',event=>{const target=event.target.closest('[data-lite-action]');if(!target)return;const kind=target.dataset.liteAction;if(kind==='close'||kind==='noop')close();if(kind==='reload')window.location.href=route(world)});
-      })();
-    </script>
   </body>
 </html>
