@@ -122,3 +122,14 @@
     document.addEventListener('keydown',event=>{if(event.key==='Escape'&&panel.classList.contains('open'))close()});
   });
 })();
+
+// NEXUS_OVERLAY_HOST_LOADER_20260813
+(()=>{
+  if(document.documentElement.dataset.nexusEmbedded==='true')return;
+  if(document.getElementById('nexusOverlayHostScript'))return;
+  const script=document.createElement('script');
+  script.id='nexusOverlayHostScript';
+  script.defer=true;
+  script.src='./nexus-overlay-host.js?v=overlay-20260813a';
+  document.head.appendChild(script);
+})();
