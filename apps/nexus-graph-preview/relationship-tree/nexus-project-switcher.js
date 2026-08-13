@@ -31,7 +31,8 @@
     bootLocal('__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__','./nexus-trade-graph-runtime.js?v=2');
   }
   bootLocal('__NEXUS_ONE_SHELL_FIXES_INSTALLED__','./nexus-one-shell-fixes.js?v=2');
-  bootLocal('__NEXUS_SHELL_UNIFIED_RECOVERY_INSTALLED__','./nexus-shell-unified-recovery.js?v=unified-20260813a');
+  // Disabled 2026-08-13: unified recovery caused live root render regression on Android Chrome.
+  // Keep the file in repo for forensic recovery, but do not boot it on live.
   if(isWorkMode)bootLocal('__NEXUS_WORKMODE_WORLD_INSTALLED__','./nexus-workmode-world.js?v=1');
 
   if(document.documentElement.dataset.nexusEmbedded==='true'){
