@@ -10,15 +10,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=flat-top-20260813b" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=flat-top-20260813c" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=flat-top-20260813c" />
     <style>
-      :root{--nexus-top-rail-h:76px;--nexus-ui-text:#102638;--nexus-ui-muted:#667985}
+      :root{--nexus-top-rail-h:76px}
       html,body{width:100%;height:100%;min-height:100%;margin:0;background:#eaf3f6;color:#102638;font-family:Inter,Arial,sans-serif;overflow:hidden;overscroll-behavior:none}
       body{position:fixed;inset:0;touch-action:manipulation}
-      #root{position:fixed;left:0;right:0;top:var(--nexus-top-rail-h);bottom:0;min-height:0;margin:0;background:#eaf3f6;color:#102638;font-family:Inter,Arial,sans-serif;overflow:hidden;isolation:isolate}
+      #root{position:fixed;left:0;right:0;top:var(--nexus-top-rail-h);bottom:0;min-height:0;margin:0;background:#eaf3f6;overflow:hidden;isolation:isolate}
       #root:empty::before{content:"Loading Nexus Relationship Tree…";height:100%;display:grid;place-items:center;background:#eaf3f6;color:rgba(43,73,91,.42);font-size:14px;letter-spacing:.02em}
-      .nexus-top-rail{display:grid!important;position:fixed;left:0;right:0;top:0;z-index:9000!important;height:var(--nexus-top-rail-h)!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;background:rgba(248,252,255,.96);border-bottom:1px solid rgba(31,112,139,.14);box-shadow:0 8px 18px rgba(5,31,45,.06);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-      .nexus-top-tile{min-width:0!important;border:0;border-right:1px solid rgba(31,112,139,.08);background:transparent;color:#102638;display:grid;place-items:center;align-content:center;gap:3px;font-family:Inter,Arial,sans-serif;font-weight:900;letter-spacing:.04em;text-decoration:none;-webkit-tap-highlight-color:transparent;outline:none!important;box-shadow:none!important}
+      .nexus-top-rail{display:grid!important;position:fixed;left:0;right:0;top:0;z-index:2147483000!important;height:var(--nexus-top-rail-h)!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;background:rgba(248,252,255,.96);border-bottom:1px solid rgba(31,112,139,.14);box-shadow:0 8px 18px rgba(5,31,45,.06);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);pointer-events:auto!important}
+      .nexus-top-tile{min-width:0!important;border:0;border-right:1px solid rgba(31,112,139,.08);background:transparent;color:#102638;display:grid;place-items:center;align-content:center;gap:3px;font-family:Inter,Arial,sans-serif;font-weight:900;letter-spacing:.04em;text-decoration:none;-webkit-tap-highlight-color:transparent;outline:none!important;box-shadow:none!important;pointer-events:auto!important;touch-action:manipulation;padding:0}
       .nexus-top-tile:focus,.nexus-top-tile:active{outline:none!important;box-shadow:none!important;background:rgba(220,241,248,.42)}
       .nexus-top-tile.disabled{opacity:.62;pointer-events:none}
       .nexus-top-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:13px;background:#e9f6fb;color:#1289a8;font-size:18px;box-shadow:inset 0 0 0 1px rgba(22,126,155,.1)}
@@ -28,48 +29,18 @@
       @media(max-width:380px){:root{--nexus-top-rail-h:74px}.nexus-top-icon{width:32px;height:32px;border-radius:12px}.nexus-top-label{font-size:8px!important}.nexus-top-sub{font-size:6.5px!important}}
     </style>
     <script>
-      (()=>{
-        const url=new URL(window.location.href);
-        const world=url.searchParams.get('world')||'dev';
-        window.__NEXUS_PROJECT_WORLD__=world;
-        window.__NEXUS_PROJECT_TIME__=null;
-        window.__NEXUS_EMBEDDED__=false;
-        document.documentElement.dataset.nexusWorld=world;
-        try{document.documentElement.dataset.nexusTheme=localStorage.getItem('nexus.theme')||'light'}catch{document.documentElement.dataset.nexusTheme='light'}
-      })();
+      (()=>{const url=new URL(window.location.href);const world=url.searchParams.get('world')||'dev';window.__NEXUS_PROJECT_WORLD__=world;window.__NEXUS_PROJECT_TIME__=null;window.__NEXUS_EMBEDDED__=false;document.documentElement.dataset.nexusWorld=world;try{document.documentElement.dataset.nexusTheme=localStorage.getItem('nexus.theme')||'light'}catch{document.documentElement.dataset.nexusTheme='light'}})();
     </script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=flat-top-20260813b"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=flat-top-20260813c"></script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
-      <a class="nexus-top-tile nexus-top-menu" id="nexusTopMenuLite" href="#"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></a>
-      <a class="nexus-top-tile" id="nexusTopProjectLite" href="#"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub" id="nexusTopProjectLiteSub">GRAPH</span></a>
+      <a class="nexus-top-tile nexus-top-menu" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813c"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></a>
+      <a class="nexus-top-tile" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=flat-top-20260813c"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub">SWITCH</span></a>
       <span class="nexus-top-tile disabled" aria-disabled="true"><span class="nexus-top-icon">◷</span><span class="nexus-top-label">TIME</span><span class="nexus-top-sub">PAUSED</span></span>
-      <a class="nexus-top-tile" id="nexusTopFilesLite" href="#"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">LOADER</span></a>
-      <a class="nexus-top-tile" id="nexusTopToolsLite" href="#"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">RELOAD</span></a>
+      <a class="nexus-top-tile" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=flat-top-20260813c"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">LOADER</span></a>
+      <a class="nexus-top-tile" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=flat-top-20260813c"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">RELOAD</span></a>
     </nav>
     <div id="root"></div>
-    <script>
-      (()=>{
-        const stamp='flat-top-20260813b';
-        const current=new URL(window.location.href);
-        const world=current.searchParams.get('world')||'dev';
-        const otherWorld=world==='esafe-demo'?'dev':'esafe-demo';
-        const worldLabel=world==='esafe-demo'?'E-SAFE':'RIVERSIDE';
-        const otherLabel=otherWorld==='esafe-demo'?'E-SAFE':'RIVERSIDE';
-        const treeUrl=(targetWorld=world)=>`/apps/nexus-graph-preview/relationship-tree/?world=${targetWorld}&runtime=4-project-clean&v=${stamp}`;
-        const byId=id=>document.getElementById(id);
-        const menu=byId('nexusTopMenuLite');
-        const project=byId('nexusTopProjectLite');
-        const files=byId('nexusTopFilesLite');
-        const tools=byId('nexusTopToolsLite');
-        const projectSub=byId('nexusTopProjectLiteSub');
-        if(menu)menu.href=treeUrl(world);
-        if(project){project.href=treeUrl(otherWorld);project.title=`Switch to ${otherLabel}`;}
-        if(projectSub)projectSub.textContent=worldLabel;
-        if(files)files.href=`/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=${stamp}`;
-        if(tools)tools.href=treeUrl(world);
-      })();
-    </script>
   </body>
 </html>
