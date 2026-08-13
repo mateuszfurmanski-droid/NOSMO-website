@@ -11,6 +11,7 @@ class NexusRelationshipTreeShellController {
   init() {
     this.cacheElements();
     this.applyWorldLabel();
+    this.installRoleSwitcherInTools();
     this.applyRole(this.role, { syncNative: true });
     this.bindTopRail();
     this.bindPanelActions();
@@ -66,6 +67,33 @@ class NexusRelationshipTreeShellController {
       if (['Manager', 'Joiner', 'Electrician'].includes(saved)) return saved;
     } catch {}
     return 'Manager';
+  }
+
+  installRoleSwitcherInTools() {
+    const panel = this.elements.toolsPanel;
+    if (!panel || panel.querySelector('[data-nexus-role]')) return;
+
+    const title = document.createElement('div');
+    title.className = 'nexus-shell-section-title';
+    title.textContent = 'Role / trade view';
+
+    const grid = document.createElement('div');
+    grid.className = 'nexus-role-grid nexus-tools-role-grid';
+    grid.setAttribute('aria-label', 'Role / trade view');
+    grid.innerHTML = `
+      <button class="nexus-role-chip" type="button" data-nexus-role="Manager">Manager</button>
+      <button class="nexus-role-chip" type="button" data-nexus-role="Joiner">Joiner</button>
+      <button class="nexus-role-chip" type="button" data-nexus-role="Electrician">Electrician</button>
+    `;
+
+    const head = panel.querySelector('.nexus-shell-panel-head');
+    if (head) {
+      head.insertAdjacentElement('afterend', title);
+      title.insertAdjacentElement('afterend', grid);
+    } else {
+      panel.prepend(grid);
+      panel.prepend(title);
+    }
   }
 
   applyWorldLabel() {
@@ -181,6 +209,7 @@ class NexusRelationshipTreeShellController {
     if (this.elements.toolsSub) this.elements.toolsSub.textContent = next.toUpperCase();
     document.querySelectorAll('[data-nexus-role]').forEach((button) => {
       button.classList.toggle('active', button.dataset.nexusRole === next);
+      button.setAttribute('aria-pressed', button.dataset.nexusRole === next ? 'true' : 'false');
     });
     try { localStorage.setItem(this.roleKey, next); } catch {}
     if (options.syncNative) this.syncNativeRole(next);
@@ -191,14 +220,34 @@ class NexusRelationshipTreeShellController {
     if (!native) return;
     native.value = role;
     native.dispatchEvent(new Event('change', { bubbles: true }));
-    native.closest('label,div,section,aside')?.classList.add('nexus-native-role-hidden');
+    this.hideNativeRoleSelect(native);
   }
 
   findNativeRoleSelect() {
     return Array.from(document.querySelectorAll('select')).find((select) => {
+      if (select.closest('#nexusToolsPanel')) return false;
       const values = Array.from(select.options || []).map((option) => option.textContent?.trim());
       return values.includes('Manager') && values.includes('Joiner') && values.includes('Electrician');
     });
+  }
+
+  hideNativeRoleSelect(native) {
+    if (!native) return;
+    native.classList.add('nexus-native-role-hidden');
+    native.setAttribute('aria-hidden', 'true');
+    native.tabIndex = -1;
+    native.style.display = 'none';
+    native.style.visibility = 'hidden';
+    native.style.pointerEvents = 'none';
+
+    const wrapper = native.closest('.nexus-top-role-slot, label, section, aside') || native.parentElement;
+    if (wrapper && !wrapper.closest('#nexusToolsPanel')) {
+      wrapper.classList.add('nexus-native-role-hidden');
+      wrapper.setAttribute('aria-hidden', 'true');
+      wrapper.style.display = 'none';
+      wrapper.style.visibility = 'hidden';
+      wrapper.style.pointerEvents = 'none';
+    }
   }
 
   watchNativeControls() {
@@ -206,7 +255,7 @@ class NexusRelationshipTreeShellController {
       const native = this.findNativeRoleSelect();
       if (native) {
         native.value = this.role;
-        native.closest('label,div,section,aside')?.classList.add('nexus-native-role-hidden');
+        this.hideNativeRoleSelect(native);
       }
     };
     hideNative();
@@ -259,8 +308,6 @@ class NexusRelationshipTreeShellController {
   }
 }
 
-window.NexusRelationshipTreeShellController = NexusRelationshipTreeShellController;
 window.addEventListener('DOMContentLoaded', () => {
-  window.nexusRelationshipTreeShell = new NexusRelationshipTreeShellController();
-  window.nexusRelationshipTreeShell.init();
+  new NexusRelationshipTreeShellController().init();
 });
