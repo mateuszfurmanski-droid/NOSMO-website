@@ -16,13 +16,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=runtimefix-20260813c" />
-    <link rel="stylesheet" href="./nexus-shell-v2.css?v=runtimefix-20260813c" />
-    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=runtimefix-20260813c" />
-    <link rel="stylesheet" href="./nexus-project-switcher.css?v=runtimefix-20260813c" />
-    <link rel="stylesheet" href="./nexus-people-panel.css?v=runtimefix-20260813c" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=mobilefit-20260813a" />
+    <link rel="stylesheet" href="./nexus-shell-v2.css?v=mobilefit-20260813a" />
+    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=mobilefit-20260813a" />
+    <link rel="stylesheet" href="./nexus-project-switcher.css?v=mobilefit-20260813a" />
+    <link rel="stylesheet" href="./nexus-people-panel.css?v=mobilefit-20260813a" />
     <style>
-      html,body{min-height:100%;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif}body{overflow:hidden}#root{min-height:100vh;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif}#root:empty::before{content:"Loading Nexus Relationship Tree…";min-height:100vh;display:grid;place-items:center;color:rgba(226,232,240,.72);font-size:14px;letter-spacing:.02em}.nexus-top-rail{display:grid!important;z-index:9000!important}.nexus-shell-panel,.nexus-shell-scrim,.nexus-time-panel,.nexus-project-switcher{z-index:9010!important}@media(max-width:760px){.nexus-top-rail{height:74px!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}.nexus-top-tile{min-width:0!important}.nexus-top-label{font-size:8px!important}.nexus-top-sub{font-size:6px!important}}
+      :root{--nexus-top-rail-h:74px;--nexus-bottom-safe:calc(env(safe-area-inset-bottom,0px) + 76px)}
+      html,body{min-height:100%;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;overscroll-behavior:none}body{overflow:hidden}#root{min-height:100vh;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;padding-bottom:var(--nexus-bottom-safe)!important}#root:empty::before{content:"Loading Nexus Relationship Tree…";min-height:100vh;display:grid;place-items:center;color:rgba(226,232,240,.72);font-size:14px;letter-spacing:.02em}.nexus-top-rail{display:grid!important;z-index:9000!important}.nexus-shell-panel,.nexus-shell-scrim,.nexus-time-panel,.nexus-project-switcher{z-index:9010!important}
+      @media(max-width:760px){
+        .nexus-top-rail{height:74px!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}.nexus-top-tile{min-width:0!important}.nexus-top-label{font-size:8px!important}.nexus-top-sub{font-size:6px!important}
+        #root{min-height:calc(100vh - 0px)!important;padding-top:0!important;padding-bottom:var(--nexus-bottom-safe)!important;overflow:hidden!important}
+        #root canvas,#root svg{max-height:calc(100vh - var(--nexus-top-rail-h) - var(--nexus-bottom-safe))!important}
+        [class*="bottom"],[class*="dock"],[class*="folder"],[class*="toolbar"]{scroll-margin-bottom:var(--nexus-bottom-safe)!important}
+        [data-nexus-mobile-fit="true"]{transform:scale(.82)!important;transform-origin:center center!important}
+      }
     </style>
     <script>
       (()=>{
@@ -46,13 +54,13 @@
         });
       })();
     </script>
-    <script src="./nexus-world-bootstrap.js?v=runtimefix-20260813c"></script>
-    <script defer src="./nexus-shell-v2.js?v=runtimefix-20260813c"></script>
-    <script defer src="./nexus-timeline-panel.js?v=runtimefix-20260813c"></script>
-    <script defer src="./nexus-project-switcher.js?v=runtimefix-20260813c"></script>
-    <script defer src="./nexus-people-panel.js?v=runtimefix-20260813c"></script>
-    <script defer src="./nexus-trade-content-ai.js?v=runtimefix-20260813c"></script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=runtimefix-20260813c"></script>
+    <script src="./nexus-world-bootstrap.js?v=mobilefit-20260813a"></script>
+    <script defer src="./nexus-shell-v2.js?v=mobilefit-20260813a"></script>
+    <script defer src="./nexus-timeline-panel.js?v=mobilefit-20260813a"></script>
+    <script defer src="./nexus-project-switcher.js?v=mobilefit-20260813a"></script>
+    <script defer src="./nexus-people-panel.js?v=mobilefit-20260813a"></script>
+    <script defer src="./nexus-trade-content-ai.js?v=mobilefit-20260813a"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=mobilefit-20260813a"></script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
@@ -67,8 +75,8 @@
       <div class="nexus-shell-panel-head"><strong>NEXUS MENU</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close menu">×</button></div>
       <div class="nexus-shell-section-title">WORKSPACE</div>
       <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=runtimefix-20260813c"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Development Project World</small></span></a>
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=runtimefix-20260813c"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Real pilot Project World</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=mobilefit-20260813a"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Development Project World</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=mobilefit-20260813a"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Real pilot Project World</small></span></a>
         <button class="nexus-shell-action" type="button" id="nexusOpenTrades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Manager / Joiner / Electrician views</small></span></button>
       </div>
       <div class="nexus-shell-section-title">PEOPLE</div>
@@ -78,7 +86,7 @@
       </div>
       <div class="nexus-shell-section-title">SYSTEM</div>
       <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=runtimefix-20260813c" data-nexus-action="file-loader"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=mobilefit-20260813a" data-nexus-action="file-loader"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
         <button class="nexus-shell-action" type="button" id="nexusOpenSettings"><span class="nexus-shell-action-icon">⚙</span><span class="nexus-shell-action-copy"><strong>Settings</strong><small>Theme and preview controls</small></span></button>
       </div>
     </aside>
@@ -87,7 +95,7 @@
       <div class="nexus-shell-section-title">FILE LOADER</div>
       <div class="nexus-shell-list">
         <label class="nexus-shell-action" for="nexusFileInput"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>Select local files</strong><small>Preview-only classification on this public page</small></span></label>
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=runtimefix-20260813c"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=mobilefit-20260813a"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
       </div>
       <input class="nexus-file-picker" id="nexusFileInput" type="file" multiple />
       <div class="nexus-file-selection" id="nexusFileSelection">No files selected</div>
@@ -107,8 +115,18 @@
         const scrim=document.getElementById('nexusShellScrim');
         const tiles=Array.from(document.querySelectorAll('.nexus-top-tile'));
         const panels={menu:document.getElementById('nexusMenuPanel'),files:document.getElementById('nexusFilesPanel'),settings:document.getElementById('nexusSettingsPanel')};
-        function closePanels(){Object.values(panels).forEach(panel=>{if(!panel)return;panel.classList.remove(openClass);panel.setAttribute('aria-hidden','true')});document.querySelectorAll('.nexus-shell-panel.open').forEach(panel=>panel.classList.remove(openClass));scrim?.classList.remove(openClass);tiles.forEach(tile=>tile.classList.remove('active'))}
-        function openPanel(panel,tile){if(!panel)return;const wasOpen=panel.classList.contains(openClass);closePanels();if(wasOpen)return;panel.classList.add(openClass);panel.setAttribute('aria-hidden','false');scrim?.classList.add(openClass);tile?.classList.add('active')}
+        const closePanels=()=>{Object.values(panels).forEach(panel=>{if(!panel)return;panel.classList.remove(openClass);panel.setAttribute('aria-hidden','true')});document.querySelectorAll('.nexus-shell-panel.open').forEach(panel=>panel.classList.remove(openClass));scrim?.classList.remove(openClass);tiles.forEach(tile=>tile.classList.remove('active'))};
+        const openPanel=(panel,tile)=>{if(!panel)return;const wasOpen=panel.classList.contains(openClass);closePanels();if(wasOpen)return;panel.classList.add(openClass);panel.setAttribute('aria-hidden','false');scrim?.classList.add(openClass);tile?.classList.add('active')};
+        const mobileFit=()=>{
+          if(window.innerWidth>760)return;
+          const root=document.getElementById('root');
+          const candidates=[...document.querySelectorAll('#root > div,#root main,#root section')].filter(el=>el.offsetWidth>240&&el.offsetHeight>240);
+          const target=candidates.find(el=>!el.dataset.nexusMobileFit&&el.querySelector('svg,canvas,[data-node-id]'))||null;
+          if(target){target.dataset.nexusMobileFit='true'}
+          root?.style.setProperty('padding-bottom','var(--nexus-bottom-safe)','important');
+        };
+        window.addEventListener('load',()=>{mobileFit();setTimeout(mobileFit,300);setTimeout(mobileFit,1200)});
+        window.addEventListener('resize',mobileFit);
         document.getElementById('nexusTopMenu')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel(panels.menu,event.currentTarget)});
         document.getElementById('nexusTopFiles')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel(panels.files,event.currentTarget)});
         document.getElementById('nexusTopTools')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel(panels.settings,event.currentTarget)});
@@ -120,8 +138,8 @@
         document.addEventListener('click',event=>{
           const target=event.target;
           const text=(target?.closest?.('button,a,div,span')?.textContent||target?.textContent||'').replace(/\s+/g,' ').trim();
-          if(/e-SAFE Catania|OPEN/i.test(text)&&document.getElementById('nexusProjectSwitcher')?.contains(target)){window.location.href='/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=runtimefix-20260813c'}
-          if(/Riverside|ACTIVE/i.test(text)&&document.getElementById('nexusProjectSwitcher')?.contains(target)){window.location.href='/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=runtimefix-20260813c'}
+          if(/e-SAFE Catania|OPEN/i.test(text)&&document.getElementById('nexusProjectSwitcher')?.contains(target)){window.location.href='/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=mobilefit-20260813a'}
+          if(/Riverside|ACTIVE/i.test(text)&&document.getElementById('nexusProjectSwitcher')?.contains(target)){window.location.href='/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=mobilefit-20260813a'}
         },true);
         const themeToggle=document.getElementById('nexusThemeToggle');
         themeToggle?.addEventListener('change',()=>{const theme=themeToggle.checked?'light':'dark';document.documentElement.dataset.nexusTheme=theme;try{localStorage.setItem('nexus.theme',theme)}catch{}const themeSub=document.getElementById('nexusMenuThemeSub');if(themeSub)themeSub.textContent=theme.toUpperCase()});
