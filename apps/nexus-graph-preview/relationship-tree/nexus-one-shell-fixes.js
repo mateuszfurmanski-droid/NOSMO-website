@@ -1,4 +1,4 @@
-// NEXUS_ONE_SHELL_FIXES_V4_NATIVE_COMPACT_TIMELINE
+// NEXUS_ONE_SHELL_FIXES_V6_SAFE_EXTERNAL_TIME
 (()=>{
   if(window.__NEXUS_ONE_SHELL_FIXES_INSTALLED__)return;
   window.__NEXUS_ONE_SHELL_FIXES_INSTALLED__=true;
@@ -18,32 +18,18 @@
       .nexus-shell-scrim{z-index:2147483001!important}
       .nexus-shell-panel,.nexus-project-switcher{z-index:2147483002!important;pointer-events:auto!important}
 
-      /* Disable the later static PROJECT TIME drawer. TIME should use the compact native recorder timeline. */
+      /* Critical: do not let the old/static or graph-native timeline take over the React root. */
       #nexusTimelinePanel{display:none!important;visibility:hidden!important;pointer-events:none!important}
-
-      /* Compact recorder timeline recovered from cf5df4a9 / NEXUS_TIMELINE_PANEL_V2_COMPACT_RECORDER. */
-      .nexus-time-panel{position:fixed!important;z-index:2147482500!important;left:8px!important;right:8px!important;bottom:calc(var(--nexus-bottom-dock-h,92px) + env(safe-area-inset-bottom,0px) + 8px)!important;top:auto!important;height:auto!important;max-height:none!important;padding:7px 8px 8px!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:6px!important;background:linear-gradient(180deg,rgba(248,252,255,.96),rgba(238,246,251,.98))!important;border:1px solid rgba(31,112,139,.18)!important;border-radius:17px!important;box-shadow:0 12px 30px rgba(39,68,89,.16)!important;-webkit-backdrop-filter:blur(18px)!important;backdrop-filter:blur(18px)!important;color:#102638!important;font-family:Inter,ui-sans-serif,system-ui,sans-serif!important;transform:translateY(140%)!important;opacity:0!important;pointer-events:none!important;transition:transform .2s ease,opacity .16s ease!important}
-      .nexus-time-panel.open{transform:translateY(0)!important;opacity:1!important;pointer-events:auto!important}
-      .nexus-time-panel .nexus-time-heading{display:none!important}
-      .nexus-time-panel .nexus-time-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important}
-      .nexus-time-panel .nexus-time-clock{font-size:14px!important;font-weight:900!important;line-height:1.05!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;color:#102638!important}
-      .nexus-time-panel .nexus-time-clock-sub,.nexus-time-panel .nexus-time-live,.nexus-time-panel .nexus-time-modes,.nexus-time-panel .nexus-time-phases,.nexus-time-panel .nexus-time-bottom,.nexus-time-panel .nexus-time-metric,.nexus-time-panel .nexus-time-event{display:none!important}
-      .nexus-time-panel .nexus-time-playback{display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:6px!important}
-      .nexus-time-panel .nexus-time-play{width:32px!important;height:32px!important;border-radius:12px!important;border:1px solid rgba(31,112,139,.14)!important;background:#fff!important;color:#102638!important;font-size:14px!important;display:grid!important;place-items:center!important}
-      .nexus-time-panel .nexus-time-play.playing{background:rgba(54,163,255,.2)!important;border-color:rgba(54,163,255,.45)!important}
-      .nexus-time-panel .nexus-time-playback select{height:32px!important;min-width:54px!important;border-radius:12px!important;border:1px solid rgba(31,112,139,.14)!important;background:#fff!important;color:#102638!important;padding:0 6px!important;font-weight:800!important}
-      .nexus-time-panel .nexus-time-rail-meta{display:flex!important;justify-content:space-between!important;color:#667985!important;font-size:7px!important;margin:0 2px!important;gap:10px!important}
-      .nexus-time-panel .nexus-time-rail{height:22px!important;position:relative!important}
-      .nexus-time-panel .nexus-time-rail:before{content:""!important;position:absolute!important;left:0!important;right:0!important;top:10px!important;height:3px!important;border-radius:99px!important;background:rgba(31,112,139,.13)!important}
-      .nexus-time-panel .nexus-time-progress{position:absolute!important;left:0!important;top:10px!important;height:3px!important;border-radius:99px!important;background:linear-gradient(90deg,#168af0,#67c4ff)!important;width:0;pointer-events:none!important}
-      .nexus-time-panel .nexus-time-rail input{position:absolute!important;left:0!important;right:0!important;top:0!important;width:100%!important;height:22px!important;margin:0!important;background:transparent!important;appearance:none!important;-webkit-appearance:none!important;cursor:ew-resize!important}
-      .nexus-time-panel .nexus-time-rail input::-webkit-slider-runnable-track{height:3px!important;background:transparent!important}
-      .nexus-time-panel .nexus-time-rail input::-webkit-slider-thumb{-webkit-appearance:none!important;width:18px!important;height:18px!important;border-radius:50%!important;background:#e9f6ff!important;border:4px solid #36a3ff!important;margin-top:-7px!important;box-shadow:0 3px 14px rgba(0,0,0,.35),0 0 0 3px rgba(54,163,255,.14)!important}
-
-      /* Keep the React toolbar available for programmatic clicks, but not visible as a second menu. */
       #root [data-nexus-hidden-legacy-toolbar="true"]{display:none!important;visibility:hidden!important;pointer-events:none!important}
 
+      #nexusSafeTimePanel{position:fixed;z-index:2147482500;left:8px;right:8px;bottom:calc(var(--nexus-bottom-dock-h,92px) + env(safe-area-inset-bottom,0px) + 8px);max-height:min(42dvh,330px);overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(31,112,139,.18);border-radius:18px;background:linear-gradient(180deg,rgba(248,252,255,.98),rgba(235,246,251,.98));box-shadow:0 16px 42px rgba(39,68,89,.2);color:#102638;font-family:Inter,Arial,sans-serif;opacity:0;transform:translateY(130%);pointer-events:none;transition:opacity .16s ease,transform .2s ease}
+      #nexusSafeTimePanel.open{opacity:1;transform:translateY(0);pointer-events:auto}
+      .nexus-safe-time-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px 8px;border-bottom:1px solid rgba(31,112,139,.1);position:sticky;top:0;z-index:3;background:linear-gradient(180deg,rgba(248,252,255,.98),rgba(235,246,251,.94));backdrop-filter:blur(10px)}
+      .nexus-safe-time-title{display:grid;gap:1px;min-width:0}.nexus-safe-time-title strong{font-size:12px;letter-spacing:.14em}.nexus-safe-time-title small{font-size:8px;color:#667985;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.nexus-safe-time-close{width:34px;height:34px;border-radius:13px;border:1px solid rgba(31,112,139,.14);background:#fff;color:#102638;font-size:24px;font-weight:900}
+      .nexus-safe-time-body{padding:9px 10px 10px}.nexus-safe-time-main{display:grid;grid-template-columns:1fr 42px 64px;gap:8px;align-items:center}.nexus-safe-time-date{font-size:19px;font-weight:950;line-height:1.05;letter-spacing:-.04em}.nexus-safe-time-sub{font-size:9px;color:#667985;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nexus-safe-time-play,.nexus-safe-time-select{height:38px;border:1px solid rgba(31,112,139,.12);border-radius:14px;background:#fff;color:#102638;font-weight:950}.nexus-safe-time-select{width:64px;font-size:12px;padding:0 4px}.nexus-safe-time-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.nexus-safe-time-mode{min-height:36px;border:1px solid rgba(31,112,139,.11);border-radius:13px;background:#fff;color:#102638;font:900 8px/1 Inter,Arial,sans-serif;letter-spacing:.08em}.nexus-safe-time-mode.active{background:#d7f3ff;color:#08748a;border-color:rgba(20,142,170,.45)}.nexus-safe-time-railmeta{display:flex;justify-content:space-between;gap:8px;color:#667985;font-size:8px;font-weight:800;margin:9px 2px 3px}.nexus-safe-time-rail{height:25px;position:relative}.nexus-safe-time-rail:before{content:"";position:absolute;left:0;right:0;top:11px;height:3px;border-radius:999px;background:rgba(31,112,139,.14)}.nexus-safe-time-progress{position:absolute;left:0;top:11px;height:3px;border-radius:999px;background:linear-gradient(90deg,#168af0,#67c4ff);width:100%;pointer-events:none}.nexus-safe-time-slider{position:absolute;left:0;right:0;top:0;width:100%;height:24px;margin:0;appearance:none;-webkit-appearance:none;background:transparent}.nexus-safe-time-slider::-webkit-slider-runnable-track{height:3px;background:transparent}.nexus-safe-time-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#e9f6ff;border:4px solid #36a3ff;margin-top:-7px;box-shadow:0 3px 14px rgba(0,0,0,.25),0 0 0 3px rgba(54,163,255,.14)}.nexus-safe-time-note{margin-top:7px;border:1px solid rgba(31,112,139,.1);border-radius:12px;background:#fff;padding:8px;font-size:9px;line-height:1.35;color:#667985}.nexus-safe-time-note strong{display:block;color:#102638;font-size:10px;margin-bottom:2px}
+
       @media (max-width:720px){
+        #nexusSafeTimePanel{left:7px;right:7px;bottom:calc(var(--nexus-bottom-dock-h,92px) + env(safe-area-inset-bottom,0px) + 7px);max-height:40dvh;border-radius:17px}
         [aria-label="Nexus folder dock"] div[class*="max-h-"]{max-height:34dvh!important}
         [aria-label="Nexus folder dock"] button[title],
         [aria-label="Nexus folder dock"] a[title]{width:68px!important;height:54px!important;min-height:54px!important;padding:5px 6px!important;border-radius:11px!important;gap:2px!important}
@@ -57,21 +43,11 @@
     document.head.appendChild(style);
   };
 
-  const findTimelineButton=()=>{
-    const root=document.getElementById('root');
-    if(!root)return null;
-    return Array.from(root.querySelectorAll('button,[role="button"]')).find(button=>{
-      if(button.closest('.nexus-top-rail,.nexus-shell-panel,.nexus-project-switcher'))return false;
-      const text=norm(button.innerText||button.textContent);
-      return text.includes('timeline');
-    })||null;
-  };
-
   const hideLegacyToolbar=()=>{
     const root=document.getElementById('root');
     if(!root)return;
     Array.from(root.querySelectorAll('[data-control],div,section')).forEach(element=>{
-      if(element.closest('.nexus-top-rail,.nexus-shell-panel,.nexus-project-switcher'))return;
+      if(element.closest('.nexus-top-rail,.nexus-shell-panel,.nexus-project-switcher,#nexusSafeTimePanel'))return;
       const text=norm(element.innerText||element.textContent);
       if(!(text.includes('workflow')&&text.includes('objects')&&text.includes('links')))return;
       const rect=element.getBoundingClientRect();
@@ -81,7 +57,7 @@
     });
 
     Array.from(root.querySelectorAll('button,a,[role="button"]')).forEach(element=>{
-      if(element.closest('.nexus-top-rail,.nexus-shell-panel,.nexus-project-switcher'))return;
+      if(element.closest('.nexus-top-rail,.nexus-shell-panel,.nexus-project-switcher,#nexusSafeTimePanel'))return;
       const text=norm(element.innerText||element.textContent);
       const rect=element.getBoundingClientRect();
       if((text==='project'||text==='projects')&&rect.top>window.innerHeight*.58){
@@ -93,28 +69,71 @@
     });
   };
 
-  const syncTimeLabel=()=>{
-    const topSub=document.getElementById('nexusTopTimeSub');
-    const button=findTimelineButton();
-    const text=norm(button?.innerText||button?.textContent);
-    if(topSub)topSub.textContent=text.includes('on')?'ON':'OFF';
-    const top=document.getElementById('nexusTopTime');
-    top?.classList.toggle('active',text.includes('on'));
+  const ensureSafeTimePanel=()=>{
+    let panel=document.getElementById('nexusSafeTimePanel');
+    if(panel)return panel;
+    panel=document.createElement('aside');
+    panel.id='nexusSafeTimePanel';
+    panel.setAttribute('aria-label','Safe project time panel');
+    panel.setAttribute('aria-hidden','true');
+    panel.innerHTML=`
+      <div class="nexus-safe-time-head">
+        <span class="nexus-safe-time-title"><strong>PROJECT TIME</strong><small id="nexusSafeTimeWorld">${worldLabel()} · SAFE OVERLAY</small></span>
+        <button class="nexus-safe-time-close" type="button" aria-label="Close time panel">×</button>
+      </div>
+      <div class="nexus-safe-time-body">
+        <div class="nexus-safe-time-main">
+          <div><div class="nexus-safe-time-date" id="nexusSafeTimeDate">8 Aug 2026</div><div class="nexus-safe-time-sub" id="nexusSafeTimeSub">Graph-safe external timeline. Runtime untouched.</div></div>
+          <button class="nexus-safe-time-play" type="button" aria-label="Play project time">▶</button>
+          <select class="nexus-safe-time-select" aria-label="Playback speed"><option>1×</option><option>5×</option><option>20×</option><option>100×</option></select>
+        </div>
+        <div class="nexus-safe-time-modes"><button class="nexus-safe-time-mode active" type="button">REAL</button><button class="nexus-safe-time-mode" type="button">REPLAY</button><button class="nexus-safe-time-mode" type="button">SIM</button></div>
+        <div class="nexus-safe-time-railmeta"><span>25 Jul 2026</span><span>SAFE</span><span>8 Aug 2026</span></div>
+        <div class="nexus-safe-time-rail"><div class="nexus-safe-time-progress"></div><input class="nexus-safe-time-slider" type="range" min="0" max="100" value="100" /></div>
+        <div class="nexus-safe-time-note"><strong>Recorder preserved as safe overlay</strong>Ten panel nie klika ukrytego timeline w grafie, więc nie powinien już wywalać drzewka do Loading. Pełny recorder / V2 / Tape zostają w historii do recovery lab.</div>
+      </div>`;
+    document.body.appendChild(panel);
+    panel.querySelector('.nexus-safe-time-close')?.addEventListener('click',closeSafeTimePanel);
+    panel.querySelectorAll('.nexus-safe-time-mode').forEach(button=>button.addEventListener('click',()=>{
+      panel.querySelectorAll('.nexus-safe-time-mode').forEach(item=>item.classList.toggle('active',item===button));
+    }));
+    return panel;
   };
+
+  const openSafeTimePanel=()=>{
+    installStyle();
+    const panel=ensureSafeTimePanel();
+    document.querySelectorAll('.nexus-shell-panel.open,.nexus-project-switcher.open').forEach(item=>item.classList.remove('open'));
+    document.getElementById('nexusShellScrim')?.classList.remove('open');
+    document.getElementById('nexusSafeTimeWorld').textContent=`${worldLabel()} · SAFE OVERLAY`;
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden','false');
+    const top=document.getElementById('nexusTopTime');
+    const topSub=document.getElementById('nexusTopTimeSub');
+    top?.classList.add('active');
+    if(topSub)topSub.textContent='SAFE';
+  };
+
+  function closeSafeTimePanel(){
+    const panel=document.getElementById('nexusSafeTimePanel');
+    panel?.classList.remove('open');
+    panel?.setAttribute('aria-hidden','true');
+    document.getElementById('nexusTopTime')?.classList.remove('active');
+    const topSub=document.getElementById('nexusTopTimeSub');
+    if(topSub)topSub.textContent='OFF';
+  }
 
   const wireTimeTile=()=>{
     const top=document.getElementById('nexusTopTime');
-    if(!top||top.dataset.nexusNativeTimelineBridge==='ready')return;
-    top.dataset.nexusNativeTimelineBridge='ready';
+    if(!top||top.dataset.nexusSafeExternalTime==='ready')return;
+    top.dataset.nexusSafeExternalTime='ready';
     top.addEventListener('click',event=>{
       event.preventDefault();
       event.stopImmediatePropagation();
-      document.querySelectorAll('.nexus-shell-panel.open,.nexus-project-switcher.open').forEach(panel=>panel.classList.remove('open'));
-      document.getElementById('nexusShellScrim')?.classList.remove('open');
-      const button=findTimelineButton();
-      if(button)button.click();
-      setTimeout(()=>{syncTimeLabel();hideLegacyToolbar();},60);
-      setTimeout(()=>{syncTimeLabel();hideLegacyToolbar();},220);
+      const panel=document.getElementById('nexusSafeTimePanel');
+      if(panel?.classList.contains('open'))closeSafeTimePanel();
+      else openSafeTimePanel();
+      hideLegacyToolbar();
     },true);
   };
 
@@ -128,7 +147,6 @@
     tuneLabels();
     wireTimeTile();
     hideLegacyToolbar();
-    syncTimeLabel();
   };
 
   if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',run,{once:true});
