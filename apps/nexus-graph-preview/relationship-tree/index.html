@@ -7,11 +7,13 @@
     <meta name="robots" content="noindex" />
     <script>
       (() => {
-        const target = new URL('./controller.html', window.location.href);
         const current = new URL(window.location.href);
+        const target = new URL('/apps/nexus-graph-preview/', window.location.origin);
         current.searchParams.forEach((value, key) => target.searchParams.set(key, value));
+        target.searchParams.set('relationshipTree', '1');
+        if (!target.searchParams.has('world')) target.searchParams.set('world', 'esafe-demo');
         if (!target.searchParams.has('runtime')) target.searchParams.set('runtime', '4-project-clean');
-        target.searchParams.set('entry', 'controller');
+        target.searchParams.set('v', 'root-fallback-20260813a');
         window.location.replace(target.toString());
       })();
     </script>
