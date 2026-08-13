@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06100b">
+<title>NOSMO Nexus — Kamil Person Card yellow metal variant</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050b08;font-family:Inter,Arial,sans-serif}
+  iframe{display:block;width:100%;height:100%;border:0;background:#050b08}
+  .fallback{position:fixed;inset:0;display:grid;place-items:center;color:#f6d36e;background:#050b08;font:800 14px Inter,Arial,sans-serif;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<div class="fallback" id="fallback">LOADING YELLOW METAL PERSON CARD…</div>
+<iframe id="cardFrame" src="/person-card-kamil-v47.html?v=v47top1" title="Kamil Person Card yellow metal variant"></iframe>
+<script>
+(()=>{
+  const frame=document.getElementById('cardFrame');
+  const fallback=document.getElementById('fallback');
+  const css=`
+    :root{
+      --bg:#06100b!important;
+      --panel:#07150f!important;
+      --line:#6f5920!important;
+      --soft:rgba(236,194,74,.32)!important;
+      --blue:#d9a93a!important;
+      --blue2:#ffe49a!important;
+      --text:#fff8e6!important;
+      --muted:#cdbf9a!important;
+      --green:#54f6a1!important;
+      --purple:#9dffcf!important;
+    }
+    html,body{background:#06100b!important;color:#fff8e6!important;}
+    body{background:radial-gradient(circle at 50% -8%,rgba(210,158,38,.2),transparent 42%),linear-gradient(180deg,#07120d,#030705 72%,#010302)!important;}
+    .top{background:linear-gradient(180deg,rgba(14,16,13,.98),rgba(5,8,6,.98))!important;border-bottom:1px solid rgba(230,181,59,.38)!important;box-shadow:0 12px 36px rgba(0,0,0,.48),inset 0 -1px 0 rgba(255,218,112,.08)!important;}
+    .btn{border-color:rgba(226,186,74,.58)!important;background:linear-gradient(145deg,rgba(32,35,27,.98),rgba(6,12,8,.98))!important;color:#ffe8a0!important;box-shadow:0 8px 22px rgba(0,0,0,.36),inset 0 0 0 1px rgba(255,236,170,.05)!important;}
+    .hamb i,.hamb:before,.hamb:after{background:#ffe8a0!important}.dot{background:#5cffaa!important;box-shadow:0 0 12px rgba(92,255,170,.8)!important}
+    .nexusImg{filter:sepia(1) hue-rotate(4deg) saturate(2.15) brightness(1.16) contrast(1.08) drop-shadow(0 4px 11px rgba(225,174,54,.42))!important;}
+    .card,.section{border-color:rgba(228,181,61,.34)!important;background:linear-gradient(180deg,rgba(11,28,20,.72),rgba(3,10,7,.92))!important;box-shadow:0 18px 44px rgba(0,0,0,.42),inset 0 0 0 1px rgba(100,255,176,.035)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;}
+    .photo{border-color:rgba(234,185,61,.9)!important;box-shadow:0 0 0 1px rgba(255,248,218,.08),0 12px 30px rgba(0,0,0,.48),0 0 30px rgba(226,174,54,.16)!important;}
+    .first,.job strong{color:#fff8e6!important}.last,.role,.sectionHead,.view,.mIcon,.bridge svg,.act svg,.mi svg{color:#e4b344!important;stroke:#e4b344!important;}
+    .role{color:#ffe49a!important}.trade,.meta,.job span,.date{color:#d8caab!important}.status{border-color:rgba(229,183,64,.28)!important;background:rgba(5,18,12,.52)!important;}
+    .status div{border-color:rgba(229,183,64,.2)!important;color:#fff2c6!important}.greenDot{background:#54f6a1!important;box-shadow:0 0 18px rgba(84,246,161,.45)!important}.blueShield{background:linear-gradient(180deg,#f2c556,#9e741b)!important;color:#09120c!important}.purpleDoc{border-color:#54f6a1!important}.purpleDoc:after{background:#54f6a1!important;box-shadow:0 4px 0 #54f6a1!important}
+    .iconLink,.bridge a,.act{border-color:rgba(229,183,64,.31)!important;background:linear-gradient(180deg,rgba(18,48,33,.66),rgba(5,18,12,.86))!important;box-shadow:0 10px 24px rgba(0,0,0,.26),inset 0 0 0 1px rgba(90,255,170,.035)!important;color:#fff8e6!important;backdrop-filter:blur(13px)!important;-webkit-backdrop-filter:blur(13px)!important;}
+    .iconLink:hover,.bridge a:hover,.act:hover,.mi:hover{background:linear-gradient(180deg,rgba(29,74,50,.74),rgba(7,24,16,.92))!important;}
+    .menu,.sheet{border-color:rgba(228,181,61,.44)!important;background:rgba(5,24,15,.84)!important;box-shadow:0 22px 66px rgba(0,0,0,.68),inset 0 0 0 1px rgba(91,255,170,.05)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;}
+    .mi{border-bottom-color:rgba(230,181,59,.18)!important;color:#fff8e6!important;background:transparent!important;}
+    .mi span,.sheet p{color:#cdbf9a!important}.mi strong,.sheet h3{color:#ffe49a!important}.sheetActions a,.sheetActions button{border-color:rgba(229,183,64,.36)!important;background:rgba(14,47,30,.76)!important;color:#fff8e6!important;}
+    .history:before{background:#9b7423!important}.job:before{background:#07150f!important;border-color:#e4b344!important;box-shadow:0 0 14px rgba(228,179,68,.25)!important}.bullet{background:#e4b344!important}.bar{background:#153222!important}.bar i{background:linear-gradient(90deg,#54f6a1,#e4b344)!important}.footer{color:#e4b344!important}
+  `;
+  const inject=()=>{
+    try{
+      const doc=frame.contentDocument;
+      if(!doc||!doc.head)return;
+      let style=doc.getElementById('yellowMetalVariantStyle');
+      if(!style){style=doc.createElement('style');style.id='yellowMetalVariantStyle';doc.head.appendChild(style)}
+      style.textContent=css;
+      fallback.style.display='none';
+    }catch(error){
+      fallback.textContent='VARIANT LOAD FAILED — OPEN STABLE CARD';
+    }
+  };
+  frame.addEventListener('load',()=>{inject();setTimeout(inject,120);setTimeout(inject,500)});
+})();
+</script>
+</body>
+</html>
