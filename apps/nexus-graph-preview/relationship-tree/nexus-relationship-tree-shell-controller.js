@@ -311,3 +311,110 @@ class NexusRelationshipTreeShellController {
 window.addEventListener('DOMContentLoaded', () => {
   new NexusRelationshipTreeShellController().init();
 });
+
+// NEXUS_TIMELINE_TAPE_SWITCH_AND_PROJECT_LAYER_FIX_20260813A
+(() => {
+  const ready = (fn) => {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+    else fn();
+  };
+
+  const installStyle = () => {
+    if (document.getElementById('nexusTimelineTapeSwitchStyle')) return;
+    const style = document.createElement('style');
+    style.id = 'nexusTimelineTapeSwitchStyle';
+    style.textContent = `
+      .nexus-project-switcher{z-index:9025!important;}
+      .nexus-project-switcher.open{z-index:9025!important;}
+      .nexus-time-view-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 10px 8px;background:rgba(238,247,251,.78);position:sticky;top:49px;z-index:1;backdrop-filter:blur(10px)}
+      .nexus-time-view-toggle{min-height:36px;border:1px solid rgba(31,112,139,.13);border-radius:13px;background:#fff;color:#667985;font:900 9px/1 Inter,Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5)}
+      .nexus-time-view-toggle.active{border-color:rgba(20,142,170,.55);background:linear-gradient(180deg,#e8f9ff,#cceefa);color:#0b7890;box-shadow:0 0 0 2px rgba(20,142,170,.12)}
+      .nexus-timeline-view{display:none}.nexus-timeline-view.active{display:block}
+      .nexus-time-tape-shell{padding:2px 10px 14px}.nexus-time-tape-card{border:1px solid rgba(31,112,139,.12);border-radius:20px;background:linear-gradient(180deg,#fff,#e7f7fc);box-shadow:inset 0 0 0 1px rgba(255,255,255,.75),0 14px 28px rgba(8,37,51,.12);padding:12px;color:#102638}
+      .nexus-time-tape-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.nexus-time-tape-title strong{font-size:11px;letter-spacing:.12em}.nexus-time-tape-title small{font-size:8px;color:#667985;font-weight:900;letter-spacing:.1em}
+      .nexus-time-tape-deck{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;border-radius:18px;background:linear-gradient(180deg,#dff4fa,#f7fdff);border:1px solid rgba(31,112,139,.1);padding:14px 12px;position:relative;overflow:hidden}.nexus-time-tape-deck:before{content:'';position:absolute;left:18%;right:18%;top:50%;height:6px;border-radius:999px;background:rgba(16,38,56,.16);transform:translateY(-50%)}
+      .nexus-tape-reel{display:grid;place-items:center;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at center,#fff 0 15%,#93d9eb 16% 22%,#f7fdff 23% 36%,#54bad2 37% 41%,#eaf9fd 42% 58%,#1289a8 59% 62%,#f9feff 63% 100%);box-shadow:inset 0 0 18px rgba(8,37,51,.08),0 8px 18px rgba(8,37,51,.1);z-index:1}.nexus-tape-reel span{width:16px;height:16px;border-radius:50%;background:#102638;box-shadow:0 0 0 5px rgba(255,255,255,.88)}
+      .nexus-time-tape-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.nexus-tape-control{min-height:38px;border:1px solid rgba(31,112,139,.12);border-radius:13px;background:#fff;color:#102638;font:900 14px/1 Inter,Arial,sans-serif}.nexus-tape-control.play{background:linear-gradient(145deg,#1789ed,#5bb8ff);color:#fff;border-color:transparent}
+      .nexus-time-tape-track{margin-top:10px;height:8px;border-radius:999px;background:linear-gradient(90deg,#1598c4 0 72%,rgba(31,112,139,.16) 72% 100%);box-shadow:inset 0 0 0 1px rgba(31,112,139,.1)}.nexus-time-tape-caption{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:8px;font-size:9px;color:#667985;font-weight:800}.nexus-time-tape-caption strong{font-size:10px;color:#102638}.nexus-time-tape-caption code{font-size:8px;background:rgba(20,142,170,.1);border-radius:999px;padding:4px 7px;color:#0b7890}
+    `;
+    document.head.appendChild(style);
+  };
+
+  const setTimelineView = (panel, view) => {
+    const next = view === 'tape' ? 'tape' : 'full';
+    panel.querySelectorAll('[data-nexus-timeline-view]').forEach((button) => {
+      const active = button.dataset.nexusTimelineView === next;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    panel.querySelectorAll('[data-nexus-timeline-view-content]').forEach((section) => {
+      const active = section.dataset.nexusTimelineViewContent === next;
+      section.classList.toggle('active', active);
+      section.setAttribute('aria-hidden', active ? 'false' : 'true');
+    });
+    const sub = document.getElementById('nexusTopTimeSub');
+    if (sub) sub.textContent = next === 'tape' ? 'TAPE' : 'FULL';
+    document.documentElement.dataset.nexusTimelineView = next;
+  };
+
+  const installTimelineViewSwitch = () => {
+    const panel = document.getElementById('nexusTimelinePanel');
+    if (!panel || panel.dataset.nexusTimelineViews === 'ready') return;
+    panel.dataset.nexusTimelineViews = 'ready';
+
+    const head = panel.querySelector('.nexus-shell-panel-head');
+    const full = document.createElement('div');
+    full.className = 'nexus-timeline-view nexus-timeline-view-full active';
+    full.dataset.nexusTimelineViewContent = 'full';
+    Array.from(panel.children).forEach((child) => {
+      if (child !== head) full.appendChild(child);
+    });
+
+    const switcher = document.createElement('div');
+    switcher.className = 'nexus-time-view-switch';
+    switcher.setAttribute('role', 'group');
+    switcher.setAttribute('aria-label', 'Timeline view');
+    switcher.innerHTML = `
+      <button class="nexus-time-view-toggle active" type="button" data-nexus-timeline-view="full" aria-pressed="true">Full menu</button>
+      <button class="nexus-time-view-toggle" type="button" data-nexus-timeline-view="tape" aria-pressed="false">Tape player</button>
+    `;
+
+    const tape = document.createElement('div');
+    tape.className = 'nexus-timeline-view nexus-timeline-view-tape';
+    tape.dataset.nexusTimelineViewContent = 'tape';
+    tape.setAttribute('aria-hidden', 'true');
+    tape.innerHTML = `
+      <div class="nexus-time-tape-shell">
+        <div class="nexus-time-tape-card">
+          <div class="nexus-time-tape-title"><strong>PROJECT TIME DECK</strong><small>e-SAFE · replay</small></div>
+          <div class="nexus-time-tape-deck" aria-label="Record tape player timeline view"><div class="nexus-tape-reel"><span></span></div><div class="nexus-tape-reel"><span></span></div></div>
+          <div class="nexus-time-tape-controls"><button class="nexus-tape-control" type="button" data-nexus-time-mode="real">●</button><button class="nexus-tape-control play" type="button" id="nexusTapePlayTimeline">▶</button><button class="nexus-tape-control" type="button" data-nexus-time-mode="replay">↺</button><button class="nexus-tape-control" type="button" data-nexus-time-mode="simulation">◇</button></div>
+          <div class="nexus-time-tape-track"></div>
+          <div class="nexus-time-tape-caption"><span><strong>8 Aug 2026</strong><br />25 Jul 2026 → 8 Aug 2026 · Testing</span><code>72%</code></div>
+        </div>
+      </div>
+    `;
+
+    if (head) head.insertAdjacentElement('afterend', switcher);
+    else panel.prepend(switcher);
+    switcher.insertAdjacentElement('afterend', full);
+    full.insertAdjacentElement('afterend', tape);
+
+    switcher.querySelectorAll('[data-nexus-timeline-view]').forEach((button) => {
+      button.addEventListener('click', () => setTimelineView(panel, button.dataset.nexusTimelineView));
+    });
+    panel.querySelectorAll('[data-nexus-time-mode]').forEach((button) => {
+      button.addEventListener('click', () => {
+        panel.querySelectorAll('[data-nexus-time-mode]').forEach((item) => item.classList.toggle('active', item.dataset.nexusTimeMode === button.dataset.nexusTimeMode));
+        document.documentElement.dataset.nexusTimeMode = button.dataset.nexusTimeMode || 'real';
+      });
+    });
+    document.getElementById('nexusTapePlayTimeline')?.addEventListener('click', () => document.getElementById('nexusPlayTimeline')?.click());
+    setTimelineView(panel, 'full');
+  };
+
+  ready(() => {
+    installStyle();
+    installTimelineViewSwitch();
+  });
+})();
