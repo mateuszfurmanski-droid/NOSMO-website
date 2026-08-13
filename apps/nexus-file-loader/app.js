@@ -18,8 +18,8 @@ const serviceStatus = el('serviceStatus');
 
 const params = new URLSearchParams(window.location.search);
 const linkedPerson = params.get('person') || '';
-const linkedCard = params.get('card') || '/person-card-kamil.html?v=v41graph1';
-const linkedDataUrl = linkedPerson ? '/data/person-card-kamil.json?v=v41graph1' : '';
+const linkedCard = params.get('card') || '/person-card-kamil.html?v=v47top1';
+const linkedDataUrl = linkedPerson ? '/data/person-card-kamil.json?v=v47top1' : '';
 const requestedProjectKey = params.get('projectKey');
 
 if (requestedProjectKey) projectKey.value = requestedProjectKey;
@@ -52,7 +52,7 @@ function renderPersonBridge(data = null) {
   const displayName = p.displayName || graph.label || 'Kamil Karaszewski';
   const sublabel = graph.sublabel || [p.role, p.trade].filter(Boolean).join(' · ') || 'Person Card context';
   const nodeId = graph.nodeId || 'p-kamil';
-  const treeUrl = data?.links?.relationshipTree || `/apps/nexus-graph-preview/relationship-tree/?focus=${encodeURIComponent(nodeId)}&person=${encodeURIComponent(linkedPerson)}&v=v41graph1`;
+  const treeUrl = data?.links?.relationshipTree || `/apps/nexus-graph-preview/relationship-tree/?focus=${encodeURIComponent(nodeId)}&person=${encodeURIComponent(linkedPerson)}&v=v47top1`;
   const cardUrl = data?.links?.personCard || linkedCard;
   const html = `
     <div class="section-head">
