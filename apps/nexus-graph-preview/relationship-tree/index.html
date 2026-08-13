@@ -2,141 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
-    <title>NOSMO Nexus™ — Relationship Tree</title>
-    <meta name="description" content="NOSMO Nexus™ — construction operating layer." />
-    <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="NOSMO Nexus™" />
-    <meta property="og:description" content="NOSMO Nexus™ — construction operating layer." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="NOSMO Nexus™" />
-    <meta name="twitter:description" content="NOSMO Nexus™ — construction operating layer." />
-    <link rel="icon" type="image/svg+xml" href="/apps/nexus-graph-preview/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=stable-20260813a" />
-    <link rel="stylesheet" href="./nexus-shell-v2.css?v=stable-20260813a" />
-    <link rel="stylesheet" href="./nexus-project-switcher.css?v=stable-20260813a" />
-    <link rel="stylesheet" href="./nexus-people-panel.css?v=stable-20260813a" />
-    <style>
-      :root{--nexus-top-rail-h:76px}
-      html,body{min-height:100%;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;overflow:hidden;overscroll-behavior:none}
-      #root{position:fixed;left:0;right:0;top:var(--nexus-top-rail-h);bottom:0;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;overflow:hidden}
-      #root:empty::before{content:"Loading Nexus Relationship Tree…";height:100%;display:grid;place-items:center;color:rgba(226,232,240,.72);font-size:14px;letter-spacing:.02em}
-      .nexus-top-rail{display:grid!important;z-index:9000!important;height:var(--nexus-top-rail-h)!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}
-      .nexus-top-tile{min-width:0!important}
-      .nexus-top-label{font-size:8px!important}
-      .nexus-top-sub{font-size:6px!important}
-      .nexus-shell-panel,.nexus-shell-scrim,.nexus-project-switcher{z-index:9010!important}
-      .nexus-shell-panel{max-height:calc(100vh - var(--nexus-top-rail-h) - 12px);overflow:auto!important;-webkit-overflow-scrolling:touch}
-      html[data-nexus-theme="light"] #root{background:#edf3f7}
-      @media(max-width:760px){#root{top:76px}.nexus-shell-panel{bottom:6px!important}}
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOSMO Nexus — Relationship Tree</title>
+    <meta name="robots" content="noindex" />
     <script>
-      (()=>{
-        const initialUrl=new URL(window.location.href);
-        const world=initialUrl.searchParams.get('world')||'dev';
-        const embedded=initialUrl.searchParams.get('embed')==='1';
-        window.__NEXUS_PROJECT_WORLD__=world;
-        window.__NEXUS_PROJECT_TIME__=null;
-        window.__NEXUS_EMBEDDED__=embedded;
-        document.documentElement.dataset.nexusWorld=world;
-        if(embedded)document.documentElement.dataset.nexusEmbedded='true';
-        try{document.documentElement.dataset.nexusTheme=localStorage.getItem('nexus.theme')||'light'}catch{document.documentElement.dataset.nexusTheme='light'}
-        window.addEventListener('message',event=>{
-          if(event.origin!==window.location.origin)return;
-          const payload=event.data;
-          if(!payload||payload.type!=='NEXUS_PROJECT_TIME_CHANGE')return;
-          window.__NEXUS_PROJECT_TIME__=payload;
-          document.documentElement.dataset.nexusWorld=payload.worldId||world;
-          document.documentElement.dataset.nexusTimeMode=payload.mode||'';
-          window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:payload}));
-        });
+      (() => {
+        const target = new URL('./controller.html', window.location.href);
+        const current = new URL(window.location.href);
+        current.searchParams.forEach((value, key) => target.searchParams.set(key, value));
+        if (!target.searchParams.has('runtime')) target.searchParams.set('runtime', '4-project-clean');
+        target.searchParams.set('entry', 'controller');
+        window.location.replace(target.toString());
       })();
     </script>
-    <script src="./nexus-world-bootstrap.js?v=stable-20260813a"></script>
-    <script defer src="./nexus-shell-v2.js?v=stable-20260813a"></script>
-    <script defer src="./nexus-project-switcher.js?v=stable-20260813a"></script>
-    <script defer src="./nexus-people-panel.js?v=stable-20260813a"></script>
-    <script defer src="./nexus-trade-content-ai.js?v=stable-20260813a"></script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=stable-20260813a"></script>
   </head>
   <body>
-    <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
-      <button class="nexus-top-tile nexus-top-menu" id="nexusTopMenu" type="button" aria-label="Open Nexus menu"><span class="nexus-top-icon">☰</span><span class="nexus-top-label">MENU</span><span class="nexus-top-sub">NEXUS</span></button>
-      <button class="nexus-top-tile" id="nexusTopProject" type="button" aria-label="Open project and trades"><span class="nexus-top-icon">▦</span><span class="nexus-top-label">PROJECT</span><span class="nexus-top-sub" id="nexusTopProjectSub">PROJECT WORLD</span></button>
-      <button class="nexus-top-tile" id="nexusTopTime" type="button" aria-label="Project time"><span class="nexus-top-icon">◷</span><span class="nexus-top-label">TIME</span><span class="nexus-top-sub" id="nexusTopTimeSub">LIVE</span></button>
-      <button class="nexus-top-tile" id="nexusTopFiles" type="button" aria-label="Open project files"><span class="nexus-top-icon">▤</span><span class="nexus-top-label">FILES</span><span class="nexus-top-sub">DOCS</span></button>
-      <button class="nexus-top-tile" id="nexusTopTools" type="button" aria-label="Open Nexus tools"><span class="nexus-top-icon">⋯</span><span class="nexus-top-label">TOOLS</span><span class="nexus-top-sub">MORE</span></button>
-    </nav>
-
-    <div class="nexus-shell-scrim" id="nexusShellScrim" aria-hidden="true"></div>
-
-    <aside class="nexus-shell-panel left" id="nexusMenuPanel" aria-label="Nexus Menu" aria-hidden="true">
-      <div class="nexus-shell-panel-head"><strong>NEXUS MENU</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close menu">×</button></div>
-      <div class="nexus-shell-section-title">PROJECT WORLDS</div>
-      <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=stable-20260813a"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Development Project World</small></span></a>
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=stable-20260813a"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Real pilot Project World</small></span></a>
-        <button class="nexus-shell-action" type="button" id="nexusOpenTrades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Manager / Joiner / Electrician views</small></span></button>
-      </div>
-      <div class="nexus-shell-section-title">PEOPLE</div>
-      <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/person-card-kamil.html?v=v47top1"><span class="nexus-shell-action-icon">KK</span><span class="nexus-shell-action-copy"><strong>Kamil Person Card</strong><small>Stable v47</small></span></a>
-        <a class="nexus-shell-action" href="/apps/nexus/person-cards/?v=v47top1"><span class="nexus-shell-action-icon">PC</span><span class="nexus-shell-action-copy"><strong>Person Cards</strong><small>Registry</small></span></a>
-      </div>
-      <div class="nexus-shell-section-title">SYSTEM</div>
-      <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=stable-20260813a" data-nexus-action="file-loader"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
-        <button class="nexus-shell-action" type="button" id="nexusOpenSettings"><span class="nexus-shell-action-icon">⚙</span><span class="nexus-shell-action-copy"><strong>Settings</strong><small>Theme and preview controls</small></span></button>
-      </div>
-    </aside>
-
-    <aside class="nexus-shell-panel right" id="nexusFilesPanel" aria-label="Project Files" aria-hidden="true">
-      <div class="nexus-shell-panel-head"><strong>PROJECT FILES</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close files">×</button></div>
-      <div class="nexus-shell-section-title">FILE LOADER</div>
-      <div class="nexus-shell-list">
-        <label class="nexus-shell-action" for="nexusFileInput"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>Select local files</strong><small>Preview-only classification on this public page</small></span></label>
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=stable-20260813a"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
-      </div>
-      <input class="nexus-file-picker" id="nexusFileInput" type="file" multiple />
-      <div class="nexus-file-selection" id="nexusFileSelection">No files selected</div>
-    </aside>
-
-    <aside class="nexus-shell-panel right" id="nexusSettingsPanel" aria-label="Nexus Settings" aria-hidden="true">
-      <div class="nexus-shell-panel-head"><strong>SETTINGS</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close settings">×</button></div>
-      <div class="nexus-setting-row"><span class="nexus-setting-copy"><strong>Light preview</strong><small id="nexusMenuThemeSub">LIGHT</small></span><label class="nexus-theme-switch"><input id="nexusThemeToggle" type="checkbox" checked /><span class="nexus-theme-track"></span></label></div>
-      <p class="nexus-theme-note">Public preview shell only. Source-of-truth product work remains in nosmo-nexus-mvp draft PRs.</p>
-    </aside>
-
-    <div id="root"></div>
-
-    <script>
-      (()=>{
-        const openClass='open';
-        const world=window.__NEXUS_PROJECT_WORLD__||'dev';
-        const projectSub=document.getElementById('nexusTopProjectSub');
-        if(projectSub)projectSub.textContent=world==='esafe-demo'?'e-SAFE':'RIVERSIDE';
-        const scrim=document.getElementById('nexusShellScrim');
-        const tiles=Array.from(document.querySelectorAll('.nexus-top-tile'));
-        const panels={menu:document.getElementById('nexusMenuPanel'),files:document.getElementById('nexusFilesPanel'),settings:document.getElementById('nexusSettingsPanel')};
-        function closePanels(){Object.values(panels).forEach(panel=>{if(!panel)return;panel.classList.remove(openClass);panel.setAttribute('aria-hidden','true')});document.querySelectorAll('.nexus-shell-panel.open').forEach(panel=>panel.classList.remove(openClass));scrim?.classList.remove(openClass);tiles.forEach(tile=>tile.classList.remove('active'))}
-        function openPanel(panel,tile){if(!panel)return;const wasOpen=panel.classList.contains(openClass);closePanels();if(wasOpen)return;panel.classList.add(openClass);panel.setAttribute('aria-hidden','false');scrim?.classList.add(openClass);tile?.classList.add('active')}
-        document.getElementById('nexusTopMenu')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel(panels.menu,event.currentTarget)});
-        document.getElementById('nexusTopFiles')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel(panels.files,event.currentTarget)});
-        document.getElementById('nexusTopTools')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();openPanel(panels.settings,event.currentTarget)});
-        document.getElementById('nexusTopProject')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const switcher=document.getElementById('nexusProjectSwitcher');if(switcher&&switcher.classList){switcher.classList.add('open');switcher.setAttribute('aria-hidden','false');scrim?.classList.add(openClass);event.currentTarget.classList.add('active')}else openPanel(panels.menu,event.currentTarget)});
-        document.getElementById('nexusTopTime')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();closePanels();const root=document.querySelector('[data-node-id="proj"] button');root?.click?.();});
-        document.getElementById('nexusOpenSettings')?.addEventListener('click',()=>openPanel(panels.settings,document.getElementById('nexusTopTools')));
-        document.querySelectorAll('[data-nexus-close-panel]').forEach(button=>button.addEventListener('click',closePanels));
-        scrim?.addEventListener('click',closePanels);
-        document.addEventListener('keydown',event=>{if(event.key==='Escape')closePanels()});
-        const themeToggle=document.getElementById('nexusThemeToggle');
-        themeToggle?.addEventListener('change',()=>{const theme=themeToggle.checked?'light':'dark';document.documentElement.dataset.nexusTheme=theme;try{localStorage.setItem('nexus.theme',theme)}catch{}const themeSub=document.getElementById('nexusMenuThemeSub');if(themeSub)themeSub.textContent=theme.toUpperCase()});
-        const fileInput=document.getElementById('nexusFileInput');const fileSelection=document.getElementById('nexusFileSelection');fileInput?.addEventListener('change',()=>{const count=fileInput.files?.length||0;if(fileSelection)fileSelection.textContent=count?`${count} file${count===1?'':'s'} selected`:'No files selected'});
-      })();
-    </script>
+    <p>Opening NOSMO Nexus Relationship Tree…</p>
   </body>
 </html>
