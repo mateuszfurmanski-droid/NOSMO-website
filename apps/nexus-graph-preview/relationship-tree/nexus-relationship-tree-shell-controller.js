@@ -378,6 +378,66 @@ class NexusRelationshipTreeShellController {
   }
 }
 
+function installNexusProjectDeduper() {
+  const norm = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+  const hideProjectWorldsInMenu = () => {
+    const menu = document.getElementById('nexusMenuPanel');
+    if (!menu) return;
+    menu.querySelectorAll('.nexus-shell-section-title').forEach((title) => {
+      if (norm(title.textContent) !== 'project worlds') return;
+      title.style.display = 'none';
+      title.setAttribute('aria-hidden', 'true');
+      const list = title.nextElementSibling;
+      if (list && list.classList.contains('nexus-shell-list')) {
+        list.style.display = 'none';
+        list.setAttribute('aria-hidden', 'true');
+      }
+    });
+  };
+
+  const renameProjectPanel = () => {
+    const panelTitle = document.querySelector('#nexusProjectPanel .nexus-shell-panel-head strong');
+    if (panelTitle) panelTitle.textContent = 'PROJECT SWITCHER';
+    const projectTile = document.getElementById('nexusTopProject');
+    projectTile?.setAttribute('aria-label', 'Open project switcher');
+  };
+
+  const hideBottomProjectDockTile = () => {
+    const root = document.getElementById('root');
+    if (!root) return;
+    const bottomZoneTop = window.innerHeight * 0.62;
+    const candidates = root.querySelectorAll('button, a, [role="button"]');
+    candidates.forEach((candidate) => {
+      if (candidate.closest('.nexus-top-rail, .nexus-shell-panel, .nexus-project-switcher')) return;
+      const label = norm(candidate.innerText || candidate.textContent);
+      if (label !== 'project' && label !== 'projects') return;
+      const rect = candidate.getBoundingClientRect();
+      if (!rect.width || !rect.height || rect.top < bottomZoneTop) return;
+      candidate.dataset.nexusHiddenDuplicateProject = 'true';
+      candidate.style.display = 'none';
+      candidate.style.visibility = 'hidden';
+      candidate.style.pointerEvents = 'none';
+      candidate.setAttribute('aria-hidden', 'true');
+    });
+  };
+
+  const apply = () => {
+    hideProjectWorldsInMenu();
+    renameProjectPanel();
+    hideBottomProjectDockTile();
+  };
+
+  apply();
+  requestAnimationFrame(apply);
+  setTimeout(apply, 250);
+  setTimeout(apply, 1000);
+
+  const observer = new MutationObserver(apply);
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   new NexusRelationshipTreeShellController().init();
+  installNexusProjectDeduper();
 });
