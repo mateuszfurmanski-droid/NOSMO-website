@@ -1,4 +1,4 @@
-// NEXUS_PEOPLE_PANEL_V6_PERSON_CARD_V47_AND_MOBILE_DOCK_FIT
+// NEXUS_PEOPLE_PANEL_V4_PERSON_CARD_V47_FREEZE
 (()=>{
   if(document.documentElement.dataset.nexusEmbedded==='true')return;
   const DATA_URL='/data/person-card-kamil.json?v=v47top1';
@@ -8,95 +8,6 @@
   const FETCHER_URL='/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v47top1';
   const norm=value=>String(value||'').replace(/\s+/g,' ').trim().toLowerCase();
   const initials=name=>String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||'').join('')||'?';
-
-  const installDockFit=()=>{
-    if(document.getElementById('nexusMobileDockFitStyle'))return;
-    const style=document.createElement('style');
-    style.id='nexusMobileDockFitStyle';
-    style.textContent=`
-      :root{--nexus-bottom-dock-h:92px;--nexus-bottom-tile-w:calc((100vw - 54px)/5.5)}
-      @supports(height:100dvh){body{min-height:100dvh}}
-      @media(max-width:760px){
-        html,body{width:100vw!important;max-width:100vw!important;overflow:hidden!important;background:#020713!important;overscroll-behavior:none!important}
-        #root{position:fixed!important;top:var(--nexus-top-rail-h,76px)!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;max-width:100vw!important;min-width:100vw!important;height:auto!important;min-height:0!important;overflow:hidden!important;background:#eaf3f6!important;transform:none!important;scale:1!important;}
-        #root>*{max-width:none!important;transform-origin:center center!important;}
-        .nexus-mobile-bottom-dock{position:fixed!important;z-index:9060!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;max-width:100vw!important;min-width:100vw!important;height:calc(var(--nexus-bottom-dock-h) + env(safe-area-inset-bottom,0px))!important;display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;justify-content:flex-start!important;gap:8px!important;box-sizing:border-box!important;padding:7px 8px calc(8px + env(safe-area-inset-bottom,0px)) 8px!important;margin:0!important;overflow-x:auto!important;overflow-y:hidden!important;background:linear-gradient(180deg,rgba(238,248,252,.88),rgba(226,239,245,.98))!important;border-top:1px solid rgba(51,116,151,.22)!important;box-shadow:0 -12px 28px rgba(6,22,35,.18)!important;transform:none!important;translate:none!important;scale:1!important;contain:layout paint!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important;}
-        .nexus-mobile-bottom-dock::-webkit-scrollbar{display:none!important}
-        .nexus-mobile-bottom-dock>*{flex:0 0 var(--nexus-bottom-tile-w)!important;width:var(--nexus-bottom-tile-w)!important;min-width:var(--nexus-bottom-tile-w)!important;max-width:var(--nexus-bottom-tile-w)!important;height:76px!important;min-height:76px!important;max-height:76px!important;margin:0!important;box-sizing:border-box!important;transform:none!important;translate:none!important;scale:1!important;border-radius:16px!important;}
-        .nexus-mobile-bottom-dock button,.nexus-mobile-bottom-dock a{touch-action:manipulation!important;}
-        .nexus-shell-panel,.nexus-project-switcher,.nexus-time-panel{bottom:calc(var(--nexus-bottom-dock-h) + env(safe-area-inset-bottom,0px) + 10px)!important;max-height:calc(100dvh - var(--nexus-top-rail-h,76px) - var(--nexus-bottom-dock-h) - env(safe-area-inset-bottom,0px) - 18px)!important;}
-        .nexus-shell-scrim{bottom:calc(var(--nexus-bottom-dock-h) + env(safe-area-inset-bottom,0px))!important;}
-      }
-      @media(max-width:390px){:root{--nexus-bottom-dock-h:88px;--nexus-bottom-tile-w:calc((100vw - 48px)/5.5)}.nexus-mobile-bottom-dock{gap:7px!important;padding-left:7px!important;padding-right:7px!important}.nexus-mobile-bottom-dock>*{height:72px!important;min-height:72px!important;max-height:72px!important;border-radius:15px!important}}
-      @media(max-width:340px){:root{--nexus-bottom-dock-h:84px;--nexus-bottom-tile-w:calc((100vw - 42px)/5.5)}.nexus-mobile-bottom-dock{gap:6px!important}.nexus-mobile-bottom-dock>*{height:69px!important;min-height:69px!important;max-height:69px!important}}
-    `;
-    document.head.appendChild(style);
-  };
-
-  const findBottomDock=()=>{
-    const root=document.getElementById('root');
-    if(!root)return null;
-    const controls=Array.from(root.querySelectorAll('button,a,[role="button"]')).filter(el=>{
-      const label=norm(el.textContent||el.getAttribute('aria-label')||'');
-      return ['tasks','project','people','docs','tools'].includes(label);
-    });
-    if(controls.length<4)return null;
-    const viewportH=window.innerHeight||document.documentElement.clientHeight||0;
-    const candidates=[];
-    for(const control of controls){
-      let node=control.parentElement;
-      for(let depth=0;node&&depth<8;depth+=1,node=node.parentElement){
-        if(node===root)break;
-        const text=norm(node.textContent||'');
-        const hitCount=['tasks','project','people','docs','tools'].filter(label=>text.includes(label)).length;
-        const rect=node.getBoundingClientRect();
-        const nearBottom=rect.bottom>viewportH-220;
-        const looksDock=hitCount>=4&&rect.width>240&&rect.height>=54&&rect.height<=190&&nearBottom;
-        if(looksDock)candidates.push({node,score:hitCount*100+rect.width-Math.abs(viewportH-rect.bottom)});
-      }
-    }
-    candidates.sort((a,b)=>b.score-a.score);
-    return candidates[0]?.node||null;
-  };
-
-  const fitBottomDock=()=>{
-    if(window.innerWidth>760)return;
-    installDockFit();
-    const dock=findBottomDock();
-    if(!dock)return;
-    dock.classList.add('nexus-mobile-bottom-dock');
-    dock.dataset.nexusDockFit='5.5';
-    if(dock.parentElement!==document.body){
-      document.body.appendChild(dock);
-    }
-    const labels=['tasks','project','people','docs','tools'];
-    Array.from(dock.children).forEach(child=>{
-      child.style.flex='0 0 var(--nexus-bottom-tile-w)';
-      child.style.width='var(--nexus-bottom-tile-w)';
-    });
-    const root=document.getElementById('root');
-    if(root){
-      root.style.paddingBottom='calc(var(--nexus-bottom-dock-h) + env(safe-area-inset-bottom,0px))';
-    }
-  };
-
-  const scheduleDockFit=()=>{
-    fitBottomDock();
-    requestAnimationFrame(fitBottomDock);
-    setTimeout(fitBottomDock,120);
-    setTimeout(fitBottomDock,450);
-    setTimeout(fitBottomDock,1100);
-  };
-
-  window.addEventListener('DOMContentLoaded',()=>{
-    installDockFit();
-    scheduleDockFit();
-    window.addEventListener('resize',scheduleDockFit,{passive:true});
-    window.addEventListener('orientationchange',()=>setTimeout(scheduleDockFit,250),{passive:true});
-    const observer=new MutationObserver(scheduleDockFit);
-    observer.observe(document.body,{childList:true,subtree:true});
-    setTimeout(()=>observer.disconnect(),12000);
-  });
 
   let kamilBridge={
     id:'p-kamil',
@@ -200,7 +111,6 @@
       document.getElementById('nexusTimelinePanel')?.classList.remove('open');
       render();
       panel.classList.add('open');panel.setAttribute('aria-hidden','false');scrim?.classList.add('open');
-      scheduleDockFit();
     };
 
     peopleAction.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();open()},true);

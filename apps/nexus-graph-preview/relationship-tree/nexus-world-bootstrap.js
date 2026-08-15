@@ -1,7 +1,21 @@
-// NEXUS_WORLD_BOOTSTRAP_V4_PROJECT_CLEAN
+// NEXUS_WORLD_BOOTSTRAP_V5_CONTROLLER_ROUTE_FIX
 (()=>{
   if(window.__NEXUS_WORLD_BOOTSTRAPPED__)return;
   window.__NEXUS_WORLD_BOOTSTRAPPED__=true;
+
+  try{
+    const current=new URL(window.location.href);
+    if(current.pathname.endsWith('/controller.html')){
+      const canonical=new URL('/apps/nexus-graph-preview/relationship-tree/', window.location.origin);
+      current.searchParams.forEach((value,key)=>canonical.searchParams.set(key,value));
+      canonical.searchParams.delete('entry');
+      if(!canonical.searchParams.has('runtime'))canonical.searchParams.set('runtime','4-project-clean');
+      history.replaceState(null,'',canonical.toString());
+    }
+  }catch(error){
+    console.warn('[NOSMO] Relationship Tree route normalisation failed',error);
+  }
+
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
   const load=(flag,path)=>{
     if(window[flag])return;
