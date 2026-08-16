@@ -3,49 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>NOSMO Nexus — e-SAFE Catania Demo</title>
-  <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="./embed-crop.css" />
-  <link rel="stylesheet" href="./world.css" />
-  <link rel="stylesheet" href="./world-order.css" />
-  <link rel="stylesheet" href="./compact-tiles.css" />
-  <link rel="stylesheet" href="./files-ui.css" />
+  <title>NOSMO Nexus — e-SAFE Catania</title>
+  <meta name="robots" content="noindex" />
+  <meta http-equiv="refresh" content="0;url=/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo" />
+  <script>
+    const target='/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo';
+    if(window.location.pathname!=='/apps/nexus-graph-preview/relationship-tree/')window.location.replace(target);
+  </script>
 </head>
-<body>
-  <main class="world-shell" id="worldShell">
-    <nav class="system-rail glass" aria-label="Nexus Project World navigation">
-      <button class="nav-tile active" id="nexusTile" type="button" aria-label="Show Nexus project world"><span class="tile-icon">N</span><span class="tile-label">NEXUS</span><span class="tile-sub">WORLD</span></button>
-      <button class="nav-tile project-tile" id="projectTile" type="button" title="e-SAFE Catania Real Pilot"><span class="tile-icon">▣</span><span class="tile-label">PROJECT</span><span class="tile-sub">e-SAFE</span></button>
-      <button class="nav-tile" id="timeTile" type="button" aria-expanded="false" aria-controls="timelineZone"><span class="tile-icon">◷</span><span class="tile-label">TIME</span><span class="tile-sub" id="timeTileValue">SIM</span></button>
-      <button class="nav-tile" id="sourcesTile" type="button" aria-label="Open project source library"><span class="tile-icon">▤</span><span class="tile-label">SOURCES</span><span class="tile-sub" id="sourceTileValue">0 DOCS</span></button>
-    </nav>
-
-    <section class="timeline-zone glass" id="timelineZone" aria-label="Project Timeline Zone" aria-hidden="true">
-      <div class="timeline-heading"><div><div class="eyebrow">NOSMO NEXUS · PROJECT WORLD</div><div class="project-title">e-SAFE Catania Real Pilot</div></div><button class="close-panel" id="closeTimeline" type="button" aria-label="Close timeline">×</button></div>
-      <div class="zone-top"><div class="clock-block"><div class="eyebrow">PROJECT TIME</div><div class="clock-main" id="projectClock">—</div><div class="clock-sub" id="sourceClock">Source: —</div></div><div class="playback-controls"><button class="play-btn" id="playBtn" aria-label="Play or pause">▶</button><select id="speedSelect" aria-label="Playback speed"><option value="0.25">0.25×</option><option value="1" selected>1×</option><option value="5">5×</option><option value="20">20×</option><option value="100">100×</option></select><button class="ghost-btn" id="liveBtn">LIVE</button></div></div>
-      <div class="mode-switch" role="group" aria-label="Timeline mode"><button data-mode="real">REAL</button><button data-mode="replay">REPLAY</button><button data-mode="simulation" class="active">SIMULATION</button></div>
-      <div class="phase-strip" id="phaseStrip"><span data-end="0.15">SURVEY</span><span data-end="0.35">DESIGN + BIM</span><span data-end="0.55">PROCUREMENT</span><span data-end="0.85">CONSTRUCTION</span><span data-end="1">TESTING + HANDOVER</span></div>
-      <div class="rail-wrap"><div class="rail-meta"><span id="rangeStart">—</span><span id="compressionLabel">—</span><span id="rangeEnd">—</span></div><div class="rail"><div class="rail-progress" id="railProgress"></div><div class="event-markers" id="eventMarkers"></div><input id="timeSlider" type="range" min="0" max="10000" value="7200" step="1" aria-label="Project time scrubber" /></div></div>
-      <div class="zone-bottom"><div class="metric"><span class="metric-value" id="visibleDocs">0</span><span class="metric-label">documents available</span></div><div class="metric"><span class="metric-value" id="visibleFiles">0</span><span class="metric-label">files available</span></div><div class="metric phase-metric"><span class="metric-value" id="currentPhase">—</span><span class="metric-label">demo phase</span></div><button class="event-card" id="eventCard" type="button"><span class="event-kicker">LATEST EVENT</span><span class="event-title" id="latestEventTitle">Move the timeline to explore the project</span><span class="event-detail" id="latestEventDetail">95 CC BY 4.0 source records loaded</span></button></div>
-    </section>
-
-    <iframe id="nexusFrame" class="nexus-frame" title="NOSMO Nexus Relationship Tree" src="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&embed=1" loading="eager" allow="fullscreen"></iframe>
-
-    <section class="project-world-layer" id="projectWorldLayer" aria-label="e-SAFE Catania project graph"><div class="world-stage" id="worldStage"><svg class="world-network" id="worldNetwork" preserveAspectRatio="none"></svg><div class="world-node-host" id="worldNodeHost"></div><div class="world-status-chip" id="worldStatus"><strong>0</strong> / 95 sources</div></div></section>
-
-    <aside class="world-panel" id="projectPanel" aria-label="Project details"><div class="world-panel-head"><div><div class="world-panel-kicker">REAL PROJECT · e-SAFE H2020</div><h2>e-SAFE Catania Real Pilot</h2></div><button class="world-panel-close" id="closeProjectPanel">×</button></div><div class="world-panel-body"><div class="provenance-band"><strong>Project facts</strong> are real e-SAFE context. Timeline placement of system nodes is currently derived from the source-publication chronology until construction-event dates are extracted from the PDFs.</div><div class="project-facts" id="projectFacts"></div><div class="project-system-grid" id="projectSystems"></div></div></aside>
-
-    <aside class="world-panel" id="sourceLibrary" aria-label="Project source library"><div class="world-panel-head"><div><div class="world-panel-kicker">SOURCE LIBRARY</div><h2>e-SAFE project records</h2></div><button class="world-panel-close" id="closeSourceLibrary">×</button></div><div class="world-panel-body"><div class="source-tools"><input class="source-search" id="sourceSearch" type="search" placeholder="Search 95 records…" /><select class="source-scope" id="sourceScope"><option value="time">AS OF TIME</option><option value="all">ALL 95</option></select></div><div class="source-filter-row" id="sourceFilterRow"></div><div class="source-summary" id="sourceSummary"></div><div class="source-list" id="sourceList"></div></div></aside>
-
-    <aside class="event-drawer glass" id="eventDrawer" aria-hidden="true"><div class="drawer-head"><div><div class="eyebrow">PROJECT EVENT</div><h2 id="drawerTitle">—</h2></div><button class="close-panel" id="closeDrawer" aria-label="Close event">×</button></div><dl id="drawerMeta"></dl><div class="drawer-files" id="drawerFiles"></div><a id="drawerSource" class="source-link" href="#" target="_blank" rel="noopener">Open source record ↗</a><div class="provenance-note"><strong>Provenance:</strong> source publication dates are preserved. Construction-event dates will be added separately as they are extracted from project documents.</div></aside>
-  </main>
-  <script src="./data.js"></script>
-  <script src="./files.js"></script>
-  <script src="./world.js"></script>
-  <script src="./compact-tiles.js"></script>
-  <script src="./app.js"></script>
-  <script src="./world-sync.js"></script>
-  <script src="./files-ui.js"></script>
+<body style="margin:0;background:#07111d;color:#dbeafe;font:14px Inter,system-ui,sans-serif;display:grid;place-items:center;min-height:100vh">
+  <a href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo" style="color:#67e8f9">Open e-SAFE in NOSMO Nexus</a>
 </body>
 </html>
