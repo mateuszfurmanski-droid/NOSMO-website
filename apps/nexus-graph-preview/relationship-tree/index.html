@@ -16,11 +16,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=roleslot-20260813a" />
-    <link rel="stylesheet" href="./nexus-shell-v2.css?v=roleslot-20260813a" />
-    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=roleslot-20260813a" />
-    <link rel="stylesheet" href="./nexus-project-switcher.css?v=roleslot-20260813a" />
-    <link rel="stylesheet" href="./nexus-people-panel.css?v=roleslot-20260813a" />
+    <link rel="stylesheet" crossorigin href="/apps/nexus-graph-preview/assets/index-Dif5omj-.css?v=timeline-v1dark-20260817a" />
+    <link rel="stylesheet" href="./nexus-shell-v2.css?v=timeline-v1dark-20260817a" />
+    <link rel="stylesheet" href="./nexus-timeline-panel.css?v=timeline-v1dark-20260817a" />
+    <link rel="stylesheet" href="./nexus-project-switcher.css?v=timeline-v1dark-20260817a" />
+    <link rel="stylesheet" href="./nexus-people-panel.css?v=timeline-v1dark-20260817a" />
     <style>
       :root{--nexus-top-h:74px;--nexus-bottom-clear:112px;--nexus-mobile-scale:.82}
       html,body{width:100%;height:100%;min-height:100%;margin:0;background:#020713;color:#f5f7fb;font-family:Inter,Arial,sans-serif;overflow:hidden;overscroll-behavior:none}
@@ -32,7 +32,7 @@
       .nexus-shell-panel{max-height:calc(100vh - var(--nexus-top-h) - 12px);overflow:auto!important;-webkit-overflow-scrolling:touch}
       .nexus-mobile-fit #root>div:first-child,.nexus-mobile-fit #root>main:first-child,.nexus-mobile-fit #root>[data-radix-scroll-area-viewport]:first-child{transform:scale(var(--nexus-mobile-scale));transform-origin:50% 0;width:calc(100% / var(--nexus-mobile-scale));height:calc(100% / var(--nexus-mobile-scale));margin-left:calc((100% - (100% / var(--nexus-mobile-scale))) / 2)}
       .nexus-mobile-fit #root [class*="bottom"],.nexus-mobile-fit #root [class*="Bottom"],.nexus-mobile-fit #root [class*="dock"],.nexus-mobile-fit #root [class*="Dock"]{max-width:100vw!important;box-sizing:border-box!important}
-      .nexus-top-role-slot{position:fixed;top:47px;right:8px;z-index:9004;display:flex;align-items:center;justify-content:flex-end;pointer-events:auto}
+      .nexus-top-role-slot{display:none!important;visibility:hidden!important;pointer-events:none!important}
       .nexus-top-role-select{width:112px;height:24px;border:1px solid rgba(21,143,174,.32);border-radius:12px;background:rgba(238,248,252,.94);color:#0b2430;font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:850;padding:0 22px 0 8px;box-shadow:0 4px 14px rgba(3,35,48,.12);outline:none}
       .nexus-native-role-hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
       @media(max-width:760px){
@@ -41,7 +41,7 @@
         .nexus-top-tile{min-width:0!important}
         .nexus-top-label{font-size:8px!important}
         .nexus-top-sub{font-size:6px!important}
-        .nexus-top-role-slot{top:49px;right:9px}
+        .nexus-top-role-slot{display:none!important;visibility:hidden!important;pointer-events:none!important}
         .nexus-top-role-select{width:104px;height:22px;font-size:9px;border-radius:11px}
         #root{top:74px;bottom:calc(118px + env(safe-area-inset-bottom,0px))}
         .nexus-mobile-fit #root .bottom-0{bottom:calc(22px + env(safe-area-inset-bottom,0px))!important}
@@ -79,13 +79,13 @@
         });
       })();
     </script>
-    <script src="./nexus-world-bootstrap.js?v=roleslot-20260813a"></script>
-    <script defer src="./nexus-shell-v2.js?v=roleslot-20260813a"></script>
-    <script defer src="./nexus-timeline-panel.js?v=roleslot-20260813a"></script>
-    <script defer src="./nexus-project-switcher.js?v=roleslot-20260813a"></script>
-    <script defer src="./nexus-people-panel.js?v=roleslot-20260813a"></script>
-    <script defer src="./nexus-trade-content-ai.js?v=roleslot-20260813a"></script>
-    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=roleslot-20260813a"></script>
+    <script src="./nexus-world-bootstrap.js?v=timeline-v1dark-20260817a"></script>
+    <script defer src="./nexus-shell-v2.js?v=timeline-v1dark-20260817a"></script>
+    <script defer src="./nexus-timeline-panel.js?v=timeline-v1dark-20260817a"></script>
+    <script defer src="./nexus-project-switcher.js?v=timeline-v1dark-20260817a"></script>
+    <script defer src="./nexus-people-panel.js?v=timeline-v1dark-20260817a"></script>
+    <script defer src="./nexus-trade-content-ai.js?v=timeline-v1dark-20260817a"></script>
+    <script type="module" crossorigin src="/apps/nexus-graph-preview/assets/index-CWI-Glgh.js?v=timeline-v1dark-20260817a"></script>
   </head>
   <body>
     <nav class="nexus-top-rail" id="nexusTopRail" aria-label="Nexus mobile workspace menu">
@@ -109,8 +109,8 @@
       <div class="nexus-shell-panel-head"><strong>NEXUS MENU</strong><button class="nexus-shell-close" type="button" data-nexus-close-panel aria-label="Close menu">×</button></div>
       <div class="nexus-shell-section-title">PROJECT WORLDS</div>
       <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=roleslot-20260813a"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Current Project World</small></span></a>
-        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=roleslot-20260813a"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Second Project World</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=esafe-demo&runtime=4-project-clean&v=timeline-v1dark-20260817a"><span class="nexus-shell-action-icon">E</span><span class="nexus-shell-action-copy"><strong>e-SAFE Catania</strong><small>Current Project World</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-graph-preview/relationship-tree/?world=dev&runtime=4-project-clean&v=timeline-v1dark-20260817a"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Riverside</strong><small>Second Project World</small></span></a>
         <button class="nexus-shell-action" type="button" id="nexusOpenTrades"><span class="nexus-shell-action-icon">T</span><span class="nexus-shell-action-copy"><strong>Trades</strong><small>Manager / Joiner / Electrician views</small></span></button>
       </div>
       <div class="nexus-shell-section-title">CORE VIEWS</div>
@@ -121,7 +121,7 @@
       </div>
       <div class="nexus-shell-section-title">MODULES</div>
       <div class="nexus-shell-list">
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=roleslot-20260813a" data-nexus-action="file-loader"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=timeline-v1dark-20260817a" data-nexus-action="file-loader"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>File Loader</strong><small>Upload & classify project files</small></span></a>
         <a class="nexus-shell-action" href="/apps/nexus-graph-preview/electrical-commissioning/"><span class="nexus-shell-action-icon">⚡</span><span class="nexus-shell-action-copy"><strong>Electrical</strong><small>Commissioning module</small></span></a>
         <a class="nexus-shell-action" href="/doorflow"><span class="nexus-shell-action-icon">D</span><span class="nexus-shell-action-copy"><strong>DoorFlow</strong><small>Fire door workflow</small></span></a>
       </div>
@@ -142,7 +142,7 @@
       <div class="nexus-shell-section-title">FILE LOADER</div>
       <div class="nexus-shell-list">
         <label class="nexus-shell-action" for="nexusFileInput"><span class="nexus-shell-action-icon">＋</span><span class="nexus-shell-action-copy"><strong>Select local files</strong><small>Preview-only classification on this public page</small></span></label>
-        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=roleslot-20260813a"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
+        <a class="nexus-shell-action" href="/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&v=timeline-v1dark-20260817a"><span class="nexus-shell-action-icon">↗</span><span class="nexus-shell-action-copy"><strong>Open File Loader</strong><small>Dedicated uploader preview</small></span></a>
         <a class="nexus-shell-action" href="https://docs.google.com/spreadsheets/d/1vZYrSX5kcgOH5izENzGwdL7wMLgbHIQNUJi9dfMuTEI/edit?usp=drivesdk"><span class="nexus-shell-action-icon">A</span><span class="nexus-shell-action-copy"><strong>Asset Index</strong><small>Google Sheet registry</small></span></a>
         <a class="nexus-shell-action" href="https://docs.google.com/document/d/1ylZRQU-m1GbYVNMGFvu3FKMamXEyvGHv8XVf_kKsd6c/edit?usp=drivesdk"><span class="nexus-shell-action-icon">R</span><span class="nexus-shell-action-copy"><strong>Routing Rules</strong><small>Cloud routing document</small></span></a>
       </div>
@@ -195,7 +195,7 @@
         document.querySelectorAll('[data-nexus-close-panel]').forEach(button=>button.addEventListener('click',closePanels));
         scrim?.addEventListener('click',closePanels);
         document.addEventListener('keydown',event=>{if(event.key==='Escape')closePanels()});
-        document.getElementById('nexusReloadView')?.addEventListener('click',()=>{const url=new URL(location.href);url.searchParams.set('v','roleslot-20260813a-reload-'+Date.now());location.href=url.toString()});
+        document.getElementById('nexusReloadView')?.addEventListener('click',()=>{const url=new URL(location.href);url.searchParams.set('v','timeline-v1dark-20260817a-reload-'+Date.now());location.href=url.toString()});
         const themeToggle=document.getElementById('nexusThemeToggle');
         themeToggle?.addEventListener('change',()=>{const theme=themeToggle.checked?'light':'dark';document.documentElement.dataset.nexusTheme=theme;try{localStorage.setItem('nexus.theme',theme)}catch{}const themeSub=document.getElementById('nexusMenuThemeSub');if(themeSub)themeSub.textContent=theme.toUpperCase()});
         const fileInput=document.getElementById('nexusFileInput');
