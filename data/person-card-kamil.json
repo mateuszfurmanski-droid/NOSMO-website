@@ -1,0 +1,66 @@
+{
+  "id": "person-kamil-karaszewski",
+  "version": "v47top1",
+  "type": "person-card",
+  "updatedAt": "2026-08-11",
+  "person": {
+    "firstName": "Kamil",
+    "lastName": "Karaszewski",
+    "displayName": "Kamil Karaszewski",
+    "role": "Technical Advisor",
+    "trade": "Welding & Fabrication",
+    "location": "Eindhoven, Netherlands",
+    "experience": "15+ yrs experience",
+    "status": "Available",
+    "verification": "Verified",
+    "organisation": "NOSMO Technology Limited"
+  },
+  "graph": {
+    "nodeId": "p-kamil",
+    "nodeType": "person",
+    "label": "Kamil Karaszewski",
+    "sublabel": "Technical Advisor · Welding & Fabrication",
+    "projectKey": "NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA",
+    "relationship": "Person Card linked to active Nexus Project Graph"
+  },
+  "links": {
+    "personCard": "/person-card-kamil.html?v=v47top1",
+    "versionedPersonCard": "/person-card-kamil-v47.html?v=v47top1",
+    "relationshipTree": "/apps/nexus-graph-preview/relationship-tree/?focus=p-kamil&person=kamil-karaszewski&v=v47top1",
+    "dataFetcher": "/apps/nexus-file-loader/?projectKey=NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA&person=kamil-karaszewski&card=/person-card-kamil.html?v=v47top1",
+    "registry": "/apps/nexus/person-cards/?v=v47top1",
+    "sections": {
+      "cv": "/person-card-kamil-section.html?section=cv&v=v47top1",
+      "certs": "/person-card-kamil-section.html?section=certs&v=v47top1",
+      "refs": "/person-card-kamil-section.html?section=refs&v=v47top1",
+      "availability": "/person-card-kamil-section.html?section=availability&v=v47top1",
+      "vault": "/person-card-kamil-section.html?section=vault&v=v47top1"
+    },
+    "communications": {
+      "whatsapp": "https://wa.me/?text=Kamil%20Karaszewski%20NOSMO%20Person%20Card",
+      "email": "mailto:?subject=Kamil%20Karaszewski%20Person%20Card&body=https://nosmotechnology.co.uk/person-card-kamil.html",
+      "phone": "tel:",
+      "sms": "sms:?body=Kamil%20Karaszewski%20Person%20Card%20https://nosmotechnology.co.uk/person-card-kamil.html",
+      "linkedin": "https://www.linkedin.com/",
+      "facebook": "https://www.facebook.com/",
+      "indeed": "https://www.indeed.co.uk/"
+    }
+  },
+  "skills": [
+    { "label": "Welding & Fabrication", "score": 72 },
+    { "label": "Technical Advisory", "score": 70 },
+    { "label": "Project Management", "score": 68 },
+    { "label": "Quality & Compliance", "score": 72 }
+  ],
+  "workHistory": [
+    { "title": "Technical Advisor", "company": "NOSMO Technology Limited", "period": "2022 – Present" },
+    { "title": "Fabrication Engineer", "company": "Custom Marine Projects", "period": "2016 – 2022" },
+    { "title": "Welding Supervisor", "company": "Industrial Structures Ltd", "period": "2012 – 2016" }
+  ],
+  "documents": {
+    "cv": "pending",
+    "certificates": "pending",
+    "references": "pending",
+    "vault": "linked"
+  }
+}

@@ -1,16 +1,24 @@
 :root{--tree-chrome-crop:112px}
 
-/* The Relationship Tree keeps its own desktop/mobile toolbar. In Project World demo
-   the outer Nexus rail is the only top navigation, so crop the embedded toolbar
-   from the iframe viewport while preserving the tree canvas and bottom app dock. */
+/* Project World uses the canonical Relationship Tree as the only graph canvas.
+   The outer e-SAFE rail/timeline controls project context, while the embedded tree
+   keeps one stable viewport so opening TIME never reflows, rescales or shifts nodes. */
 .nexus-frame{
+  z-index:15;
+  top:calc(var(--rail-h) - var(--tree-chrome-crop));
+  height:calc(100% - var(--rail-h) + var(--tree-chrome-crop));
+  transition:none!important;
+}
+
+/* Timeline is an overlay. Do not move/resize the graph when it opens. */
+.world-shell.timeline-open .nexus-frame{
   top:calc(var(--rail-h) - var(--tree-chrome-crop));
   height:calc(100% - var(--rail-h) + var(--tree-chrome-crop));
 }
-.world-shell.timeline-open .nexus-frame{
-  top:calc(var(--rail-h) + var(--timeline-h) - var(--tree-chrome-crop));
-  height:calc(100% - var(--rail-h) - var(--timeline-h) + var(--tree-chrome-crop));
-}
+
+/* Remove the second demo-specific graph painted over the real Relationship Tree.
+   Timeline data still reaches the canonical tree through NEXUS_PROJECT_TIME_CHANGE. */
+.project-world-layer{display:none!important}
 
 @media(max-width:760px){
   :root{--tree-chrome-crop:128px}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>NOSMO Nexus File Loader</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('overlay') === '1') {
+        document.documentElement.dataset.nexusOverlay = 'true';
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="./styles.css?v=overlay-20260813b" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div><div class="eyebrow">NOSMO NEXUS</div><h1>File Loader</h1></div>
+      <div class="status" id="serviceStatus">checking…</div>
+    </header>
+
+    <section class="card">
+      <label class="field">
+        <span>Project</span>
+        <input id="projectKey" value="NEXUS_DEMO_PROJECT_001_eSAFE_CATANIA" autocomplete="off" />
+      </label>
+
+      <label class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" multiple />
+        <strong>+ Add files</strong>
+        <span>PDF, Office, IFC/BIM, drawings, images, video, ZIP and other project files</span>
+      </label>
+
+      <div class="queue-head">
+        <strong id="queueTitle">No files selected</strong>
+        <button id="clearBtn" class="ghost" type="button">Clear</button>
+      </div>
+      <div id="queue" class="queue"></div>
+
+      <button id="uploadBtn" class="primary" type="button" disabled>Upload to project</button>
+      <div class="progress" id="progress" hidden><div id="progressBar"></div></div>
+      <div class="message" id="message"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div><div class="eyebrow">PROJECT FILE REGISTRY</div><h2>Imported data</h2></div>
+        <button id="refreshBtn" class="ghost" type="button">Refresh</button>
+      </div>
+      <div class="summary" id="summary">Select a project to load its registry.</div>
+      <div class="registry" id="registry"></div>
+      <div class="actions">
+        <button id="confirmBtn" class="primary secondary" type="button">Confirm pending</button>
+        <button id="manifestBtn" class="ghost" type="button">Download manifest</button>
+      </div>
+    </section>
+  </main>
+  <script src="./app.js?v=overlay-20260813b"></script>
+</body>
+</html>
