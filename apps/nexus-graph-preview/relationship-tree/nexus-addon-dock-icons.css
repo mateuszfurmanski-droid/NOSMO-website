@@ -1,0 +1,51 @@
+/* NEXUS_ADDON_DOCK_ICONS_POLISH_20260817
+   Add-on only. Normalizes dock icons for injected addon tiles; does not change panel logic, graph, Project Time or existing core dock tiles. */
+#nexusSoftwareDockTile .nx-soft-tile-icon,
+#nexusIntegrationsDockTile .nx-int-tile-icon,
+#nexusCloudDockTile .nx-cloud-tile-icon{
+  width:38px!important;
+  height:38px!important;
+  border-radius:14px!important;
+  display:grid!important;
+  place-items:center!important;
+  color:#27e9ff!important;
+  font-size:0!important;
+  line-height:1!important;
+  text-shadow:none!important;
+  filter:drop-shadow(0 0 10px rgba(39,233,255,.58))!important;
+}
+#nexusSoftwareDockTile .nx-soft-tile-icon svg,
+#nexusIntegrationsDockTile .nx-int-tile-icon svg,
+#nexusCloudDockTile .nx-cloud-tile-icon svg{
+  width:31px!important;
+  height:31px!important;
+  display:block!important;
+  overflow:visible!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:2.05!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+#nexusSoftwareDockTile .nx-soft-tile-label,
+#nexusIntegrationsDockTile .nx-int-tile-label,
+#nexusCloudDockTile .nx-cloud-tile-label{
+  color:#dff9ff!important;
+  text-shadow:0 0 8px rgba(39,233,255,.24)!important;
+  letter-spacing:.08em!important;
+}
+#nexusSoftwareDockTile,
+#nexusIntegrationsDockTile,
+#nexusCloudDockTile{
+  background:linear-gradient(180deg,#073d57 0%,#06273b 56%,#041923 100%)!important;
+  box-shadow:0 0 0 1px rgba(54,219,255,.38),0 0 18px rgba(54,219,255,.18),inset 0 1px 0 rgba(255,255,255,.11)!important;
+}
+#nexusSoftwareDockTile.active,
+#nexusIntegrationsDockTile.active,
+#nexusCloudDockTile.active,
+#nexusSoftwareDockTile:active,
+#nexusIntegrationsDockTile:active,
+#nexusCloudDockTile:active{
+  filter:brightness(1.12)!important;
+  box-shadow:0 0 0 1px rgba(54,219,255,.74),0 0 26px rgba(54,219,255,.38),inset 0 1px 0 rgba(255,255,255,.16)!important;
+}
