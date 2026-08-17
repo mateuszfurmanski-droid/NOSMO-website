@@ -8,11 +8,10 @@
   const fmt=d=>new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(d+'T00:00:00Z')).toUpperCase();
   let open=false,mode='simulation',playing=false,recording=false,screen=false,knob='VOL',eventOpen=false,knobMenu=false;
   const current={date:'2026-08-05',source:'05 NOV 2025',compression:'5.3×',phase:'CONSTRUCTION',docs:4,files:4,latest:records[3]};
-  function ensureCss(){if($('nexusProjectTimeIsoCss'))return;const link=document.createElement('link');link.id='nexusProjectTimeIsoCss';link.rel='stylesheet';link.href='./nexus-project-time-instrument.css?v=ticker-full-first-frame-20260817a';document.head.appendChild(link)}
+  function ensureCss(){if($('nexusProjectTimeIsoCss'))return;const link=document.createElement('link');link.id='nexusProjectTimeIsoCss';link.rel='stylesheet';link.href='./nexus-project-time-instrument.css?v=ticker-single-safe-20260817a';document.head.appendChild(link)}
   function setTile(state){const sub=$('nexusTopTimeSub');const tile=$('nexusTopTime');if(sub)sub.textContent=state?'ON':'LIVE';if(tile)tile.classList.toggle('active',!!state)}
   function tickerMarkup(){
-    const segment=`<span class="nx-pti-ticker-text"><b>PROJECT TIME</b><strong>${esc(fmt(current.date))}</strong><span>SOURCE ${esc(current.source)}</span><em>${esc(current.compression)}</em><span>${esc(current.phase)}</span><span>${current.docs} DOCS</span><span>${current.files} FILES</span></span>`;
-    return `<div class="nx-pti-ticker-track">${segment}${segment}${segment}${segment}</div>`;
+    return `<div class="nx-pti-ticker-text"><b>PROJECT TIME</b><strong>${esc(fmt(current.date))}</strong><span>SOURCE ${esc(current.source)}</span><em>${esc(current.compression)}</em><span>${esc(current.phase)}</span><span>${current.docs} DOCS</span><span>${current.files} FILES</span></div>`;
   }
   function render(){ensureCss();let root=$('nexusProjectTimeIso');if(!root){root=document.createElement('section');root.id='nexusProjectTimeIso';root.setAttribute('aria-label','Project Time');document.body.appendChild(root)}
     root.className=open?'nx-pti-open':'';
