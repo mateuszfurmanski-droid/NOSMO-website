@@ -3,6 +3,7 @@
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
   const version='ticker-single-safe-20260817a';
+  const dockVersion='bottom-dock-bridge-20260817a';
   const loadCss=()=>{
     if(document.getElementById('nexusProjectTimeIsoCss'))return;
     const link=document.createElement('link');
@@ -19,6 +20,14 @@
     script.src=`./nexus-project-time-instrument.js?v=${version}`;
     document.head.appendChild(script);
   };
-  const start=()=>{loadCss();loadJs();};
+  const loadDockBridge=()=>{
+    if(document.getElementById('nexusBottomDockBridgeScript'))return;
+    const script=document.createElement('script');
+    script.id='nexusBottomDockBridgeScript';
+    script.defer=true;
+    script.src=`./nexus-bottom-dock-bridge.js?v=${dockVersion}`;
+    document.head.appendChild(script);
+  };
+  const start=()=>{loadCss();loadJs();loadDockBridge();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
