@@ -7,6 +7,7 @@
   const dockVersion='bottom-dock-time-tile-20260817a';
   const timeChipVersion='top-time-chip-20260817a';
   const compactTopVersion='compact-top-shell-20260817a';
+  const integrationsVersion='integrations-panel-20260817a';
   const appendCss=(id,href)=>{
     if(document.getElementById(id))return;
     const link=document.createElement('link');
@@ -27,10 +28,12 @@
     appendCss('nexusProjectTimeIsoCss',`./nexus-project-time-instrument.css?v=${version}`);
     appendCss('nexusProjectTimeIsoTuneCss',`./nexus-project-time-instrument-tune.css?v=${tuneVersion}`);
     appendCss('nexusCompactTopShellCss',`./nexus-compact-top-shell.css?v=${compactTopVersion}`);
+    appendCss('nexusIntegrationsPanelCss',`./nexus-integrations-panel.css?v=${integrationsVersion}`);
   };
   const loadJs=()=>appendJs('nexusProjectTimeIsoScript',`./nexus-project-time-instrument.js?v=${version}`);
   const loadDockBridge=()=>appendJs('nexusBottomDockBridgeScript',`./nexus-bottom-dock-bridge.js?v=${dockVersion}`);
   const loadTopTimeChip=()=>appendJs('nexusTopTimeChipScript',`./nexus-top-time-chip.js?v=${timeChipVersion}`);
-  const start=()=>{loadCss();loadJs();loadDockBridge();loadTopTimeChip();};
+  const loadIntegrations=()=>appendJs('nexusIntegrationsPanelScript',`./nexus-integrations-panel.js?v=${integrationsVersion}`);
+  const start=()=>{loadCss();loadJs();loadDockBridge();loadTopTimeChip();loadIntegrations();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
