@@ -6,46 +6,31 @@
   const tuneVersion='project-time-thin-status-knob-20260817a';
   const dockVersion='bottom-dock-bridge-20260817a';
   const timeChipVersion='top-time-chip-20260817a';
+  const compactTopVersion='compact-top-shell-20260817a';
+  const appendCss=(id,href)=>{
+    if(document.getElementById(id))return;
+    const link=document.createElement('link');
+    link.id=id;
+    link.rel='stylesheet';
+    link.href=href;
+    document.head.appendChild(link);
+  };
+  const appendJs=(id,src)=>{
+    if(document.getElementById(id))return;
+    const script=document.createElement('script');
+    script.id=id;
+    script.defer=true;
+    script.src=src;
+    document.head.appendChild(script);
+  };
   const loadCss=()=>{
-    if(!document.getElementById('nexusProjectTimeIsoCss')){
-      const link=document.createElement('link');
-      link.id='nexusProjectTimeIsoCss';
-      link.rel='stylesheet';
-      link.href=`./nexus-project-time-instrument.css?v=${version}`;
-      document.head.appendChild(link);
-    }
-    if(!document.getElementById('nexusProjectTimeIsoTuneCss')){
-      const tune=document.createElement('link');
-      tune.id='nexusProjectTimeIsoTuneCss';
-      tune.rel='stylesheet';
-      tune.href=`./nexus-project-time-instrument-tune.css?v=${tuneVersion}`;
-      document.head.appendChild(tune);
-    }
+    appendCss('nexusProjectTimeIsoCss',`./nexus-project-time-instrument.css?v=${version}`);
+    appendCss('nexusProjectTimeIsoTuneCss',`./nexus-project-time-instrument-tune.css?v=${tuneVersion}`);
+    appendCss('nexusCompactTopShellCss',`./nexus-compact-top-shell.css?v=${compactTopVersion}`);
   };
-  const loadJs=()=>{
-    if(document.getElementById('nexusProjectTimeIsoScript'))return;
-    const script=document.createElement('script');
-    script.id='nexusProjectTimeIsoScript';
-    script.defer=true;
-    script.src=`./nexus-project-time-instrument.js?v=${version}`;
-    document.head.appendChild(script);
-  };
-  const loadDockBridge=()=>{
-    if(document.getElementById('nexusBottomDockBridgeScript'))return;
-    const script=document.createElement('script');
-    script.id='nexusBottomDockBridgeScript';
-    script.defer=true;
-    script.src=`./nexus-bottom-dock-bridge.js?v=${dockVersion}`;
-    document.head.appendChild(script);
-  };
-  const loadTopTimeChip=()=>{
-    if(document.getElementById('nexusTopTimeChipScript'))return;
-    const script=document.createElement('script');
-    script.id='nexusTopTimeChipScript';
-    script.defer=true;
-    script.src=`./nexus-top-time-chip.js?v=${timeChipVersion}`;
-    document.head.appendChild(script);
-  };
+  const loadJs=()=>appendJs('nexusProjectTimeIsoScript',`./nexus-project-time-instrument.js?v=${version}`);
+  const loadDockBridge=()=>appendJs('nexusBottomDockBridgeScript',`./nexus-bottom-dock-bridge.js?v=${dockVersion}`);
+  const loadTopTimeChip=()=>appendJs('nexusTopTimeChipScript',`./nexus-top-time-chip.js?v=${timeChipVersion}`);
   const start=()=>{loadCss();loadJs();loadDockBridge();loadTopTimeChip();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
