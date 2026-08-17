@@ -109,7 +109,7 @@
     if(!parent)return;
     const tile=el('button',{id:'nexusIntegrationsDockTile',type:'button','aria-label':'Open integrations'},[
       el('span',{class:'nx-int-tile-icon',text:'⌬'}),
-      el('span',{class:'nx-int-tile-label',text:'INTEGRATIONS'})
+      el('span',{class:'nx-int-tile-label',text:'INT.'})
     ]);
     tile.addEventListener('click',event=>{
       event.preventDefault();
