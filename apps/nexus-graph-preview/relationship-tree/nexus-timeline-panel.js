@@ -10,6 +10,7 @@
   const integrationsVersion='integrations-compact-tile-20260817a';
   const cloudVersion='cloud-panel-20260817a';
   const softwareVersion='software-connectors-20260817a';
+  const addonIconVersion='addon-dock-icons-svg-20260817a';
   const appendCss=(id,href)=>{
     if(document.getElementById(id))return;
     const link=document.createElement('link');
@@ -33,6 +34,7 @@
     appendCss('nexusIntegrationsPanelCss',`./nexus-integrations-panel.css?v=${integrationsVersion}`);
     appendCss('nexusCloudPanelCss',`./nexus-cloud-panel.css?v=${cloudVersion}`);
     appendCss('nexusSoftwarePanelCss',`./nexus-software-panel.css?v=${softwareVersion}`);
+    appendCss('nexusAddonDockIconsCss',`./nexus-addon-dock-icons.css?v=${addonIconVersion}`);
   };
   const loadJs=()=>appendJs('nexusProjectTimeIsoScript',`./nexus-project-time-instrument.js?v=${version}`);
   const loadDockBridge=()=>appendJs('nexusBottomDockBridgeScript',`./nexus-bottom-dock-bridge.js?v=${dockVersion}`);
@@ -40,6 +42,7 @@
   const loadIntegrations=()=>appendJs('nexusIntegrationsPanelScript',`./nexus-integrations-panel.js?v=${integrationsVersion}`);
   const loadCloud=()=>appendJs('nexusCloudPanelScript',`./nexus-cloud-panel.js?v=${cloudVersion}`);
   const loadSoftware=()=>appendJs('nexusSoftwarePanelScript',`./nexus-software-panel.js?v=${softwareVersion}`);
-  const start=()=>{loadCss();loadJs();loadDockBridge();loadTopTimeChip();loadIntegrations();loadCloud();loadSoftware();};
+  const loadAddonDockIcons=()=>appendJs('nexusAddonDockIconsScript',`./nexus-addon-dock-icons.js?v=${addonIconVersion}`);
+  const start=()=>{loadCss();loadJs();loadDockBridge();loadTopTimeChip();loadIntegrations();loadCloud();loadSoftware();loadAddonDockIcons();};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
