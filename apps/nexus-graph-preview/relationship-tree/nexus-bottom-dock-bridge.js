@@ -1,6 +1,6 @@
 // NEXUS_BOTTOM_DOCK_BRIDGE_ISOLATED_20260817
-// Wires the existing React bottom dock tiles to the existing Nexus shell actions.
-// No styling, no graph mutation, no Project Time UI changes.
+// Wires the existing React bottom dock tiles to Nexus shell actions.
+// Add-on only: adds a TIME tile after TASKS and compacts the top shell to menu + clock chip.
 (()=>{
   if(window.__NEXUS_BOTTOM_DOCK_BRIDGE__)return;
   window.__NEXUS_BOTTOM_DOCK_BRIDGE__=true;
@@ -16,6 +16,32 @@
   const clickFirst=selector=>click(document.querySelector(selector));
   const dispatch=(type,detail={})=>window.dispatchEvent(new CustomEvent(type,{detail}));
 
+  const installStyle=()=>{
+    if(document.getElementById('nexusBottomDockBridgeStyle'))return;
+    const style=document.createElement('style');
+    style.id='nexusBottomDockBridgeStyle';
+    style.textContent=`
+      :root{--nexus-top-h:50px!important}
+      #root{top:var(--nexus-top-h)!important}
+      #nexusTopRail{display:flex!important;grid-template-columns:none!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;height:var(--nexus-top-h)!important;min-height:var(--nexus-top-h)!important;padding:5px 8px!important;background:rgba(248,252,255,.94)!important;border-bottom:1px solid rgba(31,112,139,.14)!important;box-shadow:0 6px 16px rgba(5,31,45,.06)!important;overflow:visible!important}
+      #nexusTopProject,#nexusTopTime,#nexusTopFiles,#nexusTopTools{display:none!important;visibility:hidden!important;pointer-events:none!important}
+      #nexusTopMenu{position:relative!important;display:grid!important;place-items:center!important;align-content:center!important;width:42px!important;min-width:42px!important;max-width:42px!important;height:40px!important;min-height:40px!important;border:1px solid rgba(31,143,174,.22)!important;border-radius:14px!important;background:linear-gradient(180deg,rgba(245,252,255,.98),rgba(220,241,248,.94))!important;box-shadow:0 5px 14px rgba(6,40,52,.10),inset 0 0 0 1px rgba(255,255,255,.72)!important;overflow:visible!important;padding:0!important}
+      #nexusTopMenu .nexus-top-icon{width:32px!important;height:32px!important;border-radius:12px!important;font-size:20px!important;margin:0!important;background:linear-gradient(145deg,#1789ed,#5bb8ff)!important;color:#fff!important;box-shadow:0 4px 12px rgba(23,137,237,.25),inset 0 0 0 1px rgba(255,255,255,.25)!important}
+      #nexusTopMenu .nexus-top-label,#nexusTopMenu .nexus-top-sub{display:none!important}
+      #nexusTopTimeChip{position:absolute!important;left:48px!important;right:auto!important;top:2px!important;width:76px!important;min-width:76px!important;height:36px!important;border-radius:14px!important;font-size:10px!important;letter-spacing:.05em!important;background:linear-gradient(180deg,rgba(245,252,255,.98),rgba(217,241,249,.94))!important;border:1px solid rgba(31,143,174,.24)!important;box-shadow:0 5px 14px rgba(6,40,52,.10),inset 0 0 0 1px rgba(255,255,255,.72)!important;color:#0d7894!important}
+      #nexusTopTimeChip::before{font-size:11px!important;color:#1597b8!important}
+      #nexusTopTimeChip[data-state='on']{border-color:rgba(21,151,184,.72)!important;background:linear-gradient(180deg,rgba(232,249,254,.98),rgba(193,234,248,.96))!important;color:#075d74!important;box-shadow:0 0 0 1px rgba(21,151,184,.16),0 5px 14px rgba(6,40,52,.12),inset 0 0 0 1px rgba(255,255,255,.82)!important}
+      #nexusTopTimeChip[data-state='on']::after{right:6px!important;bottom:6px!important;width:4px!important;height:4px!important;background:#61f58a!important;box-shadow:0 0 9px rgba(97,245,138,.95)!important}
+      [data-nexus-injected-time-dock='true']{position:relative!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+      [data-nexus-injected-time-dock='true'] .nexus-injected-dock-icon{display:grid;place-items:center;width:32px;height:32px;margin:0 auto 5px;border-radius:12px;background:rgba(14,226,255,.10);color:#18d7ff;font-size:23px;font-weight:900;line-height:1;text-shadow:0 0 10px rgba(24,215,255,.44)}
+      [data-nexus-injected-time-dock='true'] .nexus-injected-dock-label{display:block;color:#dff9ff;font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:950;line-height:1;letter-spacing:.08em;text-align:center;text-transform:uppercase;text-shadow:0 0 9px rgba(14,226,255,.32)}
+      [data-nexus-injected-time-dock='true']::after{content:'';position:absolute;left:50%;bottom:10px;width:5px;height:5px;border-radius:50%;transform:translateX(-50%);background:#61f58a;box-shadow:0 0 10px rgba(97,245,138,.85)}
+      .nexus-shell-panel{top:calc(var(--nexus-top-h) + 8px)!important;max-height:calc(100vh - var(--nexus-top-h) - 16px)!important}
+      @media(max-width:390px){#nexusTopRail{padding-left:7px!important}#nexusTopMenu{width:40px!important;min-width:40px!important;height:38px!important}#nexusTopMenu .nexus-top-icon{width:30px!important;height:30px!important;font-size:19px!important}#nexusTopTimeChip{left:46px!important;width:72px!important;min-width:72px!important;height:34px!important;font-size:9px!important}}
+    `;
+    document.head.appendChild(style);
+  };
+
   const closeShellScrim=()=>{
     document.querySelectorAll('.nexus-shell-panel.open,.nexus-project-switcher.open,.nexus-time-panel.open').forEach(panel=>panel.classList.remove('open'));
     document.getElementById('nexusShellScrim')?.classList.remove('open');
@@ -29,6 +55,12 @@
       closeShellScrim();
       if(click(findTaskNode()))return;
       dispatch('nexus:dock-action',{action:'tasks'});
+    },
+    time(){
+      closeShellScrim();
+      if(clickId('nexusTopTimeChip'))return;
+      if(clickId('nexusTopTime'))return;
+      dispatch('nexus:dock-action',{action:'time'});
     },
     project(){
       if(clickId('nexusTopProject'))return;
@@ -61,7 +93,9 @@
   };
 
   const getDockLabel=control=>{
-    const text=norm(control.textContent||control.getAttribute('aria-label')||'');
+    const explicit=control?.dataset?.nexusBottomDockAction;
+    if(explicit&&actions[explicit])return explicit;
+    const text=norm(control?.textContent||control?.getAttribute('aria-label')||'');
     if(!text)return'';
     for(const key of Object.keys(actions)){
       const pattern=new RegExp(`(^|\\b)${key}(\\b|$)`,'i');
@@ -72,18 +106,39 @@
 
   const looksLikeBottomDockControl=control=>{
     if(!control||control.closest('#nexusTopRail,#nexusProjectTimeIso,.nexus-shell-panel,.nexus-project-switcher,.nexus-people-panel'))return false;
+    if(control.dataset?.nexusInjectedTimeDock==='true')return true;
     const rect=control.getBoundingClientRect();
     const viewportH=window.innerHeight||document.documentElement.clientHeight||0;
-    const nearBottom=rect.bottom>=viewportH-170&&rect.top>=viewportH-260;
+    const nearBottom=rect.bottom>=viewportH-170&&rect.top>=viewportH-285;
     const label=getDockLabel(control);
     if(!label)return false;
     if(control.closest('.nexus-mobile-bottom-dock'))return true;
     return nearBottom&&rect.width>=48&&rect.height>=42;
   };
 
+  const getDockControls=()=>Array.from(document.querySelectorAll('button,a,[role="button"]')).filter(looksLikeBottomDockControl);
+
+  const installTimeTile=()=>{
+    if(document.querySelector('[data-nexus-injected-time-dock="true"]'))return;
+    const controls=getDockControls().filter(control=>control.dataset?.nexusInjectedTimeDock!=='true');
+    const task=controls.find(control=>getDockLabel(control)==='tasks');
+    const existingTime=controls.find(control=>getDockLabel(control)==='time');
+    if(existingTime||!task||!task.parentElement)return;
+    const tile=task.cloneNode(true);
+    tile.dataset.nexusInjectedTimeDock='true';
+    tile.dataset.nexusBottomDockAction='time';
+    tile.setAttribute('data-nexus-dock-bridge','active');
+    tile.setAttribute('aria-label','TIME');
+    tile.removeAttribute('id');
+    tile.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    tile.innerHTML='<span class="nexus-injected-dock-icon" aria-hidden="true">◷</span><span class="nexus-injected-dock-label">TIME</span>';
+    task.parentElement.insertBefore(tile,task.nextSibling);
+  };
+
   const markDock=()=>{
-    const controls=Array.from(document.querySelectorAll('button,a,[role="button"]')).filter(looksLikeBottomDockControl);
-    controls.forEach(control=>{
+    installStyle();
+    installTimeTile();
+    getDockControls().forEach(control=>{
       const label=getDockLabel(control);
       if(!label)return;
       control.dataset.nexusBottomDockAction=label;
@@ -118,5 +173,5 @@
   window.addEventListener('orientationchange',()=>setTimeout(schedule,220),{passive:true});
   const observer=new MutationObserver(schedule);
   observer.observe(document.body,{childList:true,subtree:true,characterData:true});
-  setTimeout(()=>observer.disconnect(),20000);
+  setTimeout(()=>observer.disconnect(),24000);
 })();
