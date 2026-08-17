@@ -2,7 +2,7 @@
 (()=>{
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
-  const version='isolated-time-20260817a';
+  const version='ticker-single-safe-20260817a';
   const loadCss=()=>{
     if(document.getElementById('nexusProjectTimeIsoCss'))return;
     const link=document.createElement('link');
