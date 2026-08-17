@@ -1,0 +1,24 @@
+/* NEXUS_PROJECT_TIME_INSTRUMENT_TUNE_20260817
+   Fine tuning only for isolated Project Time instrument.
+   No bottom dock, graph, top rail, shell, project switcher or people selectors. */
+#nexusProjectTimeIso .nx-pti-console{grid-template-columns:minmax(0,1fr) 72px;gap:6px}
+#nexusProjectTimeIso .nx-pti-ticker{height:20px;border-color:rgba(127,208,255,.24);background:linear-gradient(180deg,rgba(2,8,16,.92),rgba(9,20,34,.86)),repeating-linear-gradient(90deg,rgba(127,208,255,.10) 0 1px,transparent 1px 7px)}
+#nexusProjectTimeIso .nx-pti-ticker-text{height:20px;line-height:20px;font-family:"Courier New",ui-monospace,monospace;font-size:7.4px;font-weight:800;letter-spacing:.18em;color:#b8d4ea;text-shadow:0 0 5px rgba(127,208,255,.42),0 0 10px rgba(46,145,220,.20)}
+#nexusProjectTimeIso .nx-pti-ticker-text b{color:#83d9ff;text-shadow:0 0 6px rgba(127,208,255,.85)}
+#nexusProjectTimeIso .nx-pti-ticker-text strong{color:#f4fbff;text-shadow:0 0 6px rgba(255,255,255,.50)}
+#nexusProjectTimeIso .nx-pti-ticker-text em{color:#ffd166;text-shadow:0 0 7px rgba(255,209,102,.55)}
+#nexusProjectTimeIso .nx-pti-knob-zone{height:62px;grid-template-rows:52px 10px;align-content:start}
+#nexusProjectTimeIso .nx-pti-knob{width:52px;height:52px;border-color:rgba(127,208,255,.34);background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.18),rgba(27,45,66,.92) 34%,rgba(5,13,25,.98) 69%),conic-gradient(from 225deg,rgba(127,208,255,.08),rgba(127,208,255,.32),rgba(255,209,102,.22),rgba(97,245,138,.22),rgba(255,90,103,.18),rgba(127,208,255,.08));box-shadow:inset -7px -9px 15px rgba(0,0,0,.62),inset 5px 5px 10px rgba(255,255,255,.07),0 8px 22px rgba(0,0,0,.42),0 0 16px rgba(47,163,255,.18)}
+#nexusProjectTimeIso .nx-pti-knob::before{content:'';position:absolute;left:50%;top:8px;width:5px;height:5px;border-radius:50%;background:#61f58a;transform:translateX(-50%);box-shadow:0 0 4px rgba(97,245,138,1),0 0 10px rgba(97,245,138,.85),0 0 18px rgba(97,245,138,.48)}
+#nexusProjectTimeIso .nx-pti-knob::after{content:'⏻';position:absolute;inset:12px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(151,193,232,.18);background:rgba(2,8,16,.35);font-size:16px;font-weight:900;line-height:1;color:#7fd0ff;text-shadow:0 0 8px rgba(127,208,255,.75),0 0 16px rgba(127,208,255,.28)}
+#nexusProjectTimeIso .nx-pti-knob-label{font-size:6px;line-height:10px;letter-spacing:.16em;color:#8edfff;text-shadow:0 0 6px rgba(127,208,255,.55)}
+#nexusProjectTimeIso .nx-pti-knob-menu{bottom:58px;right:4px}
+#nexusProjectTimeIso .nx-pti-status{height:16px;gap:3px}
+#nexusProjectTimeIso .nx-pti-stat{height:16px;border-radius:4px;padding:0 5px;gap:3px;font-size:5.6px;line-height:1;font-weight:800;letter-spacing:.12em;color:#9fb1c4;background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.012));border-color:rgba(151,193,232,.16)}
+#nexusProjectTimeIso .nx-pti-stat b{font-size:8.4px;line-height:1;font-weight:950;letter-spacing:.04em;color:#f0f7ff}
+#nexusProjectTimeIso .nx-pti-stat::before{width:3px;height:3px;border-radius:50%;flex:0 0 3px;background:#56616d;box-shadow:0 0 5px rgba(86,97,109,.55)}
+#nexusProjectTimeIso .nx-pti-stat:nth-child(1)::before{background:#69d8ff;box-shadow:0 0 7px rgba(105,216,255,.8)}
+#nexusProjectTimeIso .nx-pti-stat:nth-child(2)::before{background:#61f58a;box-shadow:0 0 7px rgba(97,245,138,.72)}
+#nexusProjectTimeIso .nx-pti-stat:nth-child(3)::before{background:#ffd166;box-shadow:0 0 8px rgba(255,209,102,.78)}
+#nexusProjectTimeIso .nx-pti-stat:nth-child(3) b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:380px){#nexusProjectTimeIso .nx-pti-console{grid-template-columns:minmax(0,1fr) 66px}#nexusProjectTimeIso .nx-pti-knob-zone{height:58px;grid-template-rows:48px 10px}#nexusProjectTimeIso .nx-pti-knob{width:48px;height:48px}#nexusProjectTimeIso .nx-pti-ticker-text{font-size:6.8px;letter-spacing:.14em}#nexusProjectTimeIso .nx-pti-stat{font-size:5.1px;padding:0 4px}#nexusProjectTimeIso .nx-pti-stat b{font-size:7.8px}}
