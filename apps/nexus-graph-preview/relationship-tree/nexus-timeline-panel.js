@@ -7,7 +7,7 @@
   const dockVersion='bottom-dock-time-tile-polished-20260817a';
   const timeChipVersion='top-time-chip-20260817a';
   const compactTopVersion='compact-top-shell-20260817a';
-  const integrationsVersion='integrations-panel-20260817a';
+  const integrationsVersion='integrations-compact-tile-20260817a';
   const appendCss=(id,href)=>{
     if(document.getElementById(id))return;
     const link=document.createElement('link');
