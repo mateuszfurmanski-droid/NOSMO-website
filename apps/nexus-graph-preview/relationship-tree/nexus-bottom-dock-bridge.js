@@ -32,12 +32,12 @@
       #nexusTopTimeChip::before{font-size:11px!important;color:#1597b8!important}
       #nexusTopTimeChip[data-state='on']{border-color:rgba(21,151,184,.72)!important;background:linear-gradient(180deg,rgba(232,249,254,.98),rgba(193,234,248,.96))!important;color:#075d74!important;box-shadow:0 0 0 1px rgba(21,151,184,.16),0 5px 14px rgba(6,40,52,.12),inset 0 0 0 1px rgba(255,255,255,.82)!important}
       #nexusTopTimeChip[data-state='on']::after{right:6px!important;bottom:6px!important;width:4px!important;height:4px!important;background:#61f58a!important;box-shadow:0 0 9px rgba(97,245,138,.95)!important}
-      [data-nexus-injected-time-dock='true']{position:relative!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
-      [data-nexus-injected-time-dock='true'] .nexus-injected-dock-icon{display:grid;place-items:center;width:32px;height:32px;margin:0 auto 5px;border-radius:12px;background:rgba(14,226,255,.10);color:#18d7ff;font-size:23px;font-weight:900;line-height:1;text-shadow:0 0 10px rgba(24,215,255,.44)}
-      [data-nexus-injected-time-dock='true'] .nexus-injected-dock-label{display:block;color:#dff9ff;font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:950;line-height:1;letter-spacing:.08em;text-align:center;text-transform:uppercase;text-shadow:0 0 9px rgba(14,226,255,.32)}
-      [data-nexus-injected-time-dock='true']::after{content:'';position:absolute;left:50%;bottom:10px;width:5px;height:5px;border-radius:50%;transform:translateX(-50%);background:#61f58a;box-shadow:0 0 10px rgba(97,245,138,.85)}
+      [data-nexus-injected-time-dock='true']{position:relative!important;display:flex!important;flex:0 0 auto!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;box-sizing:border-box!important;min-width:106px!important;max-width:116px!important;width:106px!important;min-height:94px!important;height:94px!important;padding:10px 8px 16px!important;overflow:hidden!important;touch-action:manipulation!important;-webkit-tap-highlight-color:transparent!important}
+      [data-nexus-injected-time-dock='true'] .nexus-injected-dock-icon{display:grid!important;place-items:center!important;width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;margin:0!important;border-radius:12px!important;background:rgba(14,226,255,.10)!important;color:#18d7ff!important;font-size:22px!important;font-weight:900!important;line-height:1!important;text-shadow:0 0 10px rgba(24,215,255,.44)!important;box-sizing:border-box!important;flex:0 0 auto!important}
+      [data-nexus-injected-time-dock='true'] .nexus-injected-dock-label{display:block!important;position:static!important;margin:0!important;padding:0!important;color:#dff9ff!important;font-family:Inter,Arial,sans-serif!important;font-size:12px!important;font-weight:950!important;line-height:1!important;letter-spacing:.08em!important;text-align:center!important;text-transform:uppercase!important;text-shadow:0 0 9px rgba(14,226,255,.32)!important;white-space:nowrap!important;overflow:visible!important;flex:0 0 auto!important}
+      [data-nexus-injected-time-dock='true']::after{content:'';position:absolute;left:50%;bottom:8px;width:5px;height:5px;border-radius:50%;transform:translateX(-50%);background:#61f58a;box-shadow:0 0 10px rgba(97,245,138,.85)}
       .nexus-shell-panel{top:calc(var(--nexus-top-h) + 8px)!important;max-height:calc(100vh - var(--nexus-top-h) - 16px)!important}
-      @media(max-width:390px){#nexusTopRail{padding-left:7px!important}#nexusTopMenu{width:40px!important;min-width:40px!important;height:38px!important}#nexusTopMenu .nexus-top-icon{width:30px!important;height:30px!important;font-size:19px!important}#nexusTopTimeChip{left:46px!important;width:72px!important;min-width:72px!important;height:34px!important;font-size:9px!important}}
+      @media(max-width:390px){#nexusTopRail{padding-left:7px!important}#nexusTopMenu{width:40px!important;min-width:40px!important;height:38px!important}#nexusTopMenu .nexus-top-icon{width:30px!important;height:30px!important;font-size:19px!important}#nexusTopTimeChip{left:46px!important;width:72px!important;min-width:72px!important;height:34px!important;font-size:9px!important}[data-nexus-injected-time-dock='true']{min-width:102px!important;max-width:112px!important;width:102px!important}}
     `;
     document.head.appendChild(style);
   };
@@ -118,6 +118,14 @@
 
   const getDockControls=()=>Array.from(document.querySelectorAll('button,a,[role="button"]')).filter(looksLikeBottomDockControl);
 
+  const resetDockScroll=container=>{
+    if(!container)return;
+    const reset=()=>{try{container.scrollLeft=0}catch{}};
+    reset();
+    requestAnimationFrame(reset);
+    setTimeout(reset,120);
+  };
+
   const installTimeTile=()=>{
     if(document.querySelector('[data-nexus-injected-time-dock="true"]'))return;
     const controls=getDockControls().filter(control=>control.dataset?.nexusInjectedTimeDock!=='true');
@@ -133,6 +141,7 @@
     tile.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
     tile.innerHTML='<span class="nexus-injected-dock-icon" aria-hidden="true">◷</span><span class="nexus-injected-dock-label">TIME</span>';
     task.parentElement.insertBefore(tile,task.nextSibling);
+    resetDockScroll(task.parentElement);
   };
 
   const markDock=()=>{
