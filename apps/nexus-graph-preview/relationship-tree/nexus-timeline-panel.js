@@ -4,7 +4,7 @@
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
   const version='ticker-single-safe-20260817a';
   const tuneVersion='project-time-thin-status-knob-20260817a';
-  const dockVersion='bottom-dock-bridge-20260817a';
+  const dockVersion='bottom-dock-time-tile-20260817a';
   const timeChipVersion='top-time-chip-20260817a';
   const compactTopVersion='compact-top-shell-20260817a';
   const appendCss=(id,href)=>{
