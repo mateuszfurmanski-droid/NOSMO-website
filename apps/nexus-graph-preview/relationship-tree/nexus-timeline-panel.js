@@ -3,14 +3,23 @@
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
   const version='ticker-single-safe-20260817a';
+  const tuneVersion='project-time-thin-status-knob-20260817a';
   const dockVersion='bottom-dock-bridge-20260817a';
   const loadCss=()=>{
-    if(document.getElementById('nexusProjectTimeIsoCss'))return;
-    const link=document.createElement('link');
-    link.id='nexusProjectTimeIsoCss';
-    link.rel='stylesheet';
-    link.href=`./nexus-project-time-instrument.css?v=${version}`;
-    document.head.appendChild(link);
+    if(!document.getElementById('nexusProjectTimeIsoCss')){
+      const link=document.createElement('link');
+      link.id='nexusProjectTimeIsoCss';
+      link.rel='stylesheet';
+      link.href=`./nexus-project-time-instrument.css?v=${version}`;
+      document.head.appendChild(link);
+    }
+    if(!document.getElementById('nexusProjectTimeIsoTuneCss')){
+      const tune=document.createElement('link');
+      tune.id='nexusProjectTimeIsoTuneCss';
+      tune.rel='stylesheet';
+      tune.href=`./nexus-project-time-instrument-tune.css?v=${tuneVersion}`;
+      document.head.appendChild(tune);
+    }
   };
   const loadJs=()=>{
     if(document.getElementById('nexusProjectTimeIsoScript'))return;
