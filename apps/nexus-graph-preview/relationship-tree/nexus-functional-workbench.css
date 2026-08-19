@@ -1,14 +1,3 @@
-/* NEXUS_FUNCTIONAL_WORKBENCH_20260819
-   Functional fallback toolbar. Text-first. No icons. Hides only the experimental add-on dock tiles. */
-#nexusFunctionalWorkbench,
-#nexusFunctionalWorkbench *{box-sizing:border-box}
-#nexusFunctionalWorkbench{position:fixed;left:8px;right:8px;top:calc(54px + env(safe-area-inset-top,0px));z-index:2147483100;display:flex;align-items:center;gap:6px;min-height:44px;padding:6px;border:1px solid rgba(94,231,255,.26);border-radius:15px;background:linear-gradient(180deg,rgba(5,18,29,.94),rgba(2,10,18,.96));box-shadow:0 12px 34px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.08);font-family:Inter,Arial,sans-serif;color:#dff9ff;overflow:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;touch-action:pan-x}
-.nx-fw-title{flex:0 0 auto;display:inline-flex;align-items:center;min-height:30px;padding:0 9px;border-radius:10px;background:rgba(94,231,255,.10);border:1px solid rgba(94,231,255,.18);color:#77eaff;font-size:10px;font-weight:950;letter-spacing:.16em;text-transform:uppercase}
-.nx-fw-btn{flex:0 0 auto;height:30px;min-width:58px;padding:0 10px;border:1px solid rgba(94,231,255,.20);border-radius:10px;background:rgba(255,255,255,.075);color:#f1fcff;font-size:10px;font-weight:950;letter-spacing:.10em;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);-webkit-tap-highlight-color:transparent}
-.nx-fw-btn:active,.nx-fw-btn.active{background:rgba(94,231,255,.22);border-color:rgba(94,231,255,.52);color:#ffffff;box-shadow:0 0 16px rgba(94,231,255,.18),inset 0 1px 0 rgba(255,255,255,.12)}
-.nx-fw-btn[data-fw-action="tree"]{min-width:50px;color:#a6ffca;border-color:rgba(126,255,184,.24);background:rgba(126,255,184,.08)}
-body.nexus-functional-workbench-on #nexusSoftwareDockTile,
-body.nexus-functional-workbench-on #nexusCloudDockTile,
-body.nexus-functional-workbench-on #nexusIntegrationsDockTile{display:none!important;visibility:hidden!important;pointer-events:none!important}
-@media(max-width:390px){#nexusFunctionalWorkbench{left:6px;right:6px;top:calc(50px + env(safe-area-inset-top,0px));border-radius:14px;padding:5px;gap:5px;min-height:42px}.nx-fw-title{font-size:9px;min-height:29px;padding:0 8px}.nx-fw-btn{height:29px;min-width:54px;padding:0 9px;font-size:9px}}
-@media(max-height:650px){#nexusFunctionalWorkbench{top:calc(44px + env(safe-area-inset-top,0px))}}
+/* NEXUS_FUNCTIONAL_WORKBENCH_DISABLED_20260819 */
+#nexusFunctionalWorkbench{display:none!important;visibility:hidden!important;pointer-events:none!important;height:0!important;min-height:0!important;max-height:0!important;overflow:hidden!important;opacity:0!important}
+body.nexus-functional-workbench-on #nexusFunctionalWorkbench{display:none!important}
