@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - codex/spark-skanska-demo-public
+  pull_request:
+    paths:
+      - spark-skanska-demo.html
+      - .github/workflows/deploy-spark-demo-preview.yml
   workflow_dispatch:
 
 permissions:
