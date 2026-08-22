@@ -15,7 +15,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08110f}#sp
 <script>
 const frame=document.getElementById('sparkFrame');
 const toggle=document.getElementById('langToggle');
-const compactLogoUrl='https://raw.githubusercontent.com/mateuszfurmanski-droid/nosmo-nexus-mvp/818f317b0b0457503901b2f2a953496a4276bb44/artifacts/nosmo-nexus/src/spark-demo/NEXUS_Logo_UI_Mark_N.png';
+const compactLogoUrl='/assets/NEXUS_Logo_UI_Blue.png';
 let language='en',observer=null,translating=false;
 const originals=new WeakMap(),attrOriginals=new WeakMap();
 const pl={
@@ -76,7 +76,7 @@ function installObserver(){
  observer.observe(doc.body,{subtree:true,childList:true});
 }
 function setLanguage(next){language=next;toggle.textContent=next==='en'?'🇵🇱':'🇬🇧';toggle.title=next==='en'?'Polski':'English';toggle.setAttribute('aria-label',next==='en'?'Przełącz na język polski':'Switch to English');applyLanguage()}
-frame.addEventListener('load',()=>{ensureBrandLogo();installObserver();applyLanguage()});
+frame.addEventListener('load',()=>{installObserver();applyLanguage()});
 toggle.addEventListener('click',()=>setLanguage(language==='en'?'pl':'en'));
 </script>
 </body>
