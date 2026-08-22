@@ -15,6 +15,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08110f}#sp
 <script>
 const frame=document.getElementById('sparkFrame');
 const toggle=document.getElementById('langToggle');
+const compactLogoUrl='https://raw.githubusercontent.com/mateuszfurmanski-droid/nosmo-nexus-mvp/818f317b0b0457503901b2f2a953496a4276bb44/artifacts/nosmo-nexus/src/spark-demo/NEXUS_Logo_UI_Mark_N.png';
 let language='en',observer=null,translating=false;
 const originals=new WeakMap(),attrOriginals=new WeakMap();
 const pl={
@@ -23,6 +24,13 @@ const pl={
 const ph={
 'Search ID, object, location, type or source':'Szukaj ID, obiektu, lokalizacji, typu lub źródła','Optional reason for the update':'Opcjonalny powód aktualizacji','Why is this circular route defensible?':'Dlaczego ta ścieżka cyrkularna jest uzasadniona?','e.g. Timber acoustic panel batch':'np. partia drewnianych paneli akustycznych','e.g. CLT panel, pump, door set':'np. panel CLT, pompa, zestaw drzwiowy','Level / room / storage or installation position':'Poziom / pomieszczenie / magazyn lub miejsce instalacji','Optional — does not imply verification':'Opcjonalne — nie oznacza weryfikacji','What is this record and why is it being added?':'Czym jest ten rekord i dlaczego jest dodawany?'
 };
+function ensureBrandLogo(){
+ const doc=frame.contentDocument;if(!doc)return;
+ const brand=doc.querySelector('.brand');if(!brand||brand.dataset.compactNexusLogo==='1')return;
+ brand.replaceChildren();
+ const img=doc.createElement('img');img.src=compactLogoUrl;img.alt='NEXUS compact logo';img.style.cssText='display:block;height:36px;width:auto;object-fit:contain';
+ brand.appendChild(img);brand.dataset.compactNexusLogo='1';
+}
 function transform(s){
  const lead=s.match(/^\s*/)?.[0]||'',trail=s.match(/\s*$/)?.[0]||'',t=s.trim();
  if(pl[t])return lead+pl[t]+trail;
@@ -54,6 +62,7 @@ function translateElement(el){
 function applyLanguage(){
  const doc=frame.contentDocument;if(!doc||translating)return;translating=true;
  try{
+  ensureBrandLogo();
   doc.documentElement.lang=language;
   const walker=doc.createTreeWalker(doc.body,NodeFilter.SHOW_TEXT);
   let n;while((n=walker.nextNode())){const p=n.parentElement;if(!p||p.tagName==='SCRIPT'||p.tagName==='STYLE')continue;translateNode(n)}
@@ -67,7 +76,7 @@ function installObserver(){
  observer.observe(doc.body,{subtree:true,childList:true});
 }
 function setLanguage(next){language=next;toggle.textContent=next==='en'?'🇵🇱':'🇬🇧';toggle.title=next==='en'?'Polski':'English';toggle.setAttribute('aria-label',next==='en'?'Przełącz na język polski':'Switch to English');applyLanguage()}
-frame.addEventListener('load',()=>{installObserver();applyLanguage()});
+frame.addEventListener('load',()=>{ensureBrandLogo();installObserver();applyLanguage()});
 toggle.addEventListener('click',()=>setLanguage(language==='en'?'pl':'en'));
 </script>
 </body>
