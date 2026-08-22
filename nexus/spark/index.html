@@ -41,15 +41,15 @@ function transform(s){
 }
 function translateNode(node){
  if(!originals.has(node))originals.set(node,node.textContent||'');
- const en=originals.get(node)||'';
- node.textContent=language==='pl'?transform(en):en;
+ const en=originals.get(node)||'',target=language==='pl'?transform(en):en;
+ if(node.textContent!==target)node.textContent=target;
 }
 function translateElement(el){
  if(!attrOriginals.has(el))attrOriginals.set(el,{placeholder:el.getAttribute('placeholder'),title:el.getAttribute('title'),aria:el.getAttribute('aria-label')});
  const o=attrOriginals.get(el);
- if(o.placeholder!==null)el.setAttribute('placeholder',language==='pl'?(ph[o.placeholder]||transform(o.placeholder)):o.placeholder);
- if(o.title!==null)el.setAttribute('title',language==='pl'?transform(o.title):o.title);
- if(o.aria!==null)el.setAttribute('aria-label',language==='pl'?transform(o.aria):o.aria);
+ if(o.placeholder!==null){const target=language==='pl'?(ph[o.placeholder]||transform(o.placeholder)):o.placeholder;if(el.getAttribute('placeholder')!==target)el.setAttribute('placeholder',target)}
+ if(o.title!==null){const target=language==='pl'?transform(o.title):o.title;if(el.getAttribute('title')!==target)el.setAttribute('title',target)}
+ if(o.aria!==null){const target=language==='pl'?transform(o.aria):o.aria;if(el.getAttribute('aria-label')!==target)el.setAttribute('aria-label',target)}
 }
 function applyLanguage(){
  const doc=frame.contentDocument;if(!doc||translating)return;translating=true;
@@ -64,7 +64,7 @@ function applyLanguage(){
 function installObserver(){
  if(observer)observer.disconnect();const doc=frame.contentDocument;if(!doc)return;
  observer=new MutationObserver(()=>{if(language==='pl'&&!translating)queueMicrotask(applyLanguage)});
- observer.observe(doc.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
+ observer.observe(doc.body,{subtree:true,childList:true});
 }
 function setLanguage(next){language=next;toggle.textContent=next==='en'?'🇵🇱':'🇬🇧';toggle.title=next==='en'?'Polski':'English';toggle.setAttribute('aria-label',next==='en'?'Przełącz na język polski':'Switch to English');applyLanguage()}
 frame.addEventListener('load',()=>{installObserver();applyLanguage()});
