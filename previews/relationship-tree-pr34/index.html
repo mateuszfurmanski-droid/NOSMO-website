@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>NOSMO Nexus — Relationship Tree PR #34 Preview</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#eaf3f6;font-family:Inter,Arial,sans-serif;color:#102638}
+    #loading{height:100%;display:grid;place-items:center;text-align:center;padding:24px;box-sizing:border-box}
+    #loading strong{display:block;font-size:16px;margin-bottom:8px}
+    #loading small{color:#667985;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div id="loading"><div><strong>Loading Relationship Tree PR #34…</strong><small>Historical shell/controller preview · isolated from current live tree</small></div></div>
+  <script>
+    (async () => {
+      const SHA = '8e9a8d5ca3230f33f0819670d4a819f8b6d3ccae';
+      const RAW = `https://raw.githubusercontent.com/mateuszfurmanski-droid/NOSMO-website/${SHA}/apps/nexus-graph-preview/relationship-tree/`;
+      try {
+        const [htmlResponse, controllerResponse] = await Promise.all([
+          fetch(`${RAW}index.html`, { cache: 'no-store' }),
+          fetch(`${RAW}nexus-relationship-tree-shell-controller.js`, { cache: 'no-store' })
+        ]);
+        if (!htmlResponse.ok || !controllerResponse.ok) throw new Error(`snapshot fetch failed (${htmlResponse.status}/${controllerResponse.status})`);
+        let html = await htmlResponse.text();
+        const controller = (await controllerResponse.text()).replace(/<\/script/gi, '<\\/script');
+
+        // Keep PR #34 markup/CSS exactly, but resolve its unchanged shared assets from the live canonical tree path.
+        html = html.replace('<head>', '<head><base href="/apps/nexus-graph-preview/relationship-tree/">');
+        html = html.replace(/<script\s+defer\s+src="\.\/nexus-relationship-tree-shell-controller\.js[^>]*><\/script>/i, '');
+        html = html.replace('</body>', `<script>window.__NEXUS_PR34_PREVIEW__=true;<\/script><script>${controller}<\/script></body>`);
+
+        document.open();
+        document.write(html);
+        document.close();
+      } catch (error) {
+        document.getElementById('loading').innerHTML = `<div><strong>PR #34 preview failed to load</strong><small>${String(error && error.message ? error.message : error)}</small></div>`;
+      }
+    })();
+  </script>
+</body>
+</html>
