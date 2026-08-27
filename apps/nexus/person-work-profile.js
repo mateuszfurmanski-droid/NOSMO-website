@@ -173,6 +173,73 @@
       toast(job.title+" · "+job.matchScore+"% · "+(job.gaps||[]).length+" gap(s)");
     });
   }
+  
+  function selectedRequestItems(){
+    var items=[];
+    if(q("#reqCv")&&q("#reqCv").checked)items.push("current CV");
+    if(q("#reqCerts")&&q("#reqCerts").checked)items.push("certificates / tickets");
+    if(q("#reqRefs")&&q("#reqRefs").checked)items.push("references");
+    if(q("#reqRtw")&&q("#reqRtw").checked)items.push("Right to Work check information");
+    if(q("#reqAvail")&&q("#reqAvail").checked)items.push("current availability");
+    return items;
+  }
+  function buildRequestMessage(profile){
+    var agency=(q("#reqAgency")&&q("#reqAgency").value.trim())||"the recruitment team";
+    var items=selectedRequestItems();
+    var card=window.location.origin+window.location.pathname+"?view=recruiter";
+    return "Hi Kamil,\n\n"+agency+" would like to request the following from your NOSMO Person Card: "+
+      (items.length?items.join(", "):"additional work-profile information")+
+      ".\n\nPlease review and share only the items you approve.\n\nPerson Card: "+card+
+      "\n\nThis request does not grant automatic access to private documents.";
+  }
+  function updateRequestChannels(profile){
+    var msg=buildRequestMessage(profile);
+    var preview=q("#requestPreview");if(preview)preview.value=msg;
+    var wa=q("#requestWhatsApp");if(wa)wa.href="https://wa.me/?text="+encodeURIComponent(msg);
+    var email=q("#requestEmail");if(email)email.href="mailto:?subject="+encodeURIComponent("NOSMO Person Card information request")+"&body="+encodeURIComponent(msg);
+    return msg;
+  }
+  function buildOfferMessage(profile){
+    var role=(q("#offerRole")&&q("#offerRole").value.trim())||"work opportunity";
+    var location=(q("#offerLocation")&&q("#offerLocation").value.trim())||"location to confirm";
+    var start=(q("#offerStart")&&q("#offerStart").value)||"to confirm";
+    var rate=(q("#offerRate")&&q("#offerRate").value.trim())||"to confirm";
+    var duration=(q("#offerDuration")&&q("#offerDuration").value.trim())||"to confirm";
+    var agency=(q("#offerAgency")&&q("#offerAgency").value.trim())||"Recruiter / employer";
+    return "Hi Kamil,\n\n"+agency+" would like to offer you the following work:\n"+
+      "Role: "+role+"\nLocation: "+location+"\nStart: "+start+"\nRate: "+rate+"\nDuration: "+duration+
+      "\n\nPlease review and confirm whether you are interested.\n\nThis is a draft offer from the NOSMO Recruiter View; no placement is confirmed until accepted.";
+  }
+  function updateOfferChannels(profile){
+    var msg=buildOfferMessage(profile);
+    var preview=q("#offerPreview");if(preview)preview.value=msg;
+    var wa=q("#offerWhatsApp");if(wa)wa.href="https://wa.me/?text="+encodeURIComponent(msg);
+    var email=q("#offerEmail");if(email)email.href="mailto:?subject="+encodeURIComponent("Work offer")+"&body="+encodeURIComponent(msg);
+    return msg;
+  }
+  function bindRecruiterDrafts(profile){
+    q("#buildRequest")?.addEventListener("click",function(){updateRequestChannels(profile);toast("Request Pack draft prepared")});
+    q("#copyRequest")?.addEventListener("click",function(){
+      var msg=updateRequestChannels(profile);
+      navigator.clipboard?.writeText(msg);toast("Request Pack copied");
+    });
+    ["#reqCv","#reqCerts","#reqRefs","#reqRtw","#reqAvail","#reqAgency"].forEach(function(sel){
+      q(sel)?.addEventListener("change",function(){updateRequestChannels(profile)});
+      q(sel)?.addEventListener("input",function(){updateRequestChannels(profile)});
+    });
+    q("#buildOffer")?.addEventListener("click",function(){updateOfferChannels(profile);toast("Offer draft prepared")});
+    q("#copyOffer")?.addEventListener("click",function(){
+      var msg=updateOfferChannels(profile);
+      navigator.clipboard?.writeText(msg);toast("Offer copied");
+    });
+    ["#offerRole","#offerLocation","#offerStart","#offerRate","#offerDuration","#offerAgency"].forEach(function(sel){
+      q(sel)?.addEventListener("change",function(){updateOfferChannels(profile)});
+      q(sel)?.addEventListener("input",function(){updateOfferChannels(profile)});
+    });
+    updateRequestChannels(profile);
+    updateOfferChannels(profile);
+  }
+
   function isRecruiterView(){
     return new URLSearchParams(window.location.search).get("view")==="recruiter";
   }
@@ -208,8 +275,8 @@
       if(!action)return;
       e.preventDefault();
       var type=action.dataset.recruiterAction;
-      if(type==="offer"){toast("Offer draft created locally. No message was sent.");return}
-      if(type==="docs"){toast("Document request prepared. Backend request flow is not connected yet.");return}
+      if(type==="offer"){openWork("offer");return}
+      if(type==="docs"){openWork("request");return}
       if(type==="contact"){var first=q(".comms a");if(first)first.click();return}
       if(type==="shortlist"){try{localStorage.setItem("nexus-recruiter-shortlist:"+profile.personId,"true")}catch(_){}
         toast("Worker shortlisted on this device");return}
@@ -276,6 +343,7 @@
       renderReadiness(profile);
       bindAvailability(profile);
       bindJobDetails(profile);
+      bindRecruiterDrafts(profile);
       enableRecruiterView(profile);
       var mode=q("#workDataMode");
       if(mode)mode.textContent=profile.demoMode?"DEMO DATA":"CONNECTED";
