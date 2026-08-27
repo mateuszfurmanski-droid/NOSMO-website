@@ -39,6 +39,8 @@ jobs:
           SEMANTIC=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.js
           SEMANTIC_CSS=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.css
           PEOPLE=apps/nexus-graph-preview/relationship-tree/nexus-people-panel.js
+          BRIDGE=apps/nexus-graph-preview/relationship-tree/nexus-core-browser-bridge.js
+          BRIDGE_CSS=apps/nexus-graph-preview/relationship-tree/nexus-core-browser-bridge.css
           test -s "$WINDOW"
           test -s "$CSS"
           test -s "$OVERLAY"
@@ -46,6 +48,9 @@ jobs:
           test -s "$SEMANTIC"
           test -s "$SEMANTIC_CSS"
           test -s "$PEOPLE"
+          test -s "$BRIDGE"
+          test -s "$BRIDGE_CSS"
+          node --check "$BRIDGE"
           node --check "$OVERLAY"
           node --check "$SEMANTIC"
           grep -Fq 'nexus-window-manager.css?v=addon059-window-v1a' "$INDEX"
@@ -54,6 +59,8 @@ jobs:
           grep -Fq 'nexus-overlay-host.js?v=addon059-overlay-v1' "$INDEX"
           grep -Fq 'nexus-semantic-drag.css?v=addon059-semantic-v1' "$INDEX"
           grep -Fq 'nexus-semantic-drag.js?v=addon059-semantic-v1' "$INDEX"
+          grep -Fq 'nexus-core-browser-bridge.css?v=addon059-core-bridge-v1' "$INDEX"
+          grep -Fq 'nexus-core-browser-bridge.js?v=addon059-core-bridge-v1' "$INDEX"
           grep -Fq '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js' "$INDEX"
           grep -Fq '#nexusProjectTimeIso' "$WINDOW"
           grep -Fq '#nexusCloudPanel' "$WINDOW"
@@ -80,6 +87,18 @@ jobs:
           grep -Fq "node.dataset.canonicalPersonId" "$PEOPLE"
           grep -Fq "personId:typeof data.id==='string'?data.id" "$PEOPLE"
           ! grep -Fq "person-kamil-karaszewski" "$SEMANTIC"
+          grep -Fq "SESSION_KEY='nexus-core-staging-device-session/v1'" "$BRIDGE"
+          grep -Fq "credentials:'omit'" "$BRIDGE"
+          grep -Fq "authorization','Bearer " "$BRIDGE"
+          grep -Fq "canonicalPersonId" "$BRIDGE"
+          grep -Fq "semanticIntent:'assign-work-package'" "$BRIDGE"
+          grep -Fq "nexus:semantic-drop-authoritative-result" "$BRIDGE"
+          grep -Fq "nexus:core-authoritative-projection" "$BRIDGE"
+          grep -Fq "CORE_BROWSER_ENDPOINT_NOT_CONFIGURED" "$BRIDGE"
+          grep -Fq "WORK_PACKAGE_REQUIRED" "$BRIDGE"
+          grep -Fq "nexus-staging.nosmo.tech" "$BRIDGE"
+          ! grep -Fq "_vercel_share" "$BRIDGE"
+          ! grep -Fq "vercel-protection-bypass" "$BRIDGE"
           grep -Fq "Composition ≠ assignment" "$SEMANTIC"
           grep -Fq "awaiting Core authority" "$SEMANTIC"
           grep -Fq '.nexus-semantic-drop-target' "$SEMANTIC_CSS"
