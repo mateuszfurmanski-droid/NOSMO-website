@@ -38,7 +38,7 @@ jobs:
       - name: Interaction smoke for v47 FULL
         shell: bash
         run: |
-          cat > /tmp/v47-full-smoke.js <<'EOF'
+          cat > v47-full-smoke.cjs <<'EOF'
           const { chromium } = require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
@@ -68,7 +68,8 @@ jobs:
           EOF
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 --no-save >/dev/null 2>&1
-          node /tmp/v47-full-smoke.js
+          node v47-full-smoke.cjs
+          rm -f v47-full-smoke.cjs
 
       - name: Render mobile screenshots
         shell: bash
