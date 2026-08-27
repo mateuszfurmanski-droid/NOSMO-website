@@ -35,6 +35,49 @@
       return '<div class="workChip"><span>'+escapeHtml(row[0])+'</span><strong>'+escapeHtml(row[1])+'</strong></div>';
     }).join("");
   }
+  function tokenize(value){
+    return String(value||"").toLowerCase().replace(/[^a-z0-9+]+/g," ").split(/\s+/).filter(function(x){return x.length>2});
+  }
+  function scoreJob(profile,job){
+    var prefs=profile.preferences||{};
+    var tradeTokens=tokenize([prefs.primaryTrade].concat(prefs.targetRoles||[]).join(" "));
+    var jobTokens=tokenize([job.title,job.category,job.descriptionSnippet].join(" "));
+    var overlap=tradeTokens.filter(function(token){return jobTokens.indexOf(token)>=0});
+    var score=45;
+    var reasons=[];
+    if(overlap.length){
+      score+=Math.min(30,overlap.length*8);
+      reasons.push("Trade/role terms: "+overlap.slice(0,4).join(", "));
+    }
+    var preferred=(prefs.locations||[]).map(function(x){return String(x).toLowerCase()});
+    var loc=String(job.location&&job.location.display||"").toLowerCase();
+    if(preferred.some(function(x){return x&&loc.indexOf(x)>=0})){
+      score+=15;reasons.push("Preferred location");
+    }
+    if(job.contract&&job.contract.fullTime){score+=4;reasons.push("Full-time")}
+    score=Math.max(0,Math.min(99,score));
+    return {score:score,reasons:reasons.length?reasons:["General work-profile relevance"]};
+  }
+  function normalizeLiveForCard(profile,job){
+    var scored=scoreJob(profile,job);
+    return {
+      id:job.id,
+      sourceId:job.source&&job.source.connectorId||"job-gateway",
+      sourceUrl:job.source&&job.source.sourceUrl,
+      title:job.title,
+      employer:job.company||"Employer not stated",
+      location:job.location&&job.location.display||"Location not stated",
+      distanceKm:null,
+      shift:job.contract&&job.contract.fullTime?"Full-time":"Not stated",
+      rate:job.salary&&job.salary.display||"Not stated",
+      matchScore:scored.score,
+      reasons:scored.reasons,
+      gaps:[],
+      observedAt:job.source&&job.source.observedAt,
+      sourceMode:"live-api",
+      provider:job.source&&job.source.provider||"Job Gateway"
+    };
+  }
   function renderJobs(profile){
     var list=q("#jobList");
     if(!list)return;
@@ -45,9 +88,9 @@
         : '<p class="reason">No missing requirement identified in the demo record.</p>';
       return '<article class="jobCard">'+
         '<div class="jobTop"><div><strong>'+escapeHtml(job.title)+'</strong><span>'+escapeHtml(sourceLabel(profile,job.sourceId))+' · '+escapeHtml(job.location)+'</span></div><div class="match">'+escapeHtml(job.matchScore)+'%</div></div>'+
-        '<div class="jobMeta"><i>'+escapeHtml(job.distanceKm)+' km</i><i>'+escapeHtml(job.shift||"Shift n/a")+'</i><i>'+escapeHtml(job.rate||"Rate n/a")+'</i></div>'+
+        '<div class="jobMeta">'+(job.distanceKm!==null&&job.distanceKm!==undefined?'<i>'+escapeHtml(job.distanceKm)+' km</i>':'')+'<i>'+escapeHtml(job.shift||"Shift n/a")+'</i><i>'+escapeHtml(job.rate||"Rate n/a")+'</i></div>'+
         '<p class="reason">'+reasons+'</p>'+gaps+
-        '<div class="jobActions"><button type="button" data-demo-draft="'+escapeHtml(job.title)+'">Prepare message</button><button type="button" data-job-id="'+escapeHtml(job.id)+'">Details</button></div>'+
+        '<div class="jobActions"><button type="button" data-demo-draft="'+escapeHtml(job.title)+'">Prepare message</button>'+(job.sourceUrl?'<a href="'+escapeHtml(job.sourceUrl)+'" target="_blank" rel="noopener">Open source</a>':'<button type="button" data-job-id="'+escapeHtml(job.id)+'">Details</button>')+'</div>'+
       '</article>';
     }).join("");
   }
@@ -177,6 +220,47 @@
       }
     });
   }
+  async function searchLiveJobs(profile){
+    var status=q("#jobSourceStatus");
+    var gateway=profile.jobGateway||{};
+    if(!gateway.endpoint){
+      if(status)status.textContent="LIVE connector ready but not connected: server endpoint/provider credentials are not configured.";
+      toast("Live Job Gateway is not connected yet");
+      return false;
+    }
+    var prefs=profile.preferences||{},availability=profile.availability||{};
+    var what=prefs.primaryTrade||(prefs.targetRoles||[])[0];
+    var where=(prefs.locations||[])[0];
+    if(!what){toast("Add a trade before searching");return false}
+    var url=new URL(gateway.endpoint,window.location.href);
+    url.searchParams.set("what",what);
+    if(where)url.searchParams.set("where",where);
+    url.searchParams.set("country",gateway.queryDefaults&&gateway.queryDefaults.country||"gb");
+    url.searchParams.set("results",String(gateway.queryDefaults&&gateway.queryDefaults.results||10));
+    if(status)status.textContent="Searching live "+(gateway.provider||"job")+" source…";
+    try{
+      var res=await fetch(url.toString(),{method:"GET",credentials:"omit",cache:"no-store"});
+      var payload=await res.json().catch(function(){return {}});
+      if(!res.ok){
+        var code=payload&&payload.error||("HTTP_"+res.status);
+        if(status)status.textContent="LIVE connector unavailable: "+code;
+        toast("Live connector unavailable: "+code);
+        return false;
+      }
+      var live=(payload.results||[]).map(function(job){return normalizeLiveForCard(profile,job)});
+      profile.jobMatches=live.sort(function(a,b){return b.matchScore-a.matchScore});
+      renderJobs(profile);
+      if(status)status.textContent="LIVE · "+escapeHtml(payload.provider||gateway.provider||"Job Gateway")+" · "+live.length+" jobs · "+new Date().toLocaleTimeString();
+      var mode=q("#workDataMode");if(mode)mode.textContent="LIVE JOBS";
+      openWork("matches");
+      return true;
+    }catch(err){
+      console.error("Nexus live job search failed",err);
+      if(status)status.textContent="LIVE connector unreachable. Demo data was not substituted automatically.";
+      toast("Live Job Gateway unreachable");
+      return false;
+    }
+  }
   async function init(){
     var host=q("[data-work-profile-src]");
     if(!host)return;
@@ -195,6 +279,12 @@
       enableRecruiterView(profile);
       var mode=q("#workDataMode");
       if(mode)mode.textContent=profile.demoMode?"DEMO DATA":"CONNECTED";
+      var sourceStatus=q("#jobSourceStatus");
+      if(sourceStatus){
+        sourceStatus.textContent=profile.jobGateway&&profile.jobGateway.endpoint
+          ?"LIVE Job Gateway configured · "+(profile.jobGateway.provider||"provider")
+          :"LIVE Job Gateway ready, not connected. Demo matches remain separate.";
+      }
     }catch(err){
       console.error("Nexus Work Profile data load failed",err);
       toast("Work Profile data unavailable. Static fallback remains visible.");
