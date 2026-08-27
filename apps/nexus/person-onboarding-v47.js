@@ -11,6 +11,8 @@
   const secureInvite=Boolean(inviteToken);
   const pageMode=(document.body?.dataset?.personMode||"full").toLowerCase();
   const onboardingMode=pageMode==="onboarding"||secureInvite||params.get("mode")==="onboarding";
+  window.NEXUS_V47_PAGE_MODE=pageMode;
+  window.NEXUS_V47_ONBOARDING_MODE=onboardingMode;
   const LOCAL_KEY="nexus-v47-onboarding:"+inviteId;
   const TOKEN_KEY="nexus-v47-draft-token:"+inviteId;
   let draftToken="";
