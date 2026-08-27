@@ -32,6 +32,9 @@ jobs:
           test -f data/person-work-profile-kamil.json
           test -f apps/nexus/person-work-profile.js
           test -f person-card-kamil-recruiter.html
+          test -f person-card-onboarding-v1.html
+          test -f person-card-onboarding.html
+          test -f apps/nexus/person-onboarding.js
           grep -F 'data-work-profile-src=' person-card-kamil-work-v1.html
           grep -F '>Find Work</span>' person-card-kamil-work-v1.html
           grep -F '>Matches</span>' person-card-kamil-work-v1.html
@@ -43,6 +46,12 @@ jobs:
           grep -F 'data-panel="application"' person-card-kamil-work-v1.html
           grep -F 'data-panel="incoming-request"' person-card-kamil-work-v1.html
           grep -F 'view=recruiter' person-card-kamil-recruiter.html
+          grep -F 'One Person Card · Reusable Work Identity' person-card-onboarding-v1.html
+          grep -F 'nexus-person-onboarding-draft/v1' apps/nexus/person-onboarding.js
+          grep -F 'nexus-person-draft/v1' apps/nexus/person-onboarding.js
+          grep -F 'nexus-person-work-profile/v1' apps/nexus/person-onboarding.js
+          grep -F 'loadDraftProfile' apps/nexus/person-work-profile.js
+          grep -F 'NEXUS_WORK_PROFILE_DRAFT_NOT_FOUND' apps/nexus/person-work-profile.js
           grep -F 'data-recruiter-action' apps/nexus/person-work-profile.js
           grep -F 'buildRequestMessage' apps/nexus/person-work-profile.js
           grep -F 'buildOfferMessage' apps/nexus/person-work-profile.js
@@ -53,7 +62,9 @@ jobs:
           grep -F '"schema": "nexus-person-work-profile/v1"' data/person-work-profile-kamil.json
 
       - name: Validate JavaScript syntax
-        run: node --check apps/nexus/person-work-profile.js
+        run: |
+          node --check apps/nexus/person-work-profile.js
+          node --check apps/nexus/person-onboarding.js
 
       - name: Validate JSON
         run: node -e "JSON.parse(require('fs').readFileSync('data/person-work-profile-kamil.json','utf8')); console.log('WORK_PROFILE_JSON_OK')"
@@ -69,3 +80,6 @@ jobs:
           curl --fail http://127.0.0.1:8123/data/person-work-profile-kamil.json >/dev/null
           curl --fail http://127.0.0.1:8123/apps/nexus/person-work-profile.js >/dev/null
           curl --fail http://127.0.0.1:8123/person-card-kamil-recruiter.html >/dev/null
+          curl --fail http://127.0.0.1:8123/person-card-onboarding-v1.html >/dev/null
+          curl --fail http://127.0.0.1:8123/person-card-onboarding.html >/dev/null
+          curl --fail http://127.0.0.1:8123/apps/nexus/person-onboarding.js >/dev/null
