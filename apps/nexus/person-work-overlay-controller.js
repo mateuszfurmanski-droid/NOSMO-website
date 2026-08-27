@@ -6,6 +6,7 @@
   const title=document.getElementById("workTitle");
   const toastEl=document.getElementById("workToast");
   const titles={
+    hub:"Work Hub",
     availability:"Availability",
     find:"AI Work Agent",
     matches:"Job Matches",
@@ -60,7 +61,7 @@
     if(event.key==="Escape")closeWork();
   });
 
-  document.getElementById("workShare")?.addEventListener("click",async()=>{
+  async function shareWorkProfile(){
     const url=location.href;
     const data={
       title:"NOSMO Person Card — Work Profile",
@@ -76,6 +77,14 @@
       showToast("Work Profile link copied");
     }catch(_){
       showToast("Share cancelled");
+    }
+  }
+
+  document.getElementById("workShare")?.addEventListener("click",shareWorkProfile);
+  document.addEventListener("click",event=>{
+    if(event.target.closest?.("[data-work-share]")){
+      event.preventDefault();
+      shareWorkProfile();
     }
   });
 
