@@ -1,0 +1,55 @@
+name: Render v47 Onboarding Copy Preview
+
+on:
+  push:
+    branches:
+      - codex/person-card-v47-work-ai-recruitment
+    paths:
+      - person-card-onboarding-v1.html
+      - apps/nexus/person-onboarding-v47.js
+      - .github/workflows/render-v47-copy-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Chromium for Playwright
+        run: npx --yes playwright@1.55.0 install chromium --with-deps
+
+      - name: Start static server
+        shell: bash
+        run: |
+          python3 -m http.server 8123 >/tmp/nosmo-v47-preview.log 2>&1 &
+          echo $! > /tmp/nosmo-v47-preview.pid
+          sleep 2
+          curl --fail http://127.0.0.1:8123/person-card-onboarding-v1.html >/dev/null
+
+      - name: Render mobile screenshots
+        shell: bash
+        run: |
+          mkdir -p docs/previews
+          npx --yes playwright@1.55.0 screenshot             --device="iPhone 13"             --full-page             "http://127.0.0.1:8123/person-card-onboarding-v1.html?preview=closed&agency=NOSMO%20Work%20Profile"             docs/previews/v47-copy-full.png
+          npx --yes playwright@1.55.0 screenshot             --device="iPhone 13"             "http://127.0.0.1:8123/person-card-onboarding-v1.html?agency=NOSMO%20Work%20Profile"             docs/previews/v47-copy-onboarding.png
+
+      - name: Commit preview screenshots
+        shell: bash
+        run: |
+          if git diff --quiet -- docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png &&              git ls-files --error-unmatch docs/previews/v47-copy-full.png >/dev/null 2>&1 &&              git ls-files --error-unmatch docs/previews/v47-copy-onboarding.png >/dev/null 2>&1; then
+            echo "Preview images unchanged"
+            exit 0
+          fi
+          git config user.name "NOSMO Preview Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png
+          git commit -m "preview: render fixed v47 onboarding copy [skip ci]"
+          git push
