@@ -34,10 +34,17 @@ jobs:
           INDEX=apps/nexus-graph-preview/relationship-tree/index.html
           WINDOW=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.js
           CSS=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.css
+          OVERLAY=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.js
+          OVERLAY_CSS=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.css
           test -s "$WINDOW"
           test -s "$CSS"
+          test -s "$OVERLAY"
+          test -s "$OVERLAY_CSS"
+          node --check "$OVERLAY"
           grep -Fq 'nexus-window-manager.css?v=addon059-window-v1a' "$INDEX"
           grep -Fq 'nexus-window-manager.js?v=addon059-window-v1a' "$INDEX"
+          grep -Fq 'nexus-overlay-host.css?v=addon059-overlay-v1' "$INDEX"
+          grep -Fq 'nexus-overlay-host.js?v=addon059-overlay-v1' "$INDEX"
           grep -Fq '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js' "$INDEX"
           grep -Fq '#nexusProjectTimeIso' "$WINDOW"
           grep -Fq '#nexusCloudPanel' "$WINDOW"
@@ -46,8 +53,16 @@ jobs:
           grep -Fq 'data-nexus-windowable' "$CSS"
           grep -Fq 'pointerdown' "$WINDOW"
           grep -Fq 'localStorage' "$WINDOW"
+          grep -Fq '/person-card-kamil.html?v=v47top1' "$OVERLAY"
+          grep -Fq '/apps/nexus-file-loader/' "$OVERLAY"
+          grep -Fq 'NexusWindowManager' "$OVERLAY"
+          grep -Fq 'data-nexus-window-title' "$OVERLAY"
+          grep -Fq 'dblclick' "$OVERLAY"
+          grep -Fq 'data-nexus-action="file-loader"' "$OVERLAY"
           ! grep -Fq 'innerHTML=' "$WINDOW"
           ! grep -Fq 'fetch=' "$WINDOW"
+          ! grep -Fq 'fetch=' "$OVERLAY"
+          git diff --exit-code origin/main -- person-card-kamil.html person-card-kamil-v47.html apps/nexus-file-loader/index.html apps/nexus-file-loader/app.js apps/nexus-file-loader/styles.css
           echo RELATIONSHIP_TREE_ADDON059_WINDOW_BOUNDARY_PASS
 
       - name: Prove graph bundle untouched
