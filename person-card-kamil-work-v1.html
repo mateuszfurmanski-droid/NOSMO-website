@@ -110,6 +110,38 @@ button.act{font:inherit;color:inherit;cursor:pointer}
         </div>
       </div>
 
+      <div class="workPanel" data-panel="request">
+        <div class="workIntro"><div class="eyebrow">Agency Request Pack</div><h3>Request from this Person Card</h3><p>Select only what the agency needs. This prototype prepares the request message; it does not grant access to private documents.</p></div>
+        <div class="workCriteria">
+          <label class="workChip"><span>CV</span><input id="reqCv" type="checkbox" checked style="margin-top:8px"></label>
+          <label class="workChip"><span>Certificates</span><input id="reqCerts" type="checkbox" checked style="margin-top:8px"></label>
+          <label class="workChip"><span>References</span><input id="reqRefs" type="checkbox" style="margin-top:8px"></label>
+          <label class="workChip"><span>Right to Work</span><input id="reqRtw" type="checkbox" style="margin-top:8px"></label>
+          <label class="workChip"><span>Availability</span><input id="reqAvail" type="checkbox" style="margin-top:8px"></label>
+        </div>
+        <label class="workIntro" style="display:block"><div class="eyebrow">Agency / contact name</div><input id="reqAgency" placeholder="e.g. Demo Technical Recruitment" style="margin-top:7px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:9px"></label>
+        <textarea id="requestPreview" rows="6" readonly style="width:100%;resize:vertical;background:#03101f;color:#dceaff;border:1px solid rgba(78,141,223,.28);border-radius:12px;padding:10px;font:inherit;font-size:10px;line-height:1.45"></textarea>
+        <div class="jobActions" style="margin-top:8px"><button type="button" id="buildRequest">PREPARE</button><button type="button" id="copyRequest">COPY</button></div>
+        <div class="jobActions"><a id="requestWhatsApp" href="#" target="_blank" rel="noopener">WhatsApp</a><a id="requestEmail" href="#">Email</a></div>
+        <p class="sourceNote">No document is attached or disclosed by this action. Production access requests require consent and server-side authorization.</p>
+      </div>
+
+      <div class="workPanel" data-panel="offer">
+        <div class="workIntro"><div class="eyebrow">Offer Work</div><h3>Prepare a job offer</h3><p>Create an offer draft from the Recruiter View. This prototype does not create a placement or send a message automatically.</p></div>
+        <div class="workCriteria">
+          <label class="workChip"><span>Role</span><input id="offerRole" value="Fabricator / Welder" style="margin-top:5px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:7px"></label>
+          <label class="workChip"><span>Location</span><input id="offerLocation" value="Eindhoven" style="margin-top:5px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:7px"></label>
+          <label class="workChip"><span>Start date</span><input id="offerStart" type="date" style="margin-top:5px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:7px"></label>
+          <label class="workChip"><span>Rate</span><input id="offerRate" placeholder="e.g. €28/h" style="margin-top:5px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:7px"></label>
+          <label class="workChip"><span>Duration</span><input id="offerDuration" placeholder="e.g. 6 weeks" style="margin-top:5px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:7px"></label>
+          <label class="workChip"><span>Agency</span><input id="offerAgency" placeholder="Agency / employer" style="margin-top:5px;width:100%;background:#06111e;color:#fff;border:1px solid rgba(78,141,223,.28);border-radius:9px;padding:7px"></label>
+        </div>
+        <textarea id="offerPreview" rows="7" readonly style="width:100%;resize:vertical;background:#03101f;color:#dceaff;border:1px solid rgba(78,141,223,.28);border-radius:12px;padding:10px;font:inherit;font-size:10px;line-height:1.45"></textarea>
+        <div class="jobActions" style="margin-top:8px"><button type="button" id="buildOffer">PREPARE</button><button type="button" id="copyOffer">COPY</button></div>
+        <div class="jobActions"><a id="offerWhatsApp" href="#" target="_blank" rel="noopener">WhatsApp</a><a id="offerEmail" href="#">Email</a></div>
+        <p class="sourceNote">A prepared draft is not a confirmed placement. Acceptance and project assignment remain separate authoritative actions.</p>
+      </div>
+
       <div class="workPanel" data-panel="ai">
         <div class="workIntro"><div class="eyebrow">AI profile readiness</div><h3>What should be improved?</h3><p>The agent may recommend changes, but it cannot invent or overwrite verified credentials.</p></div>
         <div class="aiFinding"><div class="aiIcon">✓</div><div><strong>Strong identity signal</strong><p>15+ years, welding/fabrication trade and supervisor history create a clear search profile.</p></div></div>
@@ -132,7 +164,7 @@ const workOverlay=document.getElementById('workOverlay');
 const workClose=document.getElementById('workClose');
 const workTitle=document.getElementById('workTitle');
 const workToast=document.getElementById('workToast');
-const titles={availability:'Availability',find:'AI Work Agent',matches:'Job Matches',agencies:'Agency Outreach',ai:'AI Profile Check'};
+const titles={availability:'Availability',find:'AI Work Agent',matches:'Job Matches',agencies:'Agency Outreach',request:'Request Pack',offer:'Offer Work',ai:'AI Profile Check'};
 function openWork(panel){
   document.querySelectorAll('.workPanel').forEach(p=>p.classList.toggle('active',p.dataset.panel===panel));
   if(workTitle) workTitle.textContent=titles[panel]||'AI Work Agent';
