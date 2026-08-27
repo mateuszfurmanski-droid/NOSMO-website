@@ -59,7 +59,7 @@ jobs:
           grep -F 'view=recruiter' person-card-kamil-recruiter.html
           # The onboarding copy MUST preserve the accepted v47 modules.
           grep -F 'Work History' person-card-onboarding-v1.html
-          grep -F 'Open in Tree' person-card-onboarding-v1.html
+          grep -F '>Work Hub</a>' person-card-onboarding-v1.html
           grep -F 'Data Fetcher' person-card-onboarding-v1.html
           grep -F '>My CV</span>' person-card-onboarding-v1.html
           grep -F '>Certs</span>' person-card-onboarding-v1.html
@@ -67,7 +67,9 @@ jobs:
           grep -F '>Avail.</span>' person-card-onboarding-v1.html
           grep -F '>Vault</span>' person-card-onboarding-v1.html
           grep -F '>Registry</span>' person-card-onboarding-v1.html
-          grep -F '>Tree</span>' person-card-onboarding-v1.html
+          grep -F '>Inbox</span>' person-card-onboarding-v1.html
+          ! grep -Fq 'relationship-tree' person-card-onboarding-v1.html
+          ! grep -Fq 'Open in Tree' person-card-onboarding-v1.html
           grep -F '>Data</span>' person-card-onboarding-v1.html
           grep -F '>Logo</span>' person-card-onboarding-v1.html
           grep -F '>Nexus</span>' person-card-onboarding-v1.html
@@ -78,7 +80,7 @@ jobs:
           grep -F 'Existing v47 modules remain in place' apps/nexus/person-onboarding-v47.js
           # Canonical v47 FULL copy must contain all accepted donor modules.
           grep -F 'Work History' person-card-v47-full-v1.html
-          grep -F 'Open in Tree' person-card-v47-full-v1.html
+          grep -F '>Work Hub</a>' person-card-v47-full-v1.html
           grep -F 'Data Fetcher' person-card-v47-full-v1.html
           grep -F '>My CV</span>' person-card-v47-full-v1.html
           grep -F '>Certs</span>' person-card-v47-full-v1.html
@@ -86,7 +88,11 @@ jobs:
           grep -F '>Avail.</span>' person-card-v47-full-v1.html
           grep -F '>Vault</span>' person-card-v47-full-v1.html
           grep -F '>Registry</span>' person-card-v47-full-v1.html
-          grep -F '>Tree</span>' person-card-v47-full-v1.html
+          grep -F '>Inbox</span>' person-card-v47-full-v1.html
+          grep -F 'data-panel="hub"' person-card-v47-full-v1.html
+          grep -F 'data-work-share' person-card-v47-full-v1.html
+          ! grep -Fq 'relationship-tree' person-card-v47-full-v1.html
+          ! grep -Fq 'Open in Tree' person-card-v47-full-v1.html
           grep -F '>Data</span>' person-card-v47-full-v1.html
           grep -F '>Logo</span>' person-card-v47-full-v1.html
           grep -F '>Nexus</span>' person-card-v47-full-v1.html
