@@ -212,6 +212,7 @@
     if(draftToken){
       const mapped=localStorage.getItem(INVITE_PREFIX+inviteId);
       if(mapped)personId=mapped;
+      try{localStorage.setItem("nexus-person-work-draft-token:"+personId,draftToken)}catch(_){}
       try{
         await loadServerDraft();
         q("#aiStatus").textContent="Secure server draft connected. Changes can be persisted to your Person Card.";
@@ -233,6 +234,7 @@
     try{
       localStorage.setItem(INVITE_PREFIX+inviteId,personId);
       localStorage.setItem(DRAFT_TOKEN_PREFIX+inviteId,draftToken);
+      localStorage.setItem("nexus-person-work-draft-token:"+personId,draftToken);
     }catch(_){}
     await loadServerDraft();
     q("#aiStatus").textContent="Secure invite claimed on this device. Worker-only draft authority is active.";
