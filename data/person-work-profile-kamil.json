@@ -162,5 +162,18 @@
       "email": "mailto:?subject=Available%20Welding%20%26%20Fabrication%20profile%20-%20Kamil%20Karaszewski&body=NOSMO%20Person%20Card%3A%20https%3A%2F%2Fnosmotechnology.co.uk%2Fperson-card-kamil.html",
       "status": "demo"
     }
-  ]
+  ],
+  "jobGateway": {
+    "schema": "nexus-job-gateway-client/v1",
+    "status": "ready-not-connected",
+    "endpoint": null,
+    "provider": "Adzuna",
+    "connectorId": "adzuna-jobs",
+    "queryDefaults": {
+      "country": "nl",
+      "results": 10
+    },
+    "productionTarget": "https://nexus.nosmo.tech/api/nexus/jobs/search",
+    "note": "Set endpoint only when a public server-side gateway is deployed with provider credentials. Never place provider credentials in this JSON."
+  }
 }
