@@ -25,7 +25,7 @@ jobs:
           node-version: 22
 
       - name: Install Chromium for Playwright
-        run: npx --yes playwright@1.55.0 install chromium --with-deps
+        run: npx --yes playwright@1.55.0 install chromium webkit --with-deps
 
       - name: Start static server
         shell: bash
