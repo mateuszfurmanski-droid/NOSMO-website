@@ -38,12 +38,14 @@ jobs:
           OVERLAY_CSS=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.css
           SEMANTIC=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.js
           SEMANTIC_CSS=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.css
+          PEOPLE=apps/nexus-graph-preview/relationship-tree/nexus-people-panel.js
           test -s "$WINDOW"
           test -s "$CSS"
           test -s "$OVERLAY"
           test -s "$OVERLAY_CSS"
           test -s "$SEMANTIC"
           test -s "$SEMANTIC_CSS"
+          test -s "$PEOPLE"
           node --check "$OVERLAY"
           node --check "$SEMANTIC"
           grep -Fq 'nexus-window-manager.css?v=addon059-window-v1a' "$INDEX"
@@ -74,6 +76,10 @@ jobs:
           grep -Fq "app-worksuite" "$SEMANTIC"
           grep -Fq "Evidence requirement" "$SEMANTIC"
           grep -Fq "paletteCapability:true" "$SEMANTIC"
+          grep -Fq "canonicalPersonId" "$SEMANTIC"
+          grep -Fq "node.dataset.canonicalPersonId" "$PEOPLE"
+          grep -Fq "personId:typeof data.id==='string'?data.id" "$PEOPLE"
+          ! grep -Fq "person-kamil-karaszewski" "$SEMANTIC"
           grep -Fq "Composition ≠ assignment" "$SEMANTIC"
           grep -Fq "awaiting Core authority" "$SEMANTIC"
           grep -Fq '.nexus-semantic-drop-target' "$SEMANTIC_CSS"
