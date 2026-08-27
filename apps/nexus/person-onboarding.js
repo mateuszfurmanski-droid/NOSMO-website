@@ -8,6 +8,7 @@
   const agency=(params.get("agency")||"NOSMO Work Profile").slice(0,120);
   const suggestedTrade=(params.get("trade")||"").slice(0,120);
   const suggestedLocation=(params.get("location")||"").slice(0,120);
+  const inviteToken=(params.get("inviteToken")||"").slice(0,8000);
 
   function q(sel){return document.querySelector(sel)}
   function qa(sel){return Array.from(document.querySelectorAll(sel))}
@@ -199,8 +200,13 @@
   async function aiAssist(){
     const status=q("#aiStatus");
     const endpoint=document.querySelector('meta[name="nexus-onboarding-ai-endpoint"]')?.content||"";
+    if(!inviteToken){
+      status.textContent="AI Assist requires a secure signed Agency Invite. This demo/unsigned invite can still use Smart Prefill.";
+      toast("Signed invite required for AI Assist");
+      return;
+    }
     if(!endpoint){
-      status.textContent="AI Assist is ready for the server connector, but no authorised onboarding AI endpoint is configured on this preview. Smart Prefill remains local.";
+      status.textContent="Signed invite detected, but no authorised onboarding AI endpoint is configured on this preview. Smart Prefill remains local.";
       toast("AI endpoint not connected yet");
       return;
     }
@@ -212,7 +218,7 @@
         method:"POST",
         headers:{"content-type":"application/json"},
         credentials:"omit",
-        body:JSON.stringify({inviteId,personId,cvText:d.cvText,current:{firstName:d.firstName,lastName:d.lastName,trade:d.trade,location:d.location,experienceYears:d.experienceYears}})
+        body:JSON.stringify({inviteId,inviteToken,personId,cvText:d.cvText,current:{firstName:d.firstName,lastName:d.lastName,trade:d.trade,location:d.location,experienceYears:d.experienceYears}})
       });
       const payload=await res.json().catch(()=>({}));
       if(!res.ok)throw new Error(payload.error||("HTTP "+res.status));
