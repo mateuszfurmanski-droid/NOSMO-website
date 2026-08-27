@@ -46,11 +46,11 @@ jobs:
             const errors=[];
             page.on('pageerror',e=>errors.push(String(e)));
             await page.goto('http://127.0.0.1:8123/person-card-v47-full-v1.html?preview=closed',{waitUntil:'networkidle'});
-            const first=(await page.locator('.first').textContent()||'').trim();
-            const last=(await page.locator('.last').textContent()||'').trim();
+            const firstNameText=(await page.locator('.first').textContent()||'').trim();
+            const lastNameText=(await page.locator('.last').textContent()||'').trim();
             const diag=await page.evaluate(()=>({bodyMode:document.body.dataset.personMode,pageMode:window.NEXUS_V47_PAGE_MODE,onboardingMode:window.NEXUS_V47_ONBOARDING_MODE}));
-            console.log('V47_FULL_DIAG',JSON.stringify({first,last,...diag}));
-            if(first!=='Kamil'||last!=='Karaszewski') throw new Error('FULL package no longer preserves Kamil donor identity');
+            console.log('V47_FULL_DIAG',JSON.stringify({first:firstNameText,last:lastNameText,...diag}));
+            if(firstNameText!=='Kamil'||lastNameText!=='Karaszewski') throw new Error('FULL package no longer preserves Kamil donor identity');
             for(const label of ['My CV','Certs','Refs','Avail.','Vault','Registry','Tree','Data','Logo','Nexus','Find Work','Matches','Agencies','AI Check','Share']){
               if(await page.getByText(label,{exact:true}).count()===0) throw new Error('Missing action: '+label);
             }
