@@ -8,6 +8,32 @@
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch];
     });
   }
+  function openWork(panel){
+    if(typeof window.NEXUS_OPEN_WORK_PANEL==="function"){
+      window.NEXUS_OPEN_WORK_PANEL(panel);
+      return;
+    }
+    var overlay=q("#workOverlay");
+    qa(".workPanel").forEach(function(el){
+      el.classList.toggle("active",el.dataset.panel===panel);
+    });
+    var title=q("#workTitle");
+    var titles={
+      availability:"Availability",
+      find:"AI Work Agent",
+      matches:"Job Matches",
+      agencies:"Agency Outreach",
+      "incoming-request":"Agency Request",
+      application:"Application Draft",
+      request:"Request Pack",
+      offer:"Offer Work",
+      ai:"AI Profile Check"
+    };
+    if(title)title.textContent=titles[panel]||"AI Work Agent";
+    overlay?.classList.add("open");
+    overlay?.setAttribute("aria-hidden","false");
+  }
+
   function toast(msg){
     var el=q("#workToast");
     if(!el)return;
