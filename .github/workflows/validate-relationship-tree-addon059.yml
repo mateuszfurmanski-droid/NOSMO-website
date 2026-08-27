@@ -1,0 +1,58 @@
+name: Validate Relationship Tree ADDON 059
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/relationship-tree-addon059-canonical
+    paths:
+      - apps/nexus-graph-preview/relationship-tree/**
+      - .github/workflows/validate-relationship-tree-addon059.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Validate add-on JavaScript
+        run: |
+          set -euo pipefail
+          node --check apps/nexus-graph-preview/relationship-tree/nexus-window-manager.js
+
+      - name: Validate canonical tree boundary
+        run: |
+          set -euo pipefail
+          INDEX=apps/nexus-graph-preview/relationship-tree/index.html
+          WINDOW=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.js
+          CSS=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.css
+          test -s "$WINDOW"
+          test -s "$CSS"
+          grep -Fq 'nexus-window-manager.css?v=addon059-window-v1' "$INDEX"
+          grep -Fq 'nexus-window-manager.js?v=addon059-window-v1' "$INDEX"
+          grep -Fq '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js' "$INDEX"
+          grep -Fq '#nexusProjectTimeIso' "$WINDOW"
+          grep -Fq '#nexusCloudPanel' "$WINDOW"
+          grep -Fq '#nexusIntegrationsPanel' "$WINDOW"
+          grep -Fq '#nexusSoftwarePanel' "$WINDOW"
+          grep -Fq 'data-nexus-windowable' "$CSS"
+          grep -Fq 'pointerdown' "$WINDOW"
+          grep -Fq 'localStorage' "$WINDOW"
+          ! grep -Fq 'innerHTML=' "$WINDOW"
+          ! grep -Fq 'fetch=' "$WINDOW"
+          echo RELATIONSHIP_TREE_ADDON059_WINDOW_BOUNDARY_PASS
+
+      - name: Prove graph bundle untouched
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          git diff --exit-code origin/main -- apps/nexus-graph-preview/assets/index-CWI-Glgh.js
+          echo RELATIONSHIP_TREE_GRAPH_BUNDLE_UNTOUCHED
