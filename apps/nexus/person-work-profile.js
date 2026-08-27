@@ -475,6 +475,16 @@
       status.setAttribute("aria-label","Worker availability");
     }
 
+    var menu=q("#menu");
+    if(menu&&!q('[data-agency-invite-link]',menu)){
+      var inviteLink=document.createElement("a");
+      inviteLink.className="mi";
+      inviteLink.href="/person-card-agency-invite.html";
+      inviteLink.setAttribute("data-agency-invite-link","true");
+      inviteLink.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg><span><strong>Invite New Worker</strong><span>Create a new Person Card onboarding link</span></span>';
+      menu.prepend(inviteLink);
+    }
+
     qa(".bridge").forEach(function(el){el.hidden=true});
     qa('a[href*="relationship-tree"],a[href*="nexus-file-loader"],a[href*="section=vault"],a[href="/apps/nexus/"],a[href*="/apps/nexus/person-cards/"],a[href*="nexus-logo-ui"]').forEach(function(el){el.hidden=true});
 
