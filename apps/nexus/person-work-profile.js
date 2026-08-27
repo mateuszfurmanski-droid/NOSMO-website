@@ -546,7 +546,7 @@
     }
 
     qa(".bridge").forEach(function(el){el.hidden=true});
-    qa('a[href*="relationship-tree"],a[href*="nexus-file-loader"],a[href*="section=vault"],a[href="/apps/nexus/"],a[href*="/apps/nexus/person-cards/"],a[href*="nexus-logo-ui"]').forEach(function(el){el.hidden=true});
+    qa('a[href*="nexus-file-loader"],a[href*="section=vault"],a[href="/apps/nexus/"],a[href*="/apps/nexus/person-cards/"],a[href*="nexus-logo-ui"]').forEach(function(el){el.hidden=true});
 
     var workButtons=qa(".actions").find(function(row){return q("[data-work-action]",row)});
     if(workButtons){
