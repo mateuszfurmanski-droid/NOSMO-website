@@ -35,6 +35,41 @@ jobs:
           sleep 2
           curl --fail http://127.0.0.1:8123/person-card-onboarding-v1.html >/dev/null
 
+      - name: Interaction smoke for v47 FULL
+        shell: bash
+        run: |
+          cat > /tmp/v47-full-smoke.js <<'EOF'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto('http://127.0.0.1:8123/person-card-v47-full-v1.html?preview=closed',{waitUntil:'networkidle'});
+            const name=(await page.locator('.name').innerText()).replace(/\s+/g,' ').trim();
+            if(!name.includes('Kamil')||!name.includes('Karaszewski')) throw new Error('FULL package no longer preserves Kamil donor identity');
+            for(const label of ['My CV','Certs','Refs','Avail.','Vault','Registry','Tree','Data','Logo','Nexus','Find Work','Matches','Agencies','AI Check','Share']){
+              if(await page.getByText(label,{exact:true}).count()===0) throw new Error('Missing action: '+label);
+            }
+            await page.getByText('Find Work',{exact:true}).click();
+            if(!(await page.locator('.workOverlay').evaluate(el=>el.classList.contains('open')))) throw new Error('Find Work overlay did not open');
+            if(!(await page.locator('.workPanel[data-panel="find"]').evaluate(el=>el.classList.contains('active')))) throw new Error('Find Work panel not active');
+            await page.locator('#workClose').click();
+            await page.locator('#openOnboarding').click();
+            if(!(await page.locator('#onboardOverlay').evaluate(el=>el.classList.contains('open')))) throw new Error('Onboarding editor did not open');
+            const first=await page.locator('#firstName').inputValue();
+            const last=await page.locator('#lastName').inputValue();
+            if(first!=='Kamil'||last!=='Karaszewski') throw new Error('FULL editor not prefilled from copied v47');
+            await page.locator('#onboardClose').click();
+            if(errors.length) throw new Error('Page errors: '+errors.join(' | '));
+            await browser.close();
+            console.log('V47_FULL_INTERACTION_OK');
+          })();
+          EOF
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 --no-save >/dev/null 2>&1
+          node /tmp/v47-full-smoke.js
+
       - name: Render mobile screenshots
         shell: bash
         run: |
