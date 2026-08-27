@@ -31,12 +31,15 @@ jobs:
           test -f person-card-kamil-work.html
           test -f data/person-work-profile-kamil.json
           test -f apps/nexus/person-work-profile.js
+          test -f person-card-kamil-recruiter.html
           grep -F 'data-work-profile-src=' person-card-kamil-work-v1.html
           grep -F '>Find Work</span>' person-card-kamil-work-v1.html
           grep -F '>Matches</span>' person-card-kamil-work-v1.html
           grep -F '>Agencies</span>' person-card-kamil-work-v1.html
           grep -F '>AI Check</span>' person-card-kamil-work-v1.html
           grep -F 'data-panel="availability"' person-card-kamil-work-v1.html
+          grep -F 'view=recruiter' person-card-kamil-recruiter.html
+          grep -F 'data-recruiter-action' apps/nexus/person-work-profile.js
           grep -F '"schema": "nexus-person-work-profile/v1"' data/person-work-profile-kamil.json
 
       - name: Validate JavaScript syntax
@@ -55,3 +58,4 @@ jobs:
           curl --fail http://127.0.0.1:8123/person-card-kamil-work-v1.html >/dev/null
           curl --fail http://127.0.0.1:8123/data/person-work-profile-kamil.json >/dev/null
           curl --fail http://127.0.0.1:8123/apps/nexus/person-work-profile.js >/dev/null
+          curl --fail http://127.0.0.1:8123/person-card-kamil-recruiter.html >/dev/null
