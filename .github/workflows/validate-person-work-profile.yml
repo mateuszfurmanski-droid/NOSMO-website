@@ -38,6 +38,9 @@ jobs:
           test -f apps/nexus/person-agency-invite.js
           test -f apps/nexus/person-onboarding.js
           test -f apps/nexus/person-onboarding-v47.js
+          test -f person-card-v47-full-v1.html
+          test -f person-card-v47-full.html
+          test -f apps/nexus/person-work-overlay-controller.js
           grep -F 'data-work-profile-src=' person-card-kamil-work-v1.html
           grep -F '>Find Work</span>' person-card-kamil-work-v1.html
           grep -F '>Matches</span>' person-card-kamil-work-v1.html
@@ -68,6 +71,32 @@ jobs:
           grep -F 'person-onboarding-v47.js' person-card-onboarding-v1.html
           grep -F 'resetDonorDataToSafeDraft' apps/nexus/person-onboarding-v47.js
           grep -F 'Existing v47 modules remain in place' apps/nexus/person-onboarding-v47.js
+          # Canonical v47 FULL copy must contain all accepted donor modules.
+          grep -F 'Work History' person-card-v47-full-v1.html
+          grep -F 'Open in Tree' person-card-v47-full-v1.html
+          grep -F 'Data Fetcher' person-card-v47-full-v1.html
+          grep -F '>My CV</span>' person-card-v47-full-v1.html
+          grep -F '>Certs</span>' person-card-v47-full-v1.html
+          grep -F '>Refs</span>' person-card-v47-full-v1.html
+          grep -F '>Avail.</span>' person-card-v47-full-v1.html
+          grep -F '>Vault</span>' person-card-v47-full-v1.html
+          grep -F '>Registry</span>' person-card-v47-full-v1.html
+          grep -F '>Tree</span>' person-card-v47-full-v1.html
+          grep -F '>Data</span>' person-card-v47-full-v1.html
+          grep -F '>Logo</span>' person-card-v47-full-v1.html
+          grep -F '>Nexus</span>' person-card-v47-full-v1.html
+          grep -F 'Core Skills' person-card-v47-full-v1.html
+          grep -F 'Training' person-card-v47-full-v1.html
+          # Additive Work / AI package.
+          grep -F '>Find Work</span>' person-card-v47-full-v1.html
+          grep -F '>Matches</span>' person-card-v47-full-v1.html
+          grep -F '>Agencies</span>' person-card-v47-full-v1.html
+          grep -F '>AI Check</span>' person-card-v47-full-v1.html
+          grep -F 'data-panel="application"' person-card-v47-full-v1.html
+          grep -F 'data-panel="request"' person-card-v47-full-v1.html
+          grep -F 'data-panel="offer"' person-card-v47-full-v1.html
+          grep -F 'id="onboardOverlay"' person-card-v47-full-v1.html
+          grep -F 'id="workOverlay"' person-card-v47-full-v1.html
           grep -F 'nexus-person-onboarding-draft/v1' apps/nexus/person-onboarding.js
           grep -F 'nexus-person-draft/v1' apps/nexus/person-onboarding.js
           grep -F 'nexus-person-work-profile/v1' apps/nexus/person-onboarding.js
@@ -91,6 +120,7 @@ jobs:
           node --check apps/nexus/person-work-profile.js
           node --check apps/nexus/person-onboarding.js
           node --check apps/nexus/person-onboarding-v47.js
+          node --check apps/nexus/person-work-overlay-controller.js
           node --check apps/nexus/person-agency-invite.js
 
       - name: Validate JSON
@@ -111,5 +141,8 @@ jobs:
           curl --fail http://127.0.0.1:8123/person-card-onboarding.html >/dev/null
           curl --fail http://127.0.0.1:8123/apps/nexus/person-onboarding.js >/dev/null
           curl --fail http://127.0.0.1:8123/apps/nexus/person-onboarding-v47.js >/dev/null
+          curl --fail http://127.0.0.1:8123/person-card-v47-full-v1.html >/dev/null
+          curl --fail http://127.0.0.1:8123/person-card-v47-full.html >/dev/null
+          curl --fail http://127.0.0.1:8123/apps/nexus/person-work-overlay-controller.js >/dev/null
           curl --fail http://127.0.0.1:8123/person-card-agency-invite.html >/dev/null
           curl --fail http://127.0.0.1:8123/apps/nexus/person-agency-invite.js >/dev/null
