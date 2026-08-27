@@ -34,7 +34,14 @@
       .map(span=>norm(span.textContent))
       .filter(Boolean)
       .filter(text=>!lower(text).startsWith('received '));
-    return{id,label:copy[0]||id,sublabel:copy[1]||'',type,node};
+    return{
+      id,
+      canonicalPersonId:type==='person'?(node.dataset.canonicalPersonId||null):null,
+      label:copy[0]||id,
+      sublabel:copy[1]||'',
+      type,
+      node
+    };
   }
 
   function liveSources(){
@@ -336,7 +343,12 @@
       actor:{accessProfile:'manager'},
       projectContext:projectContext(),
       sources,
-      target:{id:target.id,label:target.label,type:target.type},
+      target:{
+        id:target.id,
+        canonicalPersonId:target.canonicalPersonId||null,
+        label:target.label,
+        type:target.type
+      },
       workPackage:isPackage?{draftId:draft.id,items:draft.items.slice()}:null,
       requestedAt:new Date().toISOString(),
       uiOrigin:'canonical-relationship-tree'
