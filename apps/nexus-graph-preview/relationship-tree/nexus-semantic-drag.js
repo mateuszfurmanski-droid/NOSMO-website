@@ -10,7 +10,7 @@
   const accessProfile=(params.get('accessProfile')||'manager').toLowerCase();
   if(accessProfile!=='manager')return;
 
-  const sourceTypes=new Set(['task','document','module']);
+  const sourceTypes=new Set(['task','document','module','app','evidence']);
   const targetTypes=new Set(['person','project','task','module']);
   const draft={id:'draft-'+Date.now().toString(36),items:[]};
   let activeDrag=null;
@@ -19,7 +19,7 @@
 
   const norm=value=>String(value||'').replace(/\s+/g,' ').trim();
   const lower=value=>norm(value).toLowerCase();
-  const iconFor=type=>type==='task'?'✓':type==='document'?'▤':type==='module'?'◇':type==='work-package'?'▣':'•';
+  const iconFor=type=>type==='task'?'✓':type==='document'?'▤':type==='module'?'◇':type==='app'?'▦':type==='evidence'?'◉':type==='work-package'?'▣':'•';
 
   function nodeInfo(node){
     if(!node)return null;
@@ -46,8 +46,14 @@
       seen.add(info.id);
       result.push(info);
     });
-    const order={task:0,document:1,module:2};
-    return result.sort((a,b)=>(order[a.type]??9)-(order[b.type]??9)||a.label.localeCompare(b.label)).slice(0,18);
+    const capabilities=[
+      {id:'app-worksuite',label:'WorkSuite',sublabel:'Project-scoped application capability',type:'app',paletteCapability:true},
+      {id:'evidence-requirement',label:'Evidence requirement',sublabel:'Before / after photo or evidence obligation',type:'evidence',paletteCapability:true}
+    ];
+    const order={task:0,document:1,module:2,app:3,evidence:4};
+    return [...result,...capabilities]
+      .sort((a,b)=>(order[a.type]??9)-(order[b.type]??9)||a.label.localeCompare(b.label))
+      .slice(0,20);
   }
 
   function projectContext(){
@@ -62,7 +68,8 @@
     if(sourceType==='work-package')return ['person','project','task','module'].includes(targetType);
     if(sourceType==='task')return ['person','project','module'].includes(targetType);
     if(sourceType==='document')return ['person','task','project','module'].includes(targetType);
-    if(sourceType==='module')return ['person','project'].includes(targetType);
+    if(sourceType==='module'||sourceType==='app')return ['person','project'].includes(targetType);
+    if(sourceType==='evidence')return ['task','person','project','module'].includes(targetType);
     return false;
   }
 
@@ -167,7 +174,7 @@
       button.dataset.sourceType=source.type;
       button.innerHTML='<span class="nx-sem-source-icon">'+iconFor(source.type)+'</span><strong></strong><small></small>';
       button.querySelector('strong').textContent=source.label;
-      button.querySelector('small').textContent=source.type+' · '+source.id;
+      button.querySelector('small').textContent=(source.paletteCapability?'PALETTE CAPABILITY · ':'')+source.type+' · '+source.id;
       button.addEventListener('pointerdown',event=>beginDrag(event,source,'source'));
       strip.appendChild(button);
     });
