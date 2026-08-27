@@ -1,0 +1,57 @@
+name: Validate v47 Person Work Profile
+
+on:
+  push:
+    branches:
+      - codex/person-card-v47-work-ai-recruitment
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Protect accepted v47 donor
+        shell: bash
+        run: |
+          actual="$(git rev-parse HEAD:person-card-kamil-v47.html)"
+          expected="6b33057751dacb58555fc3462f2b6b811f53d48d"
+          test "$actual" = "$expected"
+          echo "V47_DONOR_UNCHANGED"
+
+      - name: Validate Work Profile files
+        shell: bash
+        run: |
+          test -f person-card-kamil-work-v1.html
+          test -f person-card-kamil-work.html
+          test -f data/person-work-profile-kamil.json
+          test -f apps/nexus/person-work-profile.js
+          grep -F 'data-work-profile-src=' person-card-kamil-work-v1.html
+          grep -F '>Find Work</span>' person-card-kamil-work-v1.html
+          grep -F '>Matches</span>' person-card-kamil-work-v1.html
+          grep -F '>Agencies</span>' person-card-kamil-work-v1.html
+          grep -F '>AI Check</span>' person-card-kamil-work-v1.html
+          grep -F 'data-panel="availability"' person-card-kamil-work-v1.html
+          grep -F '"schema": "nexus-person-work-profile/v1"' data/person-work-profile-kamil.json
+
+      - name: Validate JavaScript syntax
+        run: node --check apps/nexus/person-work-profile.js
+
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('data/person-work-profile-kamil.json','utf8')); console.log('WORK_PROFILE_JSON_OK')"
+
+      - name: Static route smoke
+        shell: bash
+        run: |
+          python3 -m http.server 8123 >/tmp/nosmo-static.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          sleep 1
+          curl --fail http://127.0.0.1:8123/person-card-kamil-work-v1.html >/dev/null
+          curl --fail http://127.0.0.1:8123/data/person-work-profile-kamil.json >/dev/null
+          curl --fail http://127.0.0.1:8123/apps/nexus/person-work-profile.js >/dev/null
