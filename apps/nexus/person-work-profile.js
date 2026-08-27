@@ -15,6 +15,97 @@
     el.classList.add("show");
     window.setTimeout(function(){el.classList.remove("show")},2400);
   }
+
+  function currentDraftId(){
+    return new URLSearchParams(window.location.search).get("draft");
+  }
+  function contextualWorkUrl(view){
+    var url=new URL(window.location.origin+window.location.pathname);
+    var draftId=currentDraftId();
+    if(draftId)url.searchParams.set("draft",draftId);
+    if(view)url.searchParams.set("view",view);
+    return url.toString();
+  }
+  function initials(first,last){
+    return [String(first||"").trim()[0],String(last||"").trim()[0]].filter(Boolean).join("").toUpperCase()||"PC";
+  }
+  function applyPersonDraftToCard(person,profile){
+    if(!person)return;
+    var first=q(".first"),last=q(".last"),role=q(".role"),trade=q(".trade"),photo=q(".photo");
+    if(first)first.textContent=person.firstName||"PERSON";
+    if(last)last.textContent=person.lastName||"CARD";
+    if(role)role.textContent="WORK PROFILE";
+    if(trade)trade.textContent=profile&&profile.preferences&&profile.preferences.primaryTrade||person.primaryRole||"TRADE NOT SET";
+
+    var meta=qa(".metaLine");
+    if(meta[0]){
+      var span=q("span",meta[0]);
+      if(span)span.textContent=person.location||profile?.preferences?.locations?.[0]||"Location not set";
+    }
+    if(meta[1]){
+      var span2=q("span",meta[1]);
+      if(span2)span2.textContent=person.experienceYears ? person.experienceYears+" yrs experience" : "Experience added in profile";
+    }
+
+    if(photo){
+      photo.style.backgroundImage="none";
+      photo.style.display="grid";
+      photo.style.placeItems="center";
+      photo.style.color="#72adff";
+      photo.style.fontWeight="950";
+      photo.style.fontSize="34px";
+      photo.textContent=initials(person.firstName,person.lastName);
+      if(person.photoDataUrl){
+        photo.style.backgroundImage='url("'+String(person.photoDataUrl).replace(/"/g,"")+'")';
+        photo.style.backgroundSize="cover";
+        photo.style.backgroundPosition="center";
+        photo.style.color="transparent";
+      }
+    }
+
+    var links=qa(".comms a");
+    links.forEach(function(link){
+      var label=(link.getAttribute("aria-label")||"").toLowerCase();
+      if(label==="whatsapp"){
+        var number=String(person.contact&&person.contact.phone||"").replace(/[^0-9+]/g,"");
+        link.href=number?"https://wa.me/"+encodeURIComponent(number.replace(/^\+/,"")):"https://wa.me/?text="+encodeURIComponent("NOSMO Person Card: "+contextualWorkUrl("recruiter"));
+      }
+      if(label==="email"){
+        var email=person.contact&&person.contact.email;
+        link.href=email?"mailto:"+encodeURIComponent(email):"mailto:?subject="+encodeURIComponent("NOSMO Person Card")+"&body="+encodeURIComponent(contextualWorkUrl("recruiter"));
+      }
+      if(label==="phone"){
+        var phone=person.contact&&person.contact.phone;
+        link.href=phone?"tel:"+encodeURIComponent(phone):"tel:";
+      }
+      if(label==="sms"){
+        var sms=person.contact&&person.contact.phone;
+        link.href=sms?"sms:"+encodeURIComponent(sms):"sms:?body="+encodeURIComponent(contextualWorkUrl("recruiter"));
+      }
+      if(label==="share")link.href=contextualWorkUrl("recruiter");
+    });
+
+    document.title="NOSMO Nexus — "+(person.displayName||[person.firstName,person.lastName].filter(Boolean).join(" "))+" Work Profile";
+    var status=q("#workDataMode");
+    if(status)status.textContent="DRAFT PROFILE";
+  }
+  function loadDraftProfile(){
+    var draftId=currentDraftId();
+    if(!draftId)return null;
+    var person=null,profile=null;
+    try{
+      person=JSON.parse(localStorage.getItem("nexus-person-draft:"+draftId)||"null");
+      profile=JSON.parse(localStorage.getItem("nexus-work-profile-draft:"+draftId)||"null");
+    }catch(_){}
+    if(!person||!profile){
+      return {error:"NEXUS_WORK_PROFILE_DRAFT_NOT_FOUND",draftId:draftId};
+    }
+    if(profile.personId!==draftId||person.id!==draftId){
+      return {error:"NEXUS_WORK_PROFILE_DRAFT_ID_MISMATCH",draftId:draftId};
+    }
+    return {person:person,profile:profile,draftId:draftId};
+  }
+
   function sourceLabel(profile,id){
     var row=(profile.sourceConnectors||[]).find(function(x){return x.id===id});
     return row?row.label:"Source";
@@ -236,7 +327,7 @@
     return "Hi "+company+",\n\nI would like to apply for the "+job.title+" role"+(loc?" in "+loc:"")+". "+
       "My NOSMO Person Card lists me as "+role+", with "+availability.toLowerCase()+". "+
       "I have 15+ years of relevant experience and can share my current CV, verified certificates and references where available.\n\n"+
-      "Person Card: "+window.location.origin+window.location.pathname+"?view=recruiter\n\n"+
+      "Person Card: "+contextualWorkUrl("recruiter")+"\n\n"+
       "Please let me know if you need any additional information.\n\n"+
       profileDisplayName();
   }
@@ -304,7 +395,7 @@
   }
   function buildWorkerRequestUrl(){
     var agency=(q("#reqAgency")&&q("#reqAgency").value.trim())||"Recruitment team";
-    var url=new URL(window.location.origin+window.location.pathname);
+    var url=new URL(contextualWorkUrl());
     url.searchParams.set("agency",agency);
     url.searchParams.set("request",requestCodes().join(","));
     url.searchParams.set("requestId","req-"+Date.now().toString(36));
@@ -408,7 +499,7 @@
       if(type==="shortlist"){try{localStorage.setItem("nexus-recruiter-shortlist:"+profile.personId,"true")}catch(_){}
         toast("Worker shortlisted on this device");return}
       if(type==="share"){
-        var url=window.location.origin+window.location.pathname+"?view=recruiter";
+        var url=contextualWorkUrl("recruiter");
         if(navigator.share){navigator.share({title:"NOSMO Recruiter View",url:url}).catch(function(){})}
         else{navigator.clipboard&&navigator.clipboard.writeText(url);toast("Recruiter View link copied")}
       }
@@ -460,9 +551,22 @@
     if(!host)return;
     var src=host.getAttribute("data-work-profile-src");
     try{
-      var res=await fetch(src,{cache:"no-store"});
-      if(!res.ok)throw new Error("HTTP "+res.status);
-      var profile=await res.json();
+      var draft=loadDraftProfile();
+      var profile;
+      if(draft){
+        if(draft.error){
+          var mode=q("#workDataMode");if(mode)mode.textContent="DRAFT MISSING";
+          var source=q("#jobSourceStatus");if(source)source.textContent="This local Person Card draft is not available on this device.";
+          toast("Person Card draft not found on this device");
+          return;
+        }
+        profile=draft.profile;
+        applyPersonDraftToCard(draft.person,profile);
+      }else{
+        var res=await fetch(src,{cache:"no-store"});
+        if(!res.ok)throw new Error("HTTP "+res.status);
+        profile=await res.json();
+      }
       window.NEXUS_WORK_PROFILE=profile;
       applyAvailabilityToUi(profile);
       renderJobs(profile);
