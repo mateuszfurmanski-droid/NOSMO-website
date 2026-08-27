@@ -9,6 +9,8 @@
   const inviteToken=(params.get("inviteToken")||"").slice(0,8000);
   const apiBase=(document.querySelector('meta[name="nexus-onboarding-api-base"]')?.content||"").trim().replace(/\/$/,"");
   const secureInvite=Boolean(inviteToken);
+  const pageMode=(document.body?.dataset?.personMode||"full").toLowerCase();
+  const onboardingMode=pageMode==="onboarding"||secureInvite||params.get("mode")==="onboarding";
   const LOCAL_KEY="nexus-v47-onboarding:"+inviteId;
   const TOKEN_KEY="nexus-v47-draft-token:"+inviteId;
   let draftToken="";
@@ -103,6 +105,28 @@
     if(draft.personId)personId=draft.personId;
     Object.keys(draft).forEach(key=>setField(key,draft[key]));
     return draft;
+  }
+
+  function seedEditorFromVisibleCard(){
+    const first=clean(q(".first")?.textContent);
+    const last=clean(q(".last")?.textContent);
+    const trade=clean(q(".trade")?.textContent);
+    const meta=qa(".metaLine");
+    const location=clean(meta[0]&&q("span",meta[0])?.textContent);
+    const experienceText=clean(meta[1]&&q("span",meta[1])?.textContent);
+    const experienceMatch=experienceText.match(/(\d{1,2})/);
+
+    setField("firstName",first&&first!=="YOUR"?first:"");
+    setField("lastName",last&&last!=="PERSON CARD"?last:"");
+    setField("trade",trade&&trade!=="ADD YOUR TRADE"?trade:"");
+    setField("location",location&&location!=="Add location"?location:"");
+    setField("experienceYears",experienceMatch?Number(experienceMatch[1]):0);
+    setField("radius",40);
+    setField("availability","available");
+    setField("dayShift",true);
+    setField("nightShift",false);
+    setField("ownTransport",false);
+    setField("workAway",false);
   }
 
   function availabilityLabel(d){
@@ -435,17 +459,39 @@
   }
 
   function init(){
-    resetDonorDataToSafeDraft();
-    loadLocal();
-    updateVisibleCard();
-    fillWorkHistoryFromCv();
     bind();
 
-    q("#inviteNotice").textContent=secureInvite
-      ? agency+" sent a secure Person Card invite. Existing v47 modules remain in place."
-      : agency+" · demo/local onboarding. Existing v47 modules remain in place.";
+    if(onboardingMode){
+      resetDonorDataToSafeDraft();
+      loadLocal();
+      updateVisibleCard();
+      fillWorkHistoryFromCv();
 
-    if(!localStorage.getItem(LOCAL_KEY)&&params.get("preview")!=="closed")openEditor();
+      q("#inviteNotice").textContent=secureInvite
+        ? agency+" sent a secure Person Card invite. Existing v47 modules remain in place."
+        : agency+" · demo/local onboarding. Existing v47 modules remain in place.";
+
+      if(!localStorage.getItem(LOCAL_KEY)&&params.get("preview")!=="closed")openEditor();
+      return;
+    }
+
+    // Full-package demo mode: preserve the accepted v47 donor data and all donor links.
+    // The editor is prefilled from the visible copied card and only modifies this copy.
+    let saved=null;
+    try{saved=JSON.parse(localStorage.getItem(LOCAL_KEY)||"null")}catch(_){}
+    if(saved){
+      if(saved.personId)personId=saved.personId;
+      Object.keys(saved).forEach(key=>setField(key,saved[key]));
+      updateVisibleCard();
+      fillWorkHistoryFromCv();
+    }else{
+      seedEditorFromVisibleCard();
+    }
+
+    const notice=q("#inviteNotice");
+    if(notice)notice.textContent="Editing the v47 FULL copy only. The accepted original v47 remains frozen and all existing modules stay connected.";
+    const launch=q("#onboardingLaunch strong");
+    if(launch)launch.textContent="Edit this v47 copy · original remains locked";
   }
 
   init();
