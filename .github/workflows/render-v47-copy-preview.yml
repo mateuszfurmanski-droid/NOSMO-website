@@ -41,17 +41,19 @@ jobs:
           mkdir -p docs/previews
           npx --yes playwright@1.55.0 screenshot --browser chromium --device "iPhone 13" --full-page "http://127.0.0.1:8123/person-card-onboarding-v1.html?preview=closed&agency=NOSMO%20Work%20Profile" docs/previews/v47-copy-full.png
           npx --yes playwright@1.55.0 screenshot --browser chromium --device "iPhone 13" "http://127.0.0.1:8123/person-card-onboarding-v1.html?agency=NOSMO%20Work%20Profile" docs/previews/v47-copy-onboarding.png
+          npx --yes playwright@1.55.0 screenshot --browser chromium --device "iPhone 13" --full-page "http://127.0.0.1:8123/person-card-v47-full-v1.html?preview=closed" docs/previews/v47-full-package.png
+          npx --yes playwright@1.55.0 screenshot --browser chromium --device "iPhone 13" "http://127.0.0.1:8123/person-card-v47-full-v1.html?preview=closed&previewWork=find" docs/previews/v47-full-find-work.png
 
       - name: Commit preview screenshots
         shell: bash
         run: |
           git status --short docs/previews || true
-          if git diff --quiet -- docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png && git ls-files --error-unmatch docs/previews/v47-copy-full.png >/dev/null 2>&1 && git ls-files --error-unmatch docs/previews/v47-copy-onboarding.png >/dev/null 2>&1; then
+          if git diff --quiet -- docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png docs/previews/v47-full-package.png docs/previews/v47-full-find-work.png && git ls-files --error-unmatch docs/previews/v47-copy-full.png >/dev/null 2>&1 && git ls-files --error-unmatch docs/previews/v47-copy-onboarding.png >/dev/null 2>&1 && git ls-files --error-unmatch docs/previews/v47-full-package.png >/dev/null 2>&1 && git ls-files --error-unmatch docs/previews/v47-full-find-work.png >/dev/null 2>&1; then
             echo "Preview images unchanged"
             exit 0
           fi
           git config user.name "NOSMO Preview Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png
+          git add docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png docs/previews/v47-full-package.png docs/previews/v47-full-find-work.png
           git commit -m "preview: render fixed v47 onboarding copy [skip ci]"
           git push
