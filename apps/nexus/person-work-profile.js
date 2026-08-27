@@ -59,6 +59,59 @@
         '<div class="agencyActions"><a href="'+escapeHtml(a.whatsapp||"#")+'" target="_blank" rel="noopener">WhatsApp</a><a href="'+escapeHtml(a.email||"#")+'">Email</a></div></div>';
     }).join("");
   }
+  function availabilityLabel(a){
+    if(!a)return "Available";
+    if(a.status==="not-looking")return "Not Looking";
+    if(a.status==="from-date")return a.availableFrom ? "From "+a.availableFrom : "From Date";
+    return "Available";
+  }
+  function readLocalAvailability(profile){
+    try{
+      var raw=localStorage.getItem("nexus-work-availability:"+profile.personId);
+      if(!raw)return profile.availability||{};
+      return Object.assign({},profile.availability||{},JSON.parse(raw));
+    }catch(_){return profile.availability||{}}
+  }
+  function applyAvailabilityToUi(profile){
+    var a=readLocalAvailability(profile);
+    profile.availability=a;
+    var label=q("#workAvailabilityLabel");
+    if(label)label.textContent=availabilityLabel(a);
+    var state=q("#availabilityState"),date=q("#availabilityDate"),radius=q("#availabilityRadius");
+    var day=q("#shiftDay"),night=q("#shiftNight"),transport=q("#ownTransport"),away=q("#workAway");
+    if(state)state.value=a.status||"available";
+    if(date)date.value=a.availableFrom||"";
+    if(radius)radius.value=String(a.preferredRadiusKm||0);
+    if(day)day.checked=(a.shifts||[]).indexOf("day")>=0;
+    if(night)night.checked=(a.shifts||[]).indexOf("night")>=0;
+    if(transport)transport.checked=!!a.ownTransport;
+    if(away)away.checked=!!a.workAway;
+    renderCriteria(profile);
+  }
+  function bindAvailability(profile){
+    var save=q("#saveAvailability");
+    if(!save)return;
+    save.addEventListener("click",function(){
+      var state=q("#availabilityState"),date=q("#availabilityDate"),radius=q("#availabilityRadius");
+      var day=q("#shiftDay"),night=q("#shiftNight"),transport=q("#ownTransport"),away=q("#workAway");
+      var shifts=[];
+      if(day&&day.checked)shifts.push("day");
+      if(night&&night.checked)shifts.push("night");
+      var next={
+        status:state?state.value:"available",
+        label:state&&state.value==="not-looking"?"Not Looking":state&&state.value==="from-date"?"From Date":"Available",
+        availableFrom:date?date.value:"",
+        preferredRadiusKm:radius?Number(radius.value||0):0,
+        shifts:shifts,
+        ownTransport:!!(transport&&transport.checked),
+        workAway:!!(away&&away.checked)
+      };
+      try{localStorage.setItem("nexus-work-availability:"+profile.personId,JSON.stringify(next))}catch(_){}
+      profile.availability=Object.assign({},profile.availability||{},next);
+      applyAvailabilityToUi(profile);
+      toast("Availability saved on this device");
+    });
+  }
   function renderReadiness(profile){
     var p=profile.readiness||{};
     var map=[
@@ -86,10 +139,11 @@
       if(!res.ok)throw new Error("HTTP "+res.status);
       var profile=await res.json();
       window.NEXUS_WORK_PROFILE=profile;
-      renderCriteria(profile);
+      applyAvailabilityToUi(profile);
       renderJobs(profile);
       renderAgencies(profile);
       renderReadiness(profile);
+      bindAvailability(profile);
       bindJobDetails(profile);
       var mode=q("#workDataMode");
       if(mode)mode.textContent=profile.demoMode?"DEMO DATA":"CONNECTED";
