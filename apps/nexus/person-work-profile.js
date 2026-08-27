@@ -90,7 +90,7 @@
         '<div class="jobTop"><div><strong>'+escapeHtml(job.title)+'</strong><span>'+escapeHtml(sourceLabel(profile,job.sourceId))+' · '+escapeHtml(job.location)+'</span></div><div class="match">'+escapeHtml(job.matchScore)+'%</div></div>'+
         '<div class="jobMeta">'+(job.distanceKm!==null&&job.distanceKm!==undefined?'<i>'+escapeHtml(job.distanceKm)+' km</i>':'')+'<i>'+escapeHtml(job.shift||"Shift n/a")+'</i><i>'+escapeHtml(job.rate||"Rate n/a")+'</i></div>'+
         '<p class="reason">'+reasons+'</p>'+gaps+
-        '<div class="jobActions"><button type="button" data-demo-draft="'+escapeHtml(job.title)+'">Prepare message</button>'+(job.sourceUrl?'<a href="'+escapeHtml(job.sourceUrl)+'" target="_blank" rel="noopener">Open source</a>':'<button type="button" data-job-id="'+escapeHtml(job.id)+'">Details</button>')+'</div>'+
+        '<div class="jobActions"><button type="button" data-application-job="'+escapeHtml(job.id)+'">Prepare application</button>'+(job.sourceUrl?'<a href="'+escapeHtml(job.sourceUrl)+'" target="_blank" rel="noopener">Open source</a>':'<button type="button" data-job-id="'+escapeHtml(job.id)+'">Details</button>')+'</div>'+
       '</article>';
     }).join("");
   }
@@ -174,6 +174,69 @@
     });
   }
   
+
+  var selectedApplicationJob=null;
+  function profileDisplayName(){
+    var h=document.querySelector(".name");
+    return h ? h.textContent.replace(/\s+/g," ").trim() : "Worker";
+  }
+  function buildApplicationMessage(profile,job){
+    var prefs=profile.preferences||{},a=profile.availability||{};
+    var role=prefs.primaryTrade||"construction professional";
+    var loc=job.location||"";
+    var company=job.employer||"your team";
+    var availability=availabilityLabel(a);
+    return "Hi "+company+",\n\nI would like to apply for the "+job.title+" role"+(loc?" in "+loc:"")+". "+
+      "My NOSMO Person Card lists me as "+role+", with "+availability.toLowerCase()+". "+
+      "I have 15+ years of relevant experience and can share my current CV, verified certificates and references where available.\n\n"+
+      "Person Card: "+window.location.origin+window.location.pathname+"?view=recruiter\n\n"+
+      "Please let me know if you need any additional information.\n\n"+
+      profileDisplayName();
+  }
+  function applicationReadiness(profile,job){
+    var r=profile.readiness||{},missing=[];
+    if(!r.cv||r.cv.state!=="current")missing.push("CV is not marked current");
+    if(!r.certificates||r.certificates.state!=="verified")missing.push("certificates need confirmation");
+    if(job&&job.gaps&&job.gaps.length)missing=missing.concat(job.gaps);
+    return missing.length ? "Before sending: "+missing.join(" · ") : "Profile appears ready for this draft.";
+  }
+  function updateApplicationDraft(profile,job){
+    if(!job)return;
+    selectedApplicationJob=job;
+    var title=q("#applicationJobTitle"),meta=q("#applicationJobMeta"),preview=q("#applicationPreview"),ready=q("#applicationReadiness");
+    if(title)title.textContent=job.title;
+    if(meta)meta.textContent=[job.employer,job.location,job.rate].filter(Boolean).join(" · ");
+    var msg=buildApplicationMessage(profile,job);
+    if(preview)preview.value=msg;
+    if(ready)ready.textContent=applicationReadiness(profile,job);
+    var wa=q("#applicationWhatsApp");if(wa)wa.href="https://wa.me/?text="+encodeURIComponent(msg);
+    var email=q("#applicationEmail");if(email)email.href="mailto:?subject="+encodeURIComponent("Application — "+job.title)+"&body="+encodeURIComponent(msg);
+  }
+  function bindApplicationDraft(profile){
+    document.addEventListener("click",function(e){
+      var btn=e.target.closest&&e.target.closest("[data-application-job]");
+      if(!btn)return;
+      e.preventDefault();
+      var job=(profile.jobMatches||[]).find(function(x){return x.id===btn.dataset.applicationJob});
+      if(!job)return;
+      updateApplicationDraft(profile,job);
+      openWork("application");
+    });
+    q("#copyApplication")?.addEventListener("click",function(){
+      var value=q("#applicationPreview")?.value||"";
+      navigator.clipboard?.writeText(value);toast("Application draft copied");
+    });
+    q("#refreshApplication")?.addEventListener("click",function(){
+      if(selectedApplicationJob)updateApplicationDraft(profile,selectedApplicationJob);
+      toast("Application draft refreshed from Person Card");
+    });
+    q("#applicationPreview")?.addEventListener("input",function(){
+      var value=q("#applicationPreview")?.value||"";
+      var wa=q("#applicationWhatsApp");if(wa)wa.href="https://wa.me/?text="+encodeURIComponent(value);
+      var email=q("#applicationEmail");if(email&&selectedApplicationJob)email.href="mailto:?subject="+encodeURIComponent("Application — "+selectedApplicationJob.title)+"&body="+encodeURIComponent(value);
+    });
+  }
+
   function selectedRequestItems(){
     var items=[];
     if(q("#reqCv")&&q("#reqCv").checked)items.push("current CV");
@@ -344,6 +407,7 @@
       bindAvailability(profile);
       bindJobDetails(profile);
       bindRecruiterDrafts(profile);
+      bindApplicationDraft(profile);
       enableRecruiterView(profile);
       var mode=q("#workDataMode");
       if(mode)mode.textContent=profile.demoMode?"DEMO DATA":"CONNECTED";
