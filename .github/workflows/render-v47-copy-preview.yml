@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -38,13 +39,14 @@ jobs:
         shell: bash
         run: |
           mkdir -p docs/previews
-          npx --yes playwright@1.55.0 screenshot             --device="iPhone 13"             --full-page             "http://127.0.0.1:8123/person-card-onboarding-v1.html?preview=closed&agency=NOSMO%20Work%20Profile"             docs/previews/v47-copy-full.png
-          npx --yes playwright@1.55.0 screenshot             --device="iPhone 13"             "http://127.0.0.1:8123/person-card-onboarding-v1.html?agency=NOSMO%20Work%20Profile"             docs/previews/v47-copy-onboarding.png
+          npx --yes playwright@1.55.0 screenshot --browser chromium --device "iPhone 13" --full-page "http://127.0.0.1:8123/person-card-onboarding-v1.html?preview=closed&agency=NOSMO%20Work%20Profile" docs/previews/v47-copy-full.png
+          npx --yes playwright@1.55.0 screenshot --browser chromium --device "iPhone 13" "http://127.0.0.1:8123/person-card-onboarding-v1.html?agency=NOSMO%20Work%20Profile" docs/previews/v47-copy-onboarding.png
 
       - name: Commit preview screenshots
         shell: bash
         run: |
-          if git diff --quiet -- docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png &&              git ls-files --error-unmatch docs/previews/v47-copy-full.png >/dev/null 2>&1 &&              git ls-files --error-unmatch docs/previews/v47-copy-onboarding.png >/dev/null 2>&1; then
+          git status --short docs/previews || true
+          if git diff --quiet -- docs/previews/v47-copy-full.png docs/previews/v47-copy-onboarding.png && git ls-files --error-unmatch docs/previews/v47-copy-full.png >/dev/null 2>&1 && git ls-files --error-unmatch docs/previews/v47-copy-onboarding.png >/dev/null 2>&1; then
             echo "Preview images unchanged"
             exit 0
           fi
