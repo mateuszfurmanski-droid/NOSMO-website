@@ -89,21 +89,55 @@
     var status=q("#workDataMode");
     if(status)status.textContent="DRAFT PROFILE";
   }
-  function loadDraftProfile(){
+  async function loadDraftProfile(){
     var draftId=currentDraftId();
     if(!draftId)return null;
+
     var person=null,profile=null;
     try{
       person=JSON.parse(localStorage.getItem("nexus-person-draft:"+draftId)||"null");
       profile=JSON.parse(localStorage.getItem("nexus-work-profile-draft:"+draftId)||"null");
     }catch(_){}
-    if(!person||!profile){
+
+    if(person&&profile){
+      if(profile.personId!==draftId||person.id!==draftId){
+        return {error:"NEXUS_WORK_PROFILE_DRAFT_ID_MISMATCH",draftId:draftId};
+      }
+      return {person:person,profile:profile,draftId:draftId,source:"local"};
+    }
+
+    var apiBase=(document.querySelector('meta[name="nexus-onboarding-api-base"]')?.content||"").trim().replace(/\/$/,"");
+    var draftToken="";
+    try{draftToken=localStorage.getItem("nexus-person-work-draft-token:"+draftId)||""}catch(_){}
+    if(!apiBase||!draftToken){
       return {error:"NEXUS_WORK_PROFILE_DRAFT_NOT_FOUND",draftId:draftId};
     }
-    if(profile.personId!==draftId||person.id!==draftId){
-      return {error:"NEXUS_WORK_PROFILE_DRAFT_ID_MISMATCH",draftId:draftId};
+
+    try{
+      var res=await fetch(apiBase+"/drafts/load",{
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        credentials:"omit",
+        cache:"no-store",
+        body:JSON.stringify({draftToken:draftToken})
+      });
+      var payload=await res.json().catch(function(){return {}});
+      if(!res.ok){
+        return {error:payload&&payload.error||("HTTP_"+res.status),draftId:draftId};
+      }
+      if(!payload.person||!payload.workProfile||payload.personId!==draftId){
+        return {error:"NEXUS_WORK_PROFILE_SERVER_DRAFT_INVALID",draftId:draftId};
+      }
+      person=payload.person;
+      profile=payload.workProfile;
+      try{
+        localStorage.setItem("nexus-person-draft:"+draftId,JSON.stringify(person));
+        localStorage.setItem("nexus-work-profile-draft:"+draftId,JSON.stringify(profile));
+      }catch(_){}
+      return {person:person,profile:profile,draftId:draftId,source:"server",persistedAt:payload.persistedAt};
+    }catch(_){
+      return {error:"NEXUS_WORK_PROFILE_SERVER_UNREACHABLE",draftId:draftId};
     }
-    return {person:person,profile:profile,draftId:draftId};
   }
 
   function sourceLabel(profile,id){
@@ -561,17 +595,18 @@
     if(!host)return;
     var src=host.getAttribute("data-work-profile-src");
     try{
-      var draft=loadDraftProfile();
+      var draft=await loadDraftProfile();
       var profile;
       if(draft){
         if(draft.error){
           var mode=q("#workDataMode");if(mode)mode.textContent="DRAFT MISSING";
-          var source=q("#jobSourceStatus");if(source)source.textContent="This local Person Card draft is not available on this device.";
+          var source=q("#jobSourceStatus");if(source)source.textContent="Person Card draft is unavailable from local storage and authorised server restore.";
           toast("Person Card draft not found on this device");
           return;
         }
         profile=draft.profile;
         applyPersonDraftToCard(draft.person,profile);
+        if(draft.source==="server"){var restored=q("#jobSourceStatus");if(restored)restored.textContent="Person Card restored from durable server persistence.";}
       }else{
         var res=await fetch(src,{cache:"no-store"});
         if(!res.ok)throw new Error("HTTP "+res.status);
