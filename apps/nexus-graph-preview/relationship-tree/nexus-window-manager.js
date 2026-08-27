@@ -159,6 +159,12 @@
     document.querySelectorAll('[data-nexus-window-title]').forEach(node=>attach(node,node.getAttribute('data-nexus-window-title')||'Nexus'));
   }
 
+  window.NexusWindowManager={
+    scan,
+    attach:(node,title)=>attach(node,title||node?.getAttribute?.('data-nexus-window-title')||'Nexus'),
+    bringToFront:bringFront
+  };
+
   const schedule=()=>{
     scan();
     requestAnimationFrame(scan);
