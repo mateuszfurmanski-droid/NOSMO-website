@@ -42,6 +42,11 @@ jobs:
           test -f person-card-v47-full.html
           test -f apps/nexus/person-work-overlay-controller.js
           grep -F 'data-work-profile-src=' person-card-kamil-work-v1.html
+          grep -F '>Work Hub</a>' person-card-kamil-work-v1.html
+          grep -F 'data-panel="hub"' person-card-kamil-work-v1.html
+          grep -F 'data-work-share' person-card-kamil-work-v1.html
+          ! grep -Fq 'relationship-tree' person-card-kamil-work-v1.html
+          ! grep -Fq 'Open in Tree' person-card-kamil-work-v1.html
           grep -F '>Find Work</span>' person-card-kamil-work-v1.html
           grep -F '>Matches</span>' person-card-kamil-work-v1.html
           grep -F '>Agencies</span>' person-card-kamil-work-v1.html
