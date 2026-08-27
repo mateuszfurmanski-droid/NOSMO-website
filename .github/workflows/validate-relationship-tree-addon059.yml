@@ -56,7 +56,7 @@ jobs:
           grep -Fq '/person-card-kamil.html?v=v47top1' "$OVERLAY"
           grep -Fq '/apps/nexus-file-loader/' "$OVERLAY"
           grep -Fq 'NexusWindowManager' "$OVERLAY"
-          grep -Fq 'data-nexus-window-title' "$OVERLAY"
+          grep -Fq 'nexusWindowTitle' "$OVERLAY"
           grep -Fq 'dblclick' "$OVERLAY"
           grep -Fq 'data-nexus-action="file-loader"' "$OVERLAY"
           ! grep -Fq 'innerHTML=' "$WINDOW"
