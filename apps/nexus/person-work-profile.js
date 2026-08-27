@@ -175,6 +175,53 @@
   }
   
 
+
+  const incomingRequestLabels={
+    cv:"Current CV",
+    certs:"Certificates / tickets",
+    refs:"References",
+    rtw:"Right to Work check information",
+    availability:"Current availability"
+  };
+  function incomingRequestFromUrl(){
+    var params=new URLSearchParams(window.location.search);
+    if(params.get("view")==="recruiter")return null;
+    var request=(params.get("request")||"").split(",").map(function(x){return x.trim()}).filter(function(x){return incomingRequestLabels[x]});
+    if(!request.length)return null;
+    return {
+      requestId:(params.get("requestId")||"req-link").slice(0,80),
+      agency:(params.get("agency")||"Recruitment team").slice(0,120),
+      items:request.slice(0,8)
+    };
+  }
+  function renderIncomingRequest(profile,request){
+    var agency=q("#incomingAgency"),list=q("#incomingRequestItems"),status=q("#incomingRequestStatus");
+    if(agency)agency.textContent=request.agency+" requests:";
+    if(list){
+      list.innerHTML=request.items.map(function(code){
+        return '<label class="agencyRow" style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span><strong>'+escapeHtml(incomingRequestLabels[code])+'</strong><p>Worker approval required</p></span><input type="checkbox" data-incoming-item="'+escapeHtml(code)+'" checked></label>';
+      }).join("");
+    }
+    var storageKey="nexus-work-request-response:"+profile.personId+":"+request.requestId;
+    var prior=null;
+    try{prior=JSON.parse(localStorage.getItem(storageKey)||"null")}catch(_){}
+    if(prior&&status)status.textContent="Saved on this device: "+String(prior.status||"response");
+    q("#approveRequest")?.addEventListener("click",function(){
+      var approved=qa("[data-incoming-item]:checked").map(function(el){return el.dataset.incomingItem});
+      var response={schema:"nexus-person-work-request-response/v1",requestId:request.requestId,personId:profile.personId,agency:request.agency,status:"approved-local",approvedItems:approved,respondedAt:new Date().toISOString(),serverDisclosurePerformed:false};
+      try{localStorage.setItem(storageKey,JSON.stringify(response))}catch(_){}
+      if(status)status.textContent="Approved on this device: "+(approved.map(function(x){return incomingRequestLabels[x]}).join(", ")||"nothing");
+      toast("Request response saved locally — nothing sent yet");
+    });
+    q("#rejectRequest")?.addEventListener("click",function(){
+      var response={schema:"nexus-person-work-request-response/v1",requestId:request.requestId,personId:profile.personId,agency:request.agency,status:"rejected-local",approvedItems:[],respondedAt:new Date().toISOString(),serverDisclosurePerformed:false};
+      try{localStorage.setItem(storageKey,JSON.stringify(response))}catch(_){}
+      if(status)status.textContent="Request rejected on this device.";
+      toast("Request rejected locally — nothing sent");
+    });
+    openWork("incoming-request");
+  }
+
   var selectedApplicationJob=null;
   function profileDisplayName(){
     var h=document.querySelector(".name");
@@ -246,13 +293,30 @@
     if(q("#reqAvail")&&q("#reqAvail").checked)items.push("current availability");
     return items;
   }
+  function requestCodes(){
+    var codes=[];
+    if(q("#reqCv")&&q("#reqCv").checked)codes.push("cv");
+    if(q("#reqCerts")&&q("#reqCerts").checked)codes.push("certs");
+    if(q("#reqRefs")&&q("#reqRefs").checked)codes.push("refs");
+    if(q("#reqRtw")&&q("#reqRtw").checked)codes.push("rtw");
+    if(q("#reqAvail")&&q("#reqAvail").checked)codes.push("availability");
+    return codes;
+  }
+  function buildWorkerRequestUrl(){
+    var agency=(q("#reqAgency")&&q("#reqAgency").value.trim())||"Recruitment team";
+    var url=new URL(window.location.origin+window.location.pathname);
+    url.searchParams.set("agency",agency);
+    url.searchParams.set("request",requestCodes().join(","));
+    url.searchParams.set("requestId","req-"+Date.now().toString(36));
+    return url.toString();
+  }
   function buildRequestMessage(profile){
     var agency=(q("#reqAgency")&&q("#reqAgency").value.trim())||"the recruitment team";
     var items=selectedRequestItems();
-    var card=window.location.origin+window.location.pathname+"?view=recruiter";
+    var card=buildWorkerRequestUrl();
     return "Hi Kamil,\n\n"+agency+" would like to request the following from your NOSMO Person Card: "+
       (items.length?items.join(", "):"additional work-profile information")+
-      ".\n\nPlease review and share only the items you approve.\n\nPerson Card: "+card+
+      ".\n\nPlease review and share only the items you approve.\n\nOpen request: "+card+
       "\n\nThis request does not grant automatic access to private documents.";
   }
   function updateRequestChannels(profile){
@@ -409,6 +473,8 @@
       bindRecruiterDrafts(profile);
       bindApplicationDraft(profile);
       enableRecruiterView(profile);
+      var incoming=incomingRequestFromUrl();
+      if(incoming)renderIncomingRequest(profile,incoming);
       var mode=q("#workDataMode");
       if(mode)mode.textContent=profile.demoMode?"DEMO DATA":"CONNECTED";
       var sourceStatus=q("#jobSourceStatus");
