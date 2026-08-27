@@ -1,7 +1,7 @@
 (function(){
   "use strict";
   const q=s=>document.querySelector(s);
-  const trustedEndpoint=document.querySelector('meta[name="nexus-onboarding-invite-endpoint"]')?.content||"";
+  const apiBase=(document.querySelector('meta[name="nexus-onboarding-api-base"]')?.content||"").trim().replace(/\/$/,"");
   let currentUrl="";
 
   function value(id,max){return String(q("#"+id)?.value||"").replace(/\s+/g," ").trim().slice(0,max)}
@@ -31,13 +31,13 @@
   async function secureInvite(){
     const agency=value("agency",120);
     if(!agency){q("#inviteState").textContent="Agency/company is required.";return}
-    if(!trustedEndpoint){
+    if(!apiBase){
       q("#inviteState").textContent="Secure Nexus invite endpoint is not configured on this preview. No fake secure token was generated.";
       return;
     }
     q("#inviteState").textContent="Creating signed invite…";
     try{
-      const res=await fetch(trustedEndpoint,{
+      const res=await fetch(apiBase+"/invites",{
         method:"POST",
         headers:{"content-type":"application/json"},
         credentials:"include",
