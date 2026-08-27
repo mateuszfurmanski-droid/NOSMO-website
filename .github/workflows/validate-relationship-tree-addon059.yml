@@ -36,15 +36,22 @@ jobs:
           CSS=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.css
           OVERLAY=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.js
           OVERLAY_CSS=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.css
+          SEMANTIC=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.js
+          SEMANTIC_CSS=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.css
           test -s "$WINDOW"
           test -s "$CSS"
           test -s "$OVERLAY"
           test -s "$OVERLAY_CSS"
+          test -s "$SEMANTIC"
+          test -s "$SEMANTIC_CSS"
           node --check "$OVERLAY"
+          node --check "$SEMANTIC"
           grep -Fq 'nexus-window-manager.css?v=addon059-window-v1a' "$INDEX"
           grep -Fq 'nexus-window-manager.js?v=addon059-window-v1a' "$INDEX"
           grep -Fq 'nexus-overlay-host.css?v=addon059-overlay-v1' "$INDEX"
           grep -Fq 'nexus-overlay-host.js?v=addon059-overlay-v1' "$INDEX"
+          grep -Fq 'nexus-semantic-drag.css?v=addon059-semantic-v1' "$INDEX"
+          grep -Fq 'nexus-semantic-drag.js?v=addon059-semantic-v1' "$INDEX"
           grep -Fq '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js' "$INDEX"
           grep -Fq '#nexusProjectTimeIso' "$WINDOW"
           grep -Fq '#nexusCloudPanel' "$WINDOW"
@@ -59,9 +66,20 @@ jobs:
           grep -Fq 'nexusWindowTitle' "$OVERLAY"
           grep -Fq 'dblclick' "$OVERLAY"
           grep -Fq 'data-nexus-action="file-loader"' "$OVERLAY"
+          grep -Fq "accessProfile!=='manager'" "$SEMANTIC"
+          grep -Fq "document.querySelectorAll('[data-node-id]')" "$SEMANTIC"
+          grep -Fq "nexus:semantic-drop-request" "$SEMANTIC"
+          grep -Fq "schema:'nexus-semantic-drop-request/v1'" "$SEMANTIC"
+          grep -Fq "workPackage:isPackage" "$SEMANTIC"
+          grep -Fq "Composition ≠ assignment" "$SEMANTIC"
+          grep -Fq "awaiting Core authority" "$SEMANTIC"
+          grep -Fq '.nexus-semantic-drop-target' "$SEMANTIC_CSS"
           ! grep -Fq 'innerHTML=' "$WINDOW"
           ! grep -Fq 'fetch=' "$WINDOW"
           ! grep -Fq 'fetch=' "$OVERLAY"
+          ! grep -Fq 'fetch=' "$SEMANTIC"
+          ! grep -Fq 'localStorage' "$SEMANTIC"
+          ! grep -Fq 'sessionStorage' "$SEMANTIC"
           git diff --exit-code origin/main -- person-card-kamil.html person-card-kamil-v47.html apps/nexus-file-loader/index.html apps/nexus-file-loader/app.js apps/nexus-file-loader/styles.css
           echo RELATIONSHIP_TREE_ADDON059_WINDOW_BOUNDARY_PASS
 
