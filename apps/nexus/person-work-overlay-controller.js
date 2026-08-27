@@ -80,4 +80,9 @@
   });
 
   window.NEXUS_OPEN_WORK_PANEL=openWork;
+
+  const previewPanel=new URLSearchParams(window.location.search).get("previewWork");
+  if(previewPanel && Object.prototype.hasOwnProperty.call(titles,previewPanel)){
+    window.setTimeout(()=>openWork(previewPanel),120);
+  }
 })();
