@@ -445,7 +445,7 @@
       ? agency+" sent a secure Person Card invite. Existing v47 modules remain in place."
       : agency+" · demo/local onboarding. Existing v47 modules remain in place.";
 
-    if(!localStorage.getItem(LOCAL_KEY))openEditor();
+    if(!localStorage.getItem(LOCAL_KEY)&&params.get("preview")!=="closed")openEditor();
   }
 
   init();
