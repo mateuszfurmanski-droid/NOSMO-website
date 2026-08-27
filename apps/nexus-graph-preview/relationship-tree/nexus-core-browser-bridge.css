@@ -1,0 +1,88 @@
+/* NEXUS_CORE_BROWSER_BRIDGE_ADDON_059_V1 */
+
+#nexusCoreBridgeControls{
+  display:grid;
+  gap:6px;
+  margin-top:9px;
+  padding:8px;
+  border:1px solid rgba(103,232,249,.15);
+  border-radius:12px;
+  background:rgba(3,14,23,.58);
+}
+
+#nexusCoreBridgeStatus{
+  color:#9fb5c2;
+  font:900 7.5px/1 Inter,system-ui,sans-serif;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+#nexusCoreBridgeStatus[data-tone="pending"]{color:#ffd782}
+#nexusCoreBridgeStatus[data-tone="ok"]{color:#72f2a0}
+#nexusCoreBridgeStatus[data-tone="blocked"]{color:#ff9c9c}
+
+.nx-core-connect{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  gap:5px;
+}
+
+#nexusCoreClaimInput{
+  min-width:0;
+  height:34px;
+  box-sizing:border-box;
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:9px;
+  background:rgba(15,27,40,.92);
+  color:#edf8ff;
+  padding:0 8px;
+  outline:none;
+  font:750 9px/1 Inter,system-ui,sans-serif;
+}
+
+#nexusCoreClaimInput:focus{
+  border-color:rgba(103,232,249,.48);
+}
+
+#nexusCoreConnectBtn,
+#nexusCoreClearBtn{
+  height:34px;
+  border-radius:9px;
+  padding:0 8px;
+  font:900 7px/1 Inter,system-ui,sans-serif;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+
+#nexusCoreConnectBtn{
+  border:1px solid rgba(74,222,128,.36);
+  background:rgba(16,91,54,.72);
+  color:#e8fff0;
+}
+
+#nexusCoreClearBtn{
+  border:1px solid rgba(148,163,184,.20);
+  background:rgba(30,41,59,.72);
+  color:#bdcbd5;
+}
+
+#nexusCoreConnectBtn:disabled,
+#nexusCoreClearBtn:disabled,
+#nexusCoreClaimInput:disabled{
+  opacity:.38;
+}
+
+#nexusCoreBridgeNote{
+  display:block;
+  color:#758d9c;
+  font:700 6.5px/1.3 Inter,system-ui,sans-serif;
+}
+
+@media(max-width:520px){
+  .nx-core-connect{
+    grid-template-columns:1fr 1fr;
+  }
+  #nexusCoreClaimInput{
+    grid-column:1/-1;
+  }
+}
