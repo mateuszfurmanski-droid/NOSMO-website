@@ -41,12 +41,15 @@ jobs:
           grep -F 'data-panel="request"' person-card-kamil-work-v1.html
           grep -F 'data-panel="offer"' person-card-kamil-work-v1.html
           grep -F 'data-panel="application"' person-card-kamil-work-v1.html
+          grep -F 'data-panel="incoming-request"' person-card-kamil-work-v1.html
           grep -F 'view=recruiter' person-card-kamil-recruiter.html
           grep -F 'data-recruiter-action' apps/nexus/person-work-profile.js
           grep -F 'buildRequestMessage' apps/nexus/person-work-profile.js
           grep -F 'buildOfferMessage' apps/nexus/person-work-profile.js
           grep -F 'searchLiveJobs' apps/nexus/person-work-profile.js
           grep -F 'buildApplicationMessage' apps/nexus/person-work-profile.js
+          grep -F 'nexus-person-work-request-response/v1' apps/nexus/person-work-profile.js
+          grep -F 'serverDisclosurePerformed:false' apps/nexus/person-work-profile.js
           grep -F '"schema": "nexus-person-work-profile/v1"' data/person-work-profile-kamil.json
 
       - name: Validate JavaScript syntax
