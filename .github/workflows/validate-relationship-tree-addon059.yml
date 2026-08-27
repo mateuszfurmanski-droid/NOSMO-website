@@ -36,8 +36,8 @@ jobs:
           CSS=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.css
           test -s "$WINDOW"
           test -s "$CSS"
-          grep -Fq 'nexus-window-manager.css?v=addon059-window-v1' "$INDEX"
-          grep -Fq 'nexus-window-manager.js?v=addon059-window-v1' "$INDEX"
+          grep -Fq 'nexus-window-manager.css?v=addon059-window-v1a' "$INDEX"
+          grep -Fq 'nexus-window-manager.js?v=addon059-window-v1a' "$INDEX"
           grep -Fq '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js' "$INDEX"
           grep -Fq '#nexusProjectTimeIso' "$WINDOW"
           grep -Fq '#nexusCloudPanel' "$WINDOW"
