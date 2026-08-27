@@ -53,7 +53,7 @@ jobs:
           grep -F 'nexus-person-draft/v1' apps/nexus/person-onboarding.js
           grep -F 'nexus-person-work-profile/v1' apps/nexus/person-onboarding.js
           grep -F 'inviteToken' apps/nexus/person-onboarding.js
-          grep -F 'DEMO · UNSIGNED' person-card-agency-invite.html
+          grep -F 'DEMO · UNSIGNED' apps/nexus/person-agency-invite.js
           grep -F 'CREATE SECURE INVITE' person-card-agency-invite.html
           grep -F 'data-agency-invite-link' apps/nexus/person-work-profile.js
           grep -F 'loadDraftProfile' apps/nexus/person-work-profile.js
