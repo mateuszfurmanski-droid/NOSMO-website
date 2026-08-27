@@ -110,6 +110,13 @@ button.act{font:inherit;color:inherit;cursor:pointer}
         </div>
       </div>
 
+      <div class="workPanel" data-panel="incoming-request">
+        <div class="workIntro"><div class="eyebrow">Agency Request</div><h3 id="incomingAgency">Recruitment request</h3><p>An agency is asking for selected Work Profile information. Nothing private is shared until the worker approves it.</p></div>
+        <div id="incomingRequestItems" class="agencyQueue"></div>
+        <div class="jobActions" style="margin-top:10px"><button type="button" id="approveRequest">APPROVE SELECTED</button><button type="button" id="rejectRequest">REJECT</button></div>
+        <p class="sourceNote" id="incomingRequestStatus">Prototype response is stored only on this device. No server disclosure occurs.</p>
+      </div>
+
       <div class="workPanel" data-panel="application">
         <div class="workIntro"><div class="eyebrow">Application Draft</div><h3 id="applicationJobTitle">Selected job</h3><p id="applicationJobMeta">Job details</p></div>
         <div class="aiFinding"><div class="aiIcon">✓</div><div><strong>Person Card used as source</strong><p>Trade, experience, availability and recruiter-safe profile context are reused. Verified credentials are never invented.</p></div></div>
@@ -174,7 +181,7 @@ const workOverlay=document.getElementById('workOverlay');
 const workClose=document.getElementById('workClose');
 const workTitle=document.getElementById('workTitle');
 const workToast=document.getElementById('workToast');
-const titles={availability:'Availability',find:'AI Work Agent',matches:'Job Matches',agencies:'Agency Outreach',application:'Application Draft',request:'Request Pack',offer:'Offer Work',ai:'AI Profile Check'};
+const titles={availability:'Availability',find:'AI Work Agent',matches:'Job Matches',agencies:'Agency Outreach','incoming-request':'Agency Request',application:'Application Draft',request:'Request Pack',offer:'Offer Work',ai:'AI Profile Check'};
 function openWork(panel){
   document.querySelectorAll('.workPanel').forEach(p=>p.classList.toggle('active',p.dataset.panel===panel));
   if(workTitle) workTitle.textContent=titles[panel]||'AI Work Agent';
