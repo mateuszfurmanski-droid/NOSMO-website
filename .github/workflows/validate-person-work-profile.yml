@@ -67,7 +67,7 @@ jobs:
           grep -F 'Training' person-card-onboarding-v1.html
           grep -F 'person-onboarding-v47.js' person-card-onboarding-v1.html
           grep -F 'resetDonorDataToSafeDraft' apps/nexus/person-onboarding-v47.js
-          grep -F 'existing v47 modules remain in place' apps/nexus/person-onboarding-v47.js
+          grep -F 'Existing v47 modules remain in place' apps/nexus/person-onboarding-v47.js
           grep -F 'nexus-person-onboarding-draft/v1' apps/nexus/person-onboarding.js
           grep -F 'nexus-person-draft/v1' apps/nexus/person-onboarding.js
           grep -F 'nexus-person-work-profile/v1' apps/nexus/person-onboarding.js
