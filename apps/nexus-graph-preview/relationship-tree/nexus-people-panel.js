@@ -105,7 +105,8 @@
     cardUrl:CARD_URL,
     dataUrl:FETCHER_URL,
     treeUrl:TREE_URL,
-    bridge:true
+    bridge:true,
+    personId:null
   };
 
   fetch(DATA_URL,{cache:'no-store'})
@@ -119,7 +120,8 @@
         sublabel:data.graph?.sublabel||[data.person?.role,data.person?.trade].filter(Boolean).join(' · ')||kamilBridge.sublabel,
         cardUrl:data.links?.personCard||kamilBridge.cardUrl,
         dataUrl:data.links?.dataFetcher||kamilBridge.dataUrl,
-        treeUrl:data.links?.relationshipTree||kamilBridge.treeUrl
+        treeUrl:data.links?.relationshipTree||kamilBridge.treeUrl,
+        personId:typeof data.id==='string'?data.id:kamilBridge.personId
       };
       window.dispatchEvent(new CustomEvent('nexus:person-data-bridge-ready',{detail:kamilBridge}));
     })
@@ -154,7 +156,8 @@
         const label=candidates[0];
         const sublabel=candidates[1]||'Project person';
         const isKamil=/\bkamil\b/i.test(label);
-        rows.push({node,button,label,sublabel,id:node.getAttribute('data-node-id')||'',cardUrl:isKamil?kamilBridge.cardUrl:null,dataUrl:isKamil?kamilBridge.dataUrl:null,treeUrl:isKamil?kamilBridge.treeUrl:null});
+        if(isKamil&&kamilBridge.personId)node.dataset.canonicalPersonId=kamilBridge.personId;
+        rows.push({node,button,label,sublabel,id:node.getAttribute('data-node-id')||'',personId:isKamil?kamilBridge.personId:null,cardUrl:isKamil?kamilBridge.cardUrl:null,dataUrl:isKamil?kamilBridge.dataUrl:null,treeUrl:isKamil?kamilBridge.treeUrl:null});
       });
       if(!rows.some(person=>/\bkamil\b/i.test(person.label))){
         rows.push({...kamilBridge});
