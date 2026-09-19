@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /apps/
+Disallow: /demos/
+Disallow: /previews/
+
+Sitemap: https://nosmotechnology.co.uk/sitemap.xml
