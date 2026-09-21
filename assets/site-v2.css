@@ -71,3 +71,6 @@ p{color:var(--muted);font-size:16px}.lead{max-width:800px;font-size:clamp(18px,2
 @media(max-width:560px){
   .shell,.footer-inner{width:calc(100% - 28px)}.brand img{width:136px}.hero{padding-top:54px}.grid.four,.object-grid,.media-grid,.people-grid,.process{grid-template-columns:1fr}h1{font-size:44px}.card,.hero-panel{padding:18px}.media-card img{height:210px}.person img{height:260px}.footer-inner{flex-direction:column}
 }
+
+.hero-media{display:block;width:100%;max-height:420px;object-fit:contain;background:#050608}
+.team-note{margin-top:18px}

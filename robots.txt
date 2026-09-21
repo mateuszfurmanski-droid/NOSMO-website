@@ -2,5 +2,14 @@ User-agent: *
 Disallow: /apps/
 Disallow: /demos/
 Disallow: /previews/
+Disallow: /person-card-kamil
+Disallow: /nexus-preview.html
+Disallow: /nexus-v1-preview.html
+Disallow: /nexus-tree-dock-preview.html
+Disallow: /nexus-grant-preview.html
+Disallow: /nexus-dock-demo.html
+Disallow: /nexus-connected.html
+Disallow: /nexus-module-wall.html
+Disallow: /communication-hub-demo.html
 
 Sitemap: https://nosmotechnology.co.uk/sitemap.xml

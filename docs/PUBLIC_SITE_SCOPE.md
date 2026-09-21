@@ -1,41 +1,80 @@
 # NOSMO public website scope
 
-Updated: 2026-09-19
+Updated: 2026-09-21
 
-This file defines the public-facing product surface for NOSMO-website.
+This file defines the public-facing surface for NOSMO-website after the September 2026 redesign.
+
+## Primary public navigation
+
+- Home
+- Software
+- Hardware
+- Recycling
+- R&D
+- Team
+
+Do not add product demos or client review links to the primary navigation.
 
 ## Canonical public pages
 
-- index.html - NOSMO ecosystem overview
-- nexus.html - NOSMO Nexus platform direction
-- work.html - NOSMO Work / Worker product
-- agency.html - NOSMO Agency
-- doorflow.html - DoorFlow, an early practical Nexus module
-- construction-hardware.html - NOSMO Construction Hardware / EXO-01
-- greenloop.html - GreenLoop circular manufacturing
-- innovation-lab.html - Innovation Lab / R&D
-- team.html - team
+- index.html
+- software.html
+- nexus.html
+- work.html
+- agency.html
+- doorflow.html
+- emergency.html
+- construction-hardware.html
+- greenloop.html
+- innovation-lab.html
+- team.html
 
 ## Product-status rule
 
-Public copy must distinguish between:
-- active product builds;
-- working modules or demonstrations;
-- platform capabilities still in development;
-- early R&D concepts.
+Public copy must distinguish:
+- live/public product or prototype;
+- active build;
+- demonstrator;
+- prototype;
+- R&D;
+- planned or future direction.
 
-Do not present a concept or synthetic demo as a certified, deployed or production-ready product.
+A visible interface is not automatically a production deployment.
+
+## Unlisted client-review pages
+
+The following are direct-link only and must not be added to public navigation, homepage, Software or sitemap:
+
+- /skanska.html
+- /skanska-property.html
+- /nexus/spark/
+- /nexus/skanska-property/
+
+Retain noindex,nofollow,noarchive on these review surfaces. Do not imply an official SKANSKA partnership or deployment.
 
 ## Archived and technical material
 
-The repository contains older experiments, previews, Person Card iterations, Nexus previews and demonstration applications under root legacy files, apps/, demos/ and previews/.
+The repository contains older experiments, Person Card iterations, Nexus previews, built demo bundles and recovery material under:
+- root legacy Person Card files;
+- apps/;
+- demos/;
+- previews/;
+- older root Nexus preview HTML files.
 
-They are retained for technical history, recovery, QA and reuse. They are not the current public product map unless explicitly linked from a canonical page.
+These files remain for technical history, QA, recovery and reuse. They are not the current public product map. Do not delete them merely because they are not linked publicly.
 
-## Substation
+## R&D history
 
-No NOSMO Substation repository or current source was found during the 2026-09-19 website audit. It is therefore not promoted in the current public navigation. Reintroduce it only after a recoverable source, scope and honest implementation status are established.
+Historic spider/crawler concepts, Steelwalker, Streetcutter, Substation and related earlier directions should be retained as Technology Evolution / R&D rather than represented as current commercial products.
 
 ## Construction Hardware
 
-Public construction-hardware copy is technology-facing only. Internal collaboration discussions, grant strategy, founder/equity terms, territorial protection, IP negotiation positions and other confidential commercial material must not be published.
+EXO-01 is R&D/prototype work. Public copy must not claim a finished, certified or commercially deployed exoskeleton.
+
+## GreenLoop
+
+Lead with selected clean and identifiable B2B polymer streams. Current material interests include TPU production waste plus suitable PP, HDPE and ABS streams. Avoid presenting random contaminated waste as the primary model.
+
+## Domain control
+
+CNAME remains nosmotechnology.co.uk. nosmo.tech is the communication brand/domain and currently redirects through IONOS. Do not change DNS, CNAME or mail configuration without explicit approval.
