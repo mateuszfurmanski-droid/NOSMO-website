@@ -2,10 +2,7 @@
 
 Updated: 2026-09-21
 
-This file defines the public-facing surface for NOSMO-website after the September 2026 redesign.
-
 ## Primary public navigation
-
 - Home
 - Software
 - Hardware
@@ -13,68 +10,61 @@ This file defines the public-facing surface for NOSMO-website after the Septembe
 - R&D
 - Team
 
-Do not add product demos or client review links to the primary navigation.
+## Public software architecture
+
+### NOSMO Nexus
+Connective construction operating layer.
+
+### NOSMO Workforce
+One workforce package. Do not present NOSMO Work and NOSMO Agency as separate product families.
+
+Built into NOSMO Workforce:
+- Worker App
+- Agency Desk
+- Person Card / Worker identity
+- Emergency
+
+Worker App and Agency Desk may remain technically separate deployments/interfaces, but public architecture treats them as parts of NOSMO Workforce.
+
+### NOSMO WorkSuite
+Separate specialist construction application family. Do not confuse WorkSuite with Workforce.
+
+Current named modules:
+- DoorSuite — new public name replacing DoorFlow
+- NOSMO Electrical Commissioning
+- NOSMO Fire Door Register & Inspection
+
+The old DoorFlow name and routes remain only for technical compatibility and historical source continuity.
 
 ## Canonical public pages
-
 - index.html
 - software.html
 - nexus.html
-- work.html
-- agency.html
-- doorflow.html
-- emergency.html
+- workforce.html
+- work.html — Worker App module page
+- agency.html — Agency Desk module page
+- emergency.html — Workforce Emergency module page
+- worksuite.html
+- doorsuite.html
 - construction-hardware.html
 - greenloop.html
 - innovation-lab.html
 - team.html
 
 ## Product-status rule
+Clearly distinguish active build, public prototype, demonstrator, prototype, R&D and planned work.
 
-Public copy must distinguish:
-- live/public product or prototype;
-- active build;
-- demonstrator;
-- prototype;
-- R&D;
-- planned or future direction.
-
-A visible interface is not automatically a production deployment.
-
-## Unlisted client-review pages
-
-The following are direct-link only and must not be added to public navigation, homepage, Software or sitemap:
-
+## Private SKANSKA review surfaces
+Keep direct-link only and noindex,nofollow,noarchive:
 - /skanska.html
 - /skanska-property.html
 - /nexus/spark/
 - /nexus/skanska-property/
 
-Retain noindex,nofollow,noarchive on these review surfaces. Do not imply an official SKANSKA partnership or deployment.
+Do not add these to homepage, public Software navigation or sitemap.
 
-## Archived and technical material
+## Archive
+Older Person Card iterations, Nexus previews, DoorFlow-named source, apps/, demos/ and previews/ remain for history, QA, compatibility and recovery. Do not delete them just because public naming changed.
 
-The repository contains older experiments, Person Card iterations, Nexus previews, built demo bundles and recovery material under:
-- root legacy Person Card files;
-- apps/;
-- demos/;
-- previews/;
-- older root Nexus preview HTML files.
-
-These files remain for technical history, QA, recovery and reuse. They are not the current public product map. Do not delete them merely because they are not linked publicly.
-
-## R&D history
-
-Historic spider/crawler concepts, Steelwalker, Streetcutter, Substation and related earlier directions should be retained as Technology Evolution / R&D rather than represented as current commercial products.
-
-## Construction Hardware
-
-EXO-01 is R&D/prototype work. Public copy must not claim a finished, certified or commercially deployed exoskeleton.
-
-## GreenLoop
-
-Lead with selected clean and identifiable B2B polymer streams. Current material interests include TPU production waste plus suitable PP, HDPE and ABS streams. Avoid presenting random contaminated waste as the primary model.
-
-## Domain control
-
-CNAME remains nosmotechnology.co.uk. nosmo.tech is the communication brand/domain and currently redirects through IONOS. Do not change DNS, CNAME or mail configuration without explicit approval.
+## Domain
+CNAME remains nosmotechnology.co.uk. Do not change DNS, CNAME or @nosmo.tech mail configuration without explicit approval.
