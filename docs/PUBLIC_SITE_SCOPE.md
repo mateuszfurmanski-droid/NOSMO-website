@@ -16,7 +16,7 @@ Updated: 2026-09-21
 Connective construction operating layer.
 
 ### NOSMO Workforce
-One workforce package. Do not present NOSMO Work and NOSMO Agency as separate product families.
+A major branch inside NOSMO Nexus. One workforce package. Do not present NOSMO Work and NOSMO Agency as separate product families.
 
 Built into NOSMO Workforce:
 - Worker App
@@ -26,8 +26,11 @@ Built into NOSMO Workforce:
 
 Worker App and Agency Desk may remain technically separate deployments/interfaces, but public architecture treats them as parts of NOSMO Workforce.
 
+### NOSMO BIM
+A major branch inside NOSMO Nexus for BIM-linked project execution, inspection, commissioning and evidence.
+
 ### NOSMO WorkSuite
-Separate specialist construction application family. Do not confuse WorkSuite with Workforce.
+Specialist construction application family inside NOSMO BIM. Do not confuse WorkSuite with Workforce.
 
 Current named modules:
 - DoorSuite — new public name replacing DoorFlow
@@ -41,6 +44,7 @@ The old DoorFlow name and routes remain only for technical compatibility and his
 - software.html
 - nexus.html
 - workforce.html
+- bim.html
 - work.html — Worker App module page
 - agency.html — Agency Desk module page
 - emergency.html — Workforce Emergency module page
