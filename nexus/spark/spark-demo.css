@@ -264,7 +264,15 @@
 .spark-status-in-use{color:var(--accent)}
 .spark-truth-inline{color:var(--feature-muted)}
 
-/* Settings-tab priority: selected tab uses active NOSMO colour, inactive tabs stay on dark shell. */
-.spark-tabs.nosmo-demo-tabs{background:var(--navy)}
-.spark-tabs.nosmo-demo-tabs button{background:var(--navy);color:var(--feature-muted);border-color:color-mix(in srgb,var(--line) 70%,transparent)}
-.spark-tabs.nosmo-demo-tabs button.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent);box-shadow:none}
+/* NOSMO app chrome: black shell, accent indicator, quiet inactive modules. */
+.spark-topbar{background:#050505;border-bottom-color:#242424}
+.spark-brand{background:#050505}
+.spark-brand-copy{display:grid;gap:1px;min-width:0}
+.spark-brand-copy b{color:#fff;font-size:10px;letter-spacing:.08em;white-space:nowrap}
+.spark-brand-copy small{color:#8e8e8e;font-size:8px;white-space:nowrap}
+.spark-tabs.nosmo-demo-tabs{background:#050505}
+.spark-tabs.nosmo-demo-tabs button{background:#050505;color:#9b9b9b;border-color:#242424;box-shadow:none}
+.spark-tabs.nosmo-demo-tabs button:hover{background:#0d0d0d;color:#fff}
+.spark-tabs.nosmo-demo-tabs button.active{background:#0d0d0d;color:#fff;border-color:#242424;box-shadow:none}
+.spark-tabs.nosmo-demo-tabs button.active::before{content:"";position:absolute;left:8px;right:8px;bottom:0;height:3px;background:var(--accent)}
+@media(max-width:720px){.spark-brand-copy{display:none}}
