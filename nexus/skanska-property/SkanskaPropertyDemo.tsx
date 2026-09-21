@@ -235,6 +235,90 @@ function PropertySettings({
   );
 }
 
+function PropertyEnvironmental({
+  workStage,
+  onOpenCircular,
+  onOpenWork,
+}: {
+  workStage: WorkStage;
+  onOpenCircular: () => void;
+  onOpenWork: () => void;
+}) {
+  const issueAssets = assets.filter((asset) => Boolean(asset.issue));
+  const replacementAssets = assets.filter((asset) => Boolean(asset.replacement));
+  const highReuseMaterials = materials.filter((material) => material.reusePotential === "HIGH");
+  const evidenceRecords = assets.reduce((total, asset) => total + asset.photos.length + asset.manuals.length + asset.certificates.length, 0);
+  const esgReady = workStage === "esg";
+
+  return (
+    <section className="property-environment" aria-label="Environmental overview">
+      <header className="property-environment-head">
+        <small>SKANSKA PROPERTY / ENVIRONMENTAL</small>
+        <h1>Circular building evidence connected to the asset lifecycle.</h1>
+        <p>Materials, maintenance, replacement, reuse and ESG evidence stay attached to the same physical-object history instead of becoming a disconnected report.</p>
+      </header>
+
+      <div className="property-environment-summary">
+        <article><b>{assets.length}</b><span>tracked assets</span></article>
+        <article><b>{materials.length}</b><span>material records</span></article>
+        <article><b>{highReuseMaterials.length}</b><span>high reuse potential</span></article>
+        <article><b>{replacementAssets.length}</b><span>replacement / reuse case</span></article>
+        <article><b>{issueAssets.length}</b><span>active maintenance issue</span></article>
+        <article><b>{evidenceRecords}</b><span>linked evidence records</span></article>
+      </div>
+
+      <div className="property-environment-grid">
+        <article className="property-environment-panel">
+          <div className="property-environment-title"><Recycle /><span><small>CIRCULAR RESOURCE INVENTORY</small><b>Materials and recovery routes</b></span></div>
+          <div className="property-environment-list">
+            {materials.map((material) => (
+              <div key={material.id}>
+                <span><b>{material.name}</b><small>{material.composition}</small></span>
+                <em className={material.reusePotential === "HIGH" ? "high" : ""}>{material.reusePotential}</em>
+                <small>{material.recoveryRoute}</small>
+              </div>
+            ))}
+          </div>
+          <button type="button" className="property-demo-primary" onClick={onOpenCircular}><Recycle /> Open circular asset record</button>
+        </article>
+
+        <article className="property-environment-panel">
+          <div className="property-environment-title"><History /><span><small>LIFECYCLE / REUSE</small><b>Operational history drives circular decisions</b></span></div>
+          <div className="property-environment-list">
+            {replacementAssets.map((asset) => (
+              <div key={asset.id}>
+                <span><b>{asset.tag} · {asset.name}</b><small>{asset.replacement?.reason}</small></span>
+                <em>OPEN CASE</em>
+                <small>{asset.replacement?.reuseOpportunity}</small>
+              </div>
+            ))}
+            {replacementAssets.length === 0 && <p className="property-demo-note">No replacement case in the current synthetic dataset.</p>}
+          </div>
+          <button type="button" className="property-demo-secondary" onClick={onOpenWork}><Wrench /> Open maintenance workflow</button>
+        </article>
+
+        <article className="property-environment-panel">
+          <div className="property-environment-title"><ShieldCheck /><span><small>CARBON INTEGRITY</small><b>No fabricated kgCO₂e</b></span></div>
+          <p>Carbon quantification remains blocked until verified quantity plus EPD / LCA factors and an agreed methodology are connected. The demonstrator records the evidence boundary instead of inventing a number.</p>
+          <div className="property-environment-state"><span>Verified EPD / LCA input</span><b>NOT CONNECTED</b></div>
+          <div className="property-environment-state"><span>Fabricated carbon estimate</span><b className="good">BLOCKED</b></div>
+        </article>
+
+        <article className="property-environment-panel">
+          <div className="property-environment-title"><Leaf /><span><small>ESG EVIDENCE READINESS</small><b>Evidence comes from approved work</b></span></div>
+          <div className={"property-environment-readiness " + (esgReady ? "ready" : "")}>
+            <strong>{esgReady ? "READY" : "IN PROGRESS"}</strong>
+            <span>{esgReady ? "Maintenance evidence, human approval, circular route and ESG evidence are linked to AHU-04." : "Complete the AHU-04 maintenance and circular workflow to create the final ESG evidence record."}</span>
+          </div>
+          <button type="button" className="property-demo-primary" onClick={onOpenWork}><ArrowRight /> {esgReady ? "Review completed evidence" : "Continue AHU-04 workflow"}</button>
+        </article>
+      </div>
+
+      <div className="property-environment-truth"><Database /> SYNTHETIC DEMO DATA · source systems remain BIM / CAFM / document storage · Nexus connects lifecycle context and evidence</div>
+    </section>
+  );
+}
+
 export default function SkanskaPropertyDemo() {
   const [theme, setTheme] = useState<DemoTheme>(loadTheme);
   const [language, setLanguage] = useState<DemoLanguage>(loadDemoLanguage);
@@ -257,9 +341,6 @@ export default function SkanskaPropertyDemo() {
   useEffect(() => {
     window.localStorage.setItem(languageStorageKey, language);
   }, [language]);
-  useEffect(() => {
-    if (topView === "environment") setTab("esg");
-  }, [topView]);
   useEffect(() => {
     if (language === "pl") translatePropertyNode(document.querySelector(".property-demo") as HTMLElement);
   });
@@ -443,7 +524,7 @@ export default function SkanskaPropertyDemo() {
           </div>
         </div>
         <nav className="property-demo-top-tabs nosmo-demo-tabs" aria-label="Demo view">
-          <button type="button" className={topView === "building" ? "active" : ""} onClick={() => { setTopView("building"); if (tab === "esg") setTab("object"); }}>Building</button>
+          <button type="button" className={topView === "building" ? "active" : ""} onClick={() => setTopView("building")}>Building</button>
           <button type="button" className={topView === "environment" ? "active" : ""} onClick={() => setTopView("environment")}>Environmental</button>
           <button type="button" className={topView === "settings" ? "active" : ""} onClick={() => setTopView("settings")}>Settings</button>
         </nav>
@@ -452,6 +533,12 @@ export default function SkanskaPropertyDemo() {
 
       {topView === "settings" ? (
         <PropertySettings theme={theme} language={language} onTheme={setTheme} onLanguage={setLanguage} />
+      ) : topView === "environment" ? (
+        <PropertyEnvironmental
+          workStage={workStage}
+          onOpenCircular={() => { returnToDemoCase(); setTab("circular"); setTopView("building"); }}
+          onOpenWork={() => { returnToDemoCase(); setTab("work"); setTopView("building"); }}
+        />
       ) : (
         <>
       <section className="property-demo-intro">
