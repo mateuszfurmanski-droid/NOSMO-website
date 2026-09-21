@@ -18,6 +18,7 @@ type DemoLanguage = "en" | "pl";
 type DemoTheme = "midnight-black" | "nexus-blue" | "eco-green" | "silent-gold" | "windows-grey" | "arctic-white";
 
 const themeStorageKey = "nosmo-theme-preset";
+const languageStorageKey = "nosmo-demo-language";
 const demoThemes: Array<{ id: DemoTheme; label: string; description: string }> = [
   { id: "midnight-black", label: "Midnight Black", description: "Black + greyscale" },
   { id: "nexus-blue", label: "Nexus Blue", description: "Navy + electric blue" },
@@ -31,9 +32,16 @@ function loadTheme(): DemoTheme {
   const stored = window.localStorage.getItem(themeStorageKey);
   return demoThemes.some((item) => item.id === stored) ? stored as DemoTheme : "midnight-black";
 }
+function loadDemoLanguage(): DemoLanguage {
+  if (typeof window === "undefined") return "en";
+  const stored = window.localStorage.getItem(languageStorageKey);
+  return stored === "pl" ? "pl" : "en";
+}
 
 const polishUi: Record<string, string> = {
-  "Project": "Projekt", "Environmental": "Środowisko", "Project structure": "Struktura projektu",
+  "Project": "Projekt", "Environmental": "Środowisko", "Settings": "Ustawienia", "Project structure": "Struktura projektu",
+  "Appearance & language": "Wygląd i język", "Language": "Język", "Colour system": "System kolorów",
+  "English": "Angielski", "Polish": "Polski", "Interface language": "Język interfejsu",
   "areas": "obszary", "tracked": "śledzone", "created locally": "utworzone lokalnie",
   "reuse": "ponowne użycie", "recover / recycle": "odzysk / recykling",
   "known provenance": "znane pochodzenie", "high attention": "wysoka uwaga",
@@ -240,9 +248,9 @@ function buildReportCsv(
 }
 
 export default function SparkSkanskaDemo() {
-  const [language, setLanguage] = useState<DemoLanguage>("en");
+  const [language, setLanguage] = useState<DemoLanguage>(loadDemoLanguage);
   const [theme, setTheme] = useState<DemoTheme>(loadTheme);
-  const [view, setView] = useState<"project" | "environment">("project");
+  const [view, setView] = useState<"project" | "environment" | "settings">("project");
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [zoneFilter, setZoneFilter] = useState("");
@@ -256,6 +264,9 @@ export default function SparkSkanskaDemo() {
   useEffect(() => {
     try { window.localStorage.setItem(themeStorageKey, theme); } catch { /* best effort */ }
   }, [theme]);
+  useEffect(() => {
+    try { window.localStorage.setItem(languageStorageKey, language); } catch { /* best effort */ }
+  }, [language]);
   useEffect(() => {
     try { window.localStorage.setItem(decisionStorageKey, JSON.stringify(decisionAudit)); } catch { /* best effort */ }
   }, [decisionAudit]);
@@ -358,31 +369,11 @@ export default function SparkSkanskaDemo() {
             alt="NEXUS compact logo"
           />
         </div>
-        <nav className="spark-tabs" aria-label="Demo view">
+        <nav className="spark-tabs nosmo-demo-tabs" aria-label="Demo view">
           <button className={view === "project" ? "active" : ""} onClick={() => setView("project")}>Project</button>
           <button className={view === "environment" ? "active" : ""} onClick={() => setView("environment")}>Environmental</button>
+          <button className={view === "settings" ? "active" : ""} onClick={() => setView("settings")}>Settings</button>
         </nav>
-        <button
-          type="button"
-          aria-label={language === "en" ? "Przełącz na język polski" : "Switch to English"}
-          title={language === "en" ? "Polski" : "English"}
-          onClick={() => setLanguage((current) => current === "en" ? "pl" : "en")}
-          style={{ border: "1px solid #3d4652", background: "#121820", color: "#fff", borderRadius: 4, padding: "5px 8px", cursor: "pointer", fontSize: 18 }}
-        >{language === "en" ? "🇵🇱" : "🇬🇧"}</button>
-        <details className="nosmo-theme-menu">
-          <summary aria-label="Change colour system" title="Appearance">
-            <span className="nosmo-theme-current" aria-hidden="true" />
-            <span className="nosmo-theme-current-label">{demoThemes.find((item) => item.id === theme)?.label}</span>
-          </summary>
-          <div className="nosmo-theme-popover">
-            {demoThemes.map((item) => (
-              <button key={item.id} type="button" className={theme === item.id ? "active" : ""} onClick={() => setTheme(item.id)}>
-                <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
-                <span><b>{item.label}</b><small>{item.description}</small></span>
-              </button>
-            ))}
-          </div>
-        </details>
         <div className="spark-truth-inline">SYNTHETIC DEMO · no real SKANSKA project data · no fabricated CO₂ values</div>
       </header>
 
@@ -473,10 +464,54 @@ export default function SparkSkanskaDemo() {
             )}
           </aside>
         </section>
-      ) : (
+      ) : view === "environment" ? (
         <EnvironmentalPanel assets={assets} decisionAudit={decisionAudit} editAudit={recordEditAudit} createdObjects={createdObjects} />
+      ) : (
+        <DemoSettings theme={theme} language={language} onTheme={setTheme} onLanguage={setLanguage} />
       )}
     </div>
+  );
+}
+
+
+function DemoSettings({
+  theme,
+  language,
+  onTheme,
+  onLanguage,
+}: {
+  theme: DemoTheme;
+  language: DemoLanguage;
+  onTheme: (theme: DemoTheme) => void;
+  onLanguage: (language: DemoLanguage) => void;
+}) {
+  return (
+    <section className="nosmo-demo-settings" aria-label="Demo settings">
+      <header className="nosmo-demo-settings-head">
+        <small>NOSMO NEXUS</small>
+        <h2>Appearance & language</h2>
+        <p>These preferences are stored on this device and shared by both SKANSKA demonstrators.</p>
+      </header>
+      <div className="nosmo-demo-setting-row">
+        <div><h3>Language</h3><p>Interface language</p></div>
+        <div className="nosmo-demo-language-grid">
+          <button type="button" className={language === "en" ? "active" : ""} onClick={() => onLanguage("en")}><b>🇬🇧 English</b><small>English interface</small></button>
+          <button type="button" className={language === "pl" ? "active" : ""} onClick={() => onLanguage("pl")}><b>🇵🇱 Polish</b><small>Polski interfejs</small></button>
+        </div>
+      </div>
+      <div className="nosmo-demo-setting-row">
+        <div><h3>Colour system</h3><p>The same NOSMO colour presets used by NOSMO Worker.</p></div>
+        <div className="nosmo-demo-theme-grid">
+          {demoThemes.map((item) => (
+            <button type="button" key={item.id} className={theme === item.id ? "active" : ""} onClick={() => onTheme(item.id)}>
+              <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
+              <span><b>{item.label}</b><small>{item.description}</small></span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="nosmo-demo-settings-note">Active top navigation uses the selected NOSMO accent. Inactive navigation remains on the dark Nexus shell.</div>
+    </section>
   );
 }
 
