@@ -364,10 +364,8 @@ export default function SparkSkanskaDemo() {
     <div key={language} className="spark-workbench" lang={language} data-skin={theme}>
       <header className="spark-topbar">
         <div className="spark-brand">
-          <img
-            src={compactNexusLogo}
-            alt="NEXUS compact logo"
-          />
+          <img src={compactNexusLogo} alt="NEXUS compact logo" />
+          <span className="spark-brand-copy"><b>SKANSKA RESIDENTIAL DEMO</b><small>NOSMO Nexus</small></span>
         </div>
         <nav className="spark-tabs nosmo-demo-tabs" aria-label="Demo view">
           <button className={view === "project" ? "active" : ""} onClick={() => setView("project")}>Project</button>
