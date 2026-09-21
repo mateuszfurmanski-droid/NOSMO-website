@@ -1,39 +1,3 @@
-/* NOSMO Worker shared palette bridge */
-.property-demo{
-  --demo-bg:var(--bg);
-  --demo-panel:var(--surface);
-  --demo-panel-strong:var(--surface-soft);
-  --demo-text:var(--ink);
-  --demo-muted:var(--muted);
-  --demo-border:var(--line);
-  --demo-accent:var(--accent);
-  --demo-accent-strong:var(--accent-strong);
-  --demo-warn:#e9b949;
-  --demo-danger:#e56b63;
-  background:var(--bg);
-  color:var(--ink);
-}
-.property-demo-header{background:var(--navy);border-color:var(--line);padding:8px 10px}
-.property-demo-brand span{color:var(--feature-muted)}
-.property-demo-brand img{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 20%,transparent))}
-.property-demo-intro,.property-demo-graph-panel,.property-demo-detail-panel,.property-demo-ai,.property-demo-path{background:var(--surface);border-color:var(--line);box-shadow:none}
-.property-demo-graph-panel,.property-demo-detail-panel,.property-demo-ai,.property-demo-path,.property-demo-ai-cta,.property-demo-root-node,.property-demo-node-row button,.property-demo-search,.property-demo-relation-chip,.property-demo-kv,.property-demo-evidence-grid>div,.property-demo-primary,.property-demo-secondary,.property-demo-good,.property-demo-step-card,.property-demo-work-mode,.property-demo-checklist label,.property-demo-photo-actions button,.property-demo-source-stack>div,.property-demo-nexus-graph-box,.property-demo-person-card,.property-demo-badge,.property-demo-work-progress span,.property-demo-event-type{border-radius:3px}
-.property-demo-ai-cta,.property-demo-root-node,.property-demo-work-mode,.property-demo-nexus-graph-box{background:var(--accent-soft);border-color:var(--accent)}
-.property-demo-search{background:var(--field);border-color:var(--line)}
-.property-demo-search input{color:var(--ink)}
-.property-demo-node-row button,.property-demo-kv,.property-demo-step-card,.property-demo-checklist label,.property-demo-source-stack>div{background:var(--surface-soft);border-color:var(--line)}
-.property-demo-node-row button:hover,.property-demo-node-row button.active{background:var(--accent-soft);border-color:var(--accent);transform:none}
-.property-demo-tabs{background:var(--surface-soft);border-color:var(--line)}
-.property-demo-tabs button.active{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 -2px var(--accent)}
-.property-demo-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.property-demo-secondary{background:var(--surface);border-color:var(--line);color:var(--ink)}
-.property-demo-relation-icon{background:var(--accent-soft);color:var(--accent);border-radius:2px}
-.property-demo-work-progress span.active,.property-demo-work-progress span.done{border-color:var(--accent);color:var(--accent)}
-.property-demo-checklist label.done{background:var(--accent-soft);color:var(--accent)}
-.property-demo-object-heading span:first-child,.property-demo-panel-title svg,.property-demo-eyebrow,.property-demo-brand strong{color:var(--accent)}
-.property-demo-badge-source{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
-.property-demo-theme-picker{display:none}
-
 .property-demo {
   --demo-bg: #07110d;
   --demo-panel: rgba(14, 31, 24, 0.92);
@@ -305,3 +269,39 @@
   .property-demo-relations { grid-template-columns:1fr; }
   .property-demo-tabs button { padding-inline:8px; }
 }
+
+/* NOSMO Worker shared palette bridge */
+.property-demo{
+  --demo-bg:var(--bg);
+  --demo-panel:var(--surface);
+  --demo-panel-strong:var(--surface-soft);
+  --demo-text:var(--ink);
+  --demo-muted:var(--muted);
+  --demo-border:var(--line);
+  --demo-accent:var(--accent);
+  --demo-accent-strong:var(--accent-strong);
+  --demo-warn:#e9b949;
+  --demo-danger:#e56b63;
+  background:var(--bg);
+  color:var(--ink);
+}
+.property-demo-header{background:var(--navy);border-color:var(--line);padding:8px 10px}
+.property-demo-brand span{color:var(--feature-muted)}
+.property-demo-brand img{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 20%,transparent))}
+.property-demo-intro,.property-demo-graph-panel,.property-demo-detail-panel,.property-demo-ai,.property-demo-path{background:var(--surface);border-color:var(--line);box-shadow:none}
+.property-demo-graph-panel,.property-demo-detail-panel,.property-demo-ai,.property-demo-path,.property-demo-ai-cta,.property-demo-root-node,.property-demo-node-row button,.property-demo-search,.property-demo-relation-chip,.property-demo-kv,.property-demo-evidence-grid>div,.property-demo-primary,.property-demo-secondary,.property-demo-good,.property-demo-step-card,.property-demo-work-mode,.property-demo-checklist label,.property-demo-photo-actions button,.property-demo-source-stack>div,.property-demo-nexus-graph-box,.property-demo-person-card,.property-demo-badge,.property-demo-work-progress span,.property-demo-event-type{border-radius:3px}
+.property-demo-ai-cta,.property-demo-root-node,.property-demo-work-mode,.property-demo-nexus-graph-box{background:var(--accent-soft);border-color:var(--accent)}
+.property-demo-search{background:var(--field);border-color:var(--line)}
+.property-demo-search input{color:var(--ink)}
+.property-demo-node-row button,.property-demo-kv,.property-demo-step-card,.property-demo-checklist label,.property-demo-source-stack>div{background:var(--surface-soft);border-color:var(--line)}
+.property-demo-node-row button:hover,.property-demo-node-row button.active{background:var(--accent-soft);border-color:var(--accent);transform:none}
+.property-demo-tabs{background:var(--surface-soft);border-color:var(--line)}
+.property-demo-tabs button.active{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 -2px var(--accent)}
+.property-demo-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.property-demo-secondary{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.property-demo-relation-icon{background:var(--accent-soft);color:var(--accent);border-radius:2px}
+.property-demo-work-progress span.active,.property-demo-work-progress span.done{border-color:var(--accent);color:var(--accent)}
+.property-demo-checklist label.done{background:var(--accent-soft);color:var(--accent)}
+.property-demo-object-heading span:first-child,.property-demo-panel-title svg,.property-demo-eyebrow,.property-demo-brand strong{color:var(--accent)}
+.property-demo-badge-source{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.property-demo-theme-picker{display:none}
