@@ -305,3 +305,40 @@
 .property-demo-object-heading span:first-child,.property-demo-panel-title svg,.property-demo-eyebrow,.property-demo-brand strong{color:var(--accent)}
 .property-demo-badge-source{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .property-demo-theme-picker{display:none}
+
+/* Property top shell parity with Residential demo */
+.property-demo-header{
+  max-width:none;
+  width:calc(100% + 32px);
+  min-height:52px;
+  margin:-16px -16px 0;
+  padding:0 14px;
+  display:flex;
+  align-items:stretch;
+  gap:12px;
+  background:var(--navy);
+  border-bottom:1px solid var(--line)
+}
+.property-demo-brand{min-height:52px;align-items:center}
+.property-demo-brand img{width:38px;height:38px}
+.property-demo-brand strong{color:#fff}
+.property-demo-brand span{color:var(--feature-muted)}
+.property-demo-top-tabs{margin-left:8px;align-self:stretch}
+.property-demo-header-actions{margin-left:auto;align-items:center;flex-wrap:nowrap}
+.property-demo-top-tabs.nosmo-demo-tabs button{background:var(--navy);color:var(--feature-muted)}
+.property-demo-top-tabs.nosmo-demo-tabs button.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+@media(max-width:760px){
+  .property-demo-header{
+    width:calc(100% + 18px);
+    min-height:48px;
+    margin:-9px -9px 0;
+    padding:0 8px;
+    gap:5px
+  }
+  .property-demo-brand{min-height:48px}
+  .property-demo-brand img{width:34px;height:34px}
+  .property-demo-brand div{display:none}
+  .property-demo-top-tabs{margin-left:0;flex:1}
+  .property-demo-top-tabs.nosmo-demo-tabs button{flex:1;padding:0 8px}
+  .property-demo-header-actions{display:none}
+}
