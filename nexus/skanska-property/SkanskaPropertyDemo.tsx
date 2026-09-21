@@ -41,23 +41,24 @@ import {
 } from "./data";
 import "./skanska-property-demo.css";
 
-type DemoTheme = "green" | "gold" | "blue" | "white" | "black";
+type DemoTheme = "midnight-black" | "nexus-blue" | "eco-green" | "silent-gold" | "windows-grey" | "arctic-white";
 type DetailTab = "object" | "work" | "circular" | "esg" | "sources";
 type WorkStage = "issue" | "task" | "work" | "evidence" | "approved" | "updated" | "reuse" | "esg";
 
-const themeStorageKey = "nosmo.spark.demo.theme.v1";
-const themes: Array<{ id: DemoTheme; label: string }> = [
-  { id: "green", label: "Eco" },
-  { id: "gold", label: "Gold" },
-  { id: "blue", label: "Nexus" },
-  { id: "white", label: "White" },
-  { id: "black", label: "Black" },
+const themeStorageKey = "nosmo-theme-preset";
+const themes: Array<{ id: DemoTheme; label: string; description: string }> = [
+  { id: "midnight-black", label: "Midnight Black", description: "Black + greyscale" },
+  { id: "nexus-blue", label: "Nexus Blue", description: "Navy + electric blue" },
+  { id: "eco-green", label: "Eco Green", description: "Forest + mint" },
+  { id: "silent-gold", label: "Silent Gold", description: "Graphite + gold" },
+  { id: "windows-grey", label: "Windows Grey", description: "Steel + teal" },
+  { id: "arctic-white", label: "Architect White", description: "White + blue" },
 ];
 
 function loadTheme(): DemoTheme {
-  if (typeof window === "undefined") return "green";
+  if (typeof window === "undefined") return "midnight-black";
   const stored = window.localStorage.getItem(themeStorageKey);
-  return themes.some((theme) => theme.id === stored) ? (stored as DemoTheme) : "green";
+  return themes.some((theme) => theme.id === stored) ? (stored as DemoTheme) : "midnight-black";
 }
 
 function byId<T extends { id: string }>(items: T[], id: string) {
@@ -304,7 +305,7 @@ export default function SkanskaPropertyDemo() {
   }
 
   return (
-    <main className="property-demo" data-theme={theme}>
+    <main className="property-demo" data-skin={theme}>
       <header className="property-demo-header">
         <div className="property-demo-brand">
           <img src={compactNexusLogo} alt="Nexus" />
@@ -315,13 +316,20 @@ export default function SkanskaPropertyDemo() {
         </div>
         <div className="property-demo-header-actions">
           <ProvenanceBadge />
-          <div className="property-demo-theme-picker" aria-label="Nexus skin selector">
-            {themes.map((item) => (
-              <button key={item.id} type="button" className={theme === item.id ? "active" : ""} onClick={() => setTheme(item.id)}>
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <details className="nosmo-theme-menu">
+            <summary aria-label="Change colour system" title="Appearance">
+              <span className="nosmo-theme-current" aria-hidden="true" />
+              <span className="nosmo-theme-current-label">{themes.find((item) => item.id === theme)?.label}</span>
+            </summary>
+            <div className="nosmo-theme-popover">
+              {themes.map((item) => (
+                <button key={item.id} type="button" className={theme === item.id ? "active" : ""} onClick={() => setTheme(item.id)}>
+                  <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
+                  <span><b>{item.label}</b><small>{item.description}</small></span>
+                </button>
+              ))}
+            </div>
+          </details>
         </div>
       </header>
 
