@@ -62,3 +62,60 @@
 .nosmo-theme-popover b{display:block;font-size:9px;line-height:1.2}
 .nosmo-theme-popover small{display:block;margin-top:2px;color:var(--muted);font-size:7px;line-height:1.2}
 @media(max-width:720px){.nosmo-theme-current-label{display:none}.nosmo-theme-menu>summary{padding:5px}.nosmo-theme-popover{position:fixed;top:58px;right:8px;left:8px;width:auto}}
+
+
+/* NOSMO demo settings panel and top tabs */
+.nosmo-demo-tabs{display:flex;align-items:stretch;min-height:52px;background:var(--navy)}
+.nosmo-demo-tabs button{
+  min-width:92px;border:0;border-left:1px solid color-mix(in srgb,var(--line) 70%,transparent);
+  border-right:1px solid transparent;background:var(--navy);color:var(--feature-muted);
+  padding:0 14px;font:inherit;font-size:11px;font-weight:750;cursor:pointer
+}
+.nosmo-demo-tabs button:hover{color:#fff;background:color-mix(in srgb,var(--navy) 84%,var(--accent))}
+.nosmo-demo-tabs button.active{
+  background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:900
+}
+.nosmo-demo-settings{
+  width:min(980px,calc(100% - 28px));margin:18px auto 40px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink)
+}
+.nosmo-demo-settings-head{
+  padding:16px 18px;border-bottom:1px solid var(--line);background:var(--surface-soft)
+}
+.nosmo-demo-settings-head small{
+  display:block;margin-bottom:4px;color:var(--accent);font-size:9px;font-weight:900;letter-spacing:.14em;text-transform:uppercase
+}
+.nosmo-demo-settings-head h2{margin:0;font-size:22px}
+.nosmo-demo-settings-head p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+.nosmo-demo-setting-row{padding:17px 18px;border-bottom:1px solid var(--line)}
+.nosmo-demo-setting-row:last-child{border-bottom:0}
+.nosmo-demo-setting-row>div:first-child{margin-bottom:11px}
+.nosmo-demo-setting-row h3{margin:0;color:var(--ink);font-size:13px}
+.nosmo-demo-setting-row p{margin:4px 0 0;color:var(--muted);font-size:10px}
+.nosmo-demo-language-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.nosmo-demo-language-grid button,.nosmo-demo-theme-grid button{
+  min-height:52px;border:1px solid var(--line);background:var(--surface-soft);color:var(--ink);
+  padding:8px 10px;text-align:left;cursor:pointer;border-radius:0
+}
+.nosmo-demo-language-grid button.active,.nosmo-demo-theme-grid button.active{
+  border-color:var(--accent);background:var(--accent-soft);color:var(--accent);
+  box-shadow:inset 3px 0 var(--accent)
+}
+.nosmo-demo-language-grid button b{display:block;font-size:11px}
+.nosmo-demo-language-grid button small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
+.nosmo-demo-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.nosmo-demo-theme-grid button{
+  display:grid;grid-template-columns:44px minmax(0,1fr);gap:9px;align-items:center
+}
+.nosmo-demo-theme-grid button b{display:block;font-size:10px}
+.nosmo-demo-theme-grid button small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
+.nosmo-demo-settings-note{
+  padding:12px 18px;border-top:1px solid var(--line);background:var(--surface-soft);
+  color:var(--muted);font-size:9px;line-height:1.45
+}
+@media(max-width:720px){
+  .nosmo-demo-tabs{min-height:48px;overflow-x:auto}
+  .nosmo-demo-tabs button{min-width:auto;padding:0 12px;font-size:10px}
+  .nosmo-demo-settings{width:calc(100% - 16px);margin:10px auto 24px}
+  .nosmo-demo-theme-grid{grid-template-columns:1fr}
+}
