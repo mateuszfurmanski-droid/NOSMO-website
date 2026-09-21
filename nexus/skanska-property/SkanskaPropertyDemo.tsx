@@ -42,10 +42,13 @@ import {
 import "./skanska-property-demo.css";
 
 type DemoTheme = "midnight-black" | "nexus-blue" | "eco-green" | "silent-gold" | "windows-grey" | "arctic-white";
+type DemoLanguage = "en" | "pl";
+type TopView = "building" | "environment" | "settings";
 type DetailTab = "object" | "work" | "circular" | "esg" | "sources";
 type WorkStage = "issue" | "task" | "work" | "evidence" | "approved" | "updated" | "reuse" | "esg";
 
 const themeStorageKey = "nosmo-theme-preset";
+const languageStorageKey = "nosmo-demo-language";
 const themes: Array<{ id: DemoTheme; label: string; description: string }> = [
   { id: "midnight-black", label: "Midnight Black", description: "Black + greyscale" },
   { id: "nexus-blue", label: "Nexus Blue", description: "Navy + electric blue" },
@@ -59,6 +62,60 @@ function loadTheme(): DemoTheme {
   if (typeof window === "undefined") return "midnight-black";
   const stored = window.localStorage.getItem(themeStorageKey);
   return themes.some((theme) => theme.id === stored) ? (stored as DemoTheme) : "midnight-black";
+}
+
+function loadDemoLanguage(): DemoLanguage {
+  if (typeof window === "undefined") return "en";
+  return window.localStorage.getItem(languageStorageKey) === "pl" ? "pl" : "en";
+}
+
+const propertyPolishUi: Record<string, string> = {
+  "Building": "Budynek",
+  "Environmental": "Środowisko",
+  "Settings": "Ustawienia",
+  "Appearance & language": "Wygląd i język",
+  "Language": "Język",
+  "Interface language": "Język interfejsu",
+  "Colour system": "System kolorów",
+  "English": "Angielski",
+  "Polish": "Polski",
+  "ONE PROJECT / BUILDING GRAPH": "JEDEN PROJEKT / GRAF BUDYNKU",
+  "Everything SKANSKA knows about this physical object.": "Wszystko, co SKANSKA wie o tym fizycznym obiekcie.",
+  "Stop Searching. Start Asking.": "Przestań szukać. Zacznij pytać.",
+  "What do we know about this asset?": "Co wiemy o tym zasobie?",
+  "RELATIONSHIP TREE / BUILDING GRAPH": "DRZEWO RELACJI / GRAF BUDYNKU",
+  "FLOORS": "KONDYGNACJE",
+  "SPACES": "PRZESTRZENIE",
+  "ASSETS": "AKTYWA",
+  "OBJECT CARD": "KARTA OBIEKTU",
+  "WORK / MAINTENANCE": "PRACA / UTRZYMANIE",
+  "CIRCULAR": "CYRKULARNOŚĆ",
+  "ESG": "ESG",
+  "SOURCES": "ŹRÓDŁA",
+  "Close": "Zamknij",
+  "Reset demo workflow": "Resetuj workflow demo",
+  "Capture demo photo": "Dodaj zdjęcie demo",
+  "Approve evidence": "Zatwierdź dowody",
+  "Record circular decision": "Zapisz decyzję cyrkularną",
+  "No active replacement case": "Brak aktywnego przypadku wymiany",
+  "Existing systems remain sources. Nexus connects them.": "Istniejące systemy pozostają źródłami. Nexus je łączy."
+};
+
+function translatePropertyNode(root: HTMLElement) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const raw = node.textContent ?? "";
+    const trimmed = raw.trim();
+    if (propertyPolishUi[trimmed]) node.textContent = raw.replace(trimmed, propertyPolishUi[trimmed]);
+    node = walker.nextNode();
+  }
+  root.querySelectorAll<HTMLInputElement>("[placeholder], [aria-label]").forEach((element) => {
+    const placeholder = element.getAttribute("placeholder");
+    if (placeholder === "Search assets in selected space") element.setAttribute("placeholder", "Szukaj aktywów w wybranej przestrzeni");
+    const aria = element.getAttribute("aria-label");
+    if (aria === "Search assets in selected space") element.setAttribute("aria-label", "Szukaj aktywów w wybranej przestrzeni");
+  });
 }
 
 function byId<T extends { id: string }>(items: T[], id: string) {
@@ -118,8 +175,52 @@ function RelationChip({ icon, label, value, onClick }: { icon: React.ReactNode; 
   );
 }
 
+
+function PropertySettings({
+  theme,
+  language,
+  onTheme,
+  onLanguage,
+}: {
+  theme: DemoTheme;
+  language: DemoLanguage;
+  onTheme: (theme: DemoTheme) => void;
+  onLanguage: (language: DemoLanguage) => void;
+}) {
+  return (
+    <section className="nosmo-demo-settings" aria-label="Demo settings">
+      <header className="nosmo-demo-settings-head">
+        <small>NOSMO NEXUS</small>
+        <h2>Appearance & language</h2>
+        <p>These preferences are stored on this device and shared by both SKANSKA demonstrators.</p>
+      </header>
+      <div className="nosmo-demo-setting-row">
+        <div><h3>Language</h3><p>Interface language</p></div>
+        <div className="nosmo-demo-language-grid">
+          <button type="button" className={language === "en" ? "active" : ""} onClick={() => onLanguage("en")}><b>🇬🇧 English</b><small>English interface</small></button>
+          <button type="button" className={language === "pl" ? "active" : ""} onClick={() => onLanguage("pl")}><b>🇵🇱 Polish</b><small>Polski interfejs</small></button>
+        </div>
+      </div>
+      <div className="nosmo-demo-setting-row">
+        <div><h3>Colour system</h3><p>The same NOSMO colour presets used by NOSMO Worker.</p></div>
+        <div className="nosmo-demo-theme-grid">
+          {themes.map((item) => (
+            <button type="button" key={item.id} className={theme === item.id ? "active" : ""} onClick={() => onTheme(item.id)}>
+              <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
+              <span><b>{item.label}</b><small>{item.description}</small></span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="nosmo-demo-settings-note">Active top navigation uses the selected NOSMO accent. Inactive navigation remains on the dark Nexus shell.</div>
+    </section>
+  );
+}
+
 export default function SkanskaPropertyDemo() {
   const [theme, setTheme] = useState<DemoTheme>(loadTheme);
+  const [language, setLanguage] = useState<DemoLanguage>(loadDemoLanguage);
+  const [topView, setTopView] = useState<TopView>("building");
   const [selectedFloorId, setSelectedFloorId] = useState("floor-00");
   const [selectedSpaceId, setSelectedSpaceId] = useState("space-plant");
   const [selectedAssetId, setSelectedAssetId] = useState("asset-ahu-04");
@@ -135,6 +236,15 @@ export default function SkanskaPropertyDemo() {
   useEffect(() => {
     window.localStorage.setItem(themeStorageKey, theme);
   }, [theme]);
+  useEffect(() => {
+    window.localStorage.setItem(languageStorageKey, language);
+  }, [language]);
+  useEffect(() => {
+    if (topView === "environment") setTab("esg");
+  }, [topView]);
+  useEffect(() => {
+    if (language === "pl") translatePropertyNode(document.querySelector(".property-demo") as HTMLElement);
+  });
 
   const selectedAsset = byId(assets, selectedAssetId) ?? assets[0];
   const selectedFloor = byId(floors, selectedAsset.floorId) ?? floors[0];
@@ -305,7 +415,7 @@ export default function SkanskaPropertyDemo() {
   }
 
   return (
-    <main className="property-demo" data-skin={theme}>
+    <main className="property-demo" data-skin={theme} lang={language}>
       <header className="property-demo-header">
         <div className="property-demo-brand">
           <img src={compactNexusLogo} alt="Nexus" />
@@ -314,25 +424,18 @@ export default function SkanskaPropertyDemo() {
             <span>Construction + Building Operating Layer</span>
           </div>
         </div>
-        <div className="property-demo-header-actions">
-          <ProvenanceBadge />
-          <details className="nosmo-theme-menu">
-            <summary aria-label="Change colour system" title="Appearance">
-              <span className="nosmo-theme-current" aria-hidden="true" />
-              <span className="nosmo-theme-current-label">{themes.find((item) => item.id === theme)?.label}</span>
-            </summary>
-            <div className="nosmo-theme-popover">
-              {themes.map((item) => (
-                <button key={item.id} type="button" className={theme === item.id ? "active" : ""} onClick={() => setTheme(item.id)}>
-                  <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
-                  <span><b>{item.label}</b><small>{item.description}</small></span>
-                </button>
-              ))}
-            </div>
-          </details>
-        </div>
+        <nav className="property-demo-top-tabs nosmo-demo-tabs" aria-label="Demo view">
+          <button type="button" className={topView === "building" ? "active" : ""} onClick={() => { setTopView("building"); if (tab === "esg") setTab("object"); }}>Building</button>
+          <button type="button" className={topView === "environment" ? "active" : ""} onClick={() => setTopView("environment")}>Environmental</button>
+          <button type="button" className={topView === "settings" ? "active" : ""} onClick={() => setTopView("settings")}>Settings</button>
+        </nav>
+        <div className="property-demo-header-actions"><ProvenanceBadge /></div>
       </header>
 
+      {topView === "settings" ? (
+        <PropertySettings theme={theme} language={language} onTheme={setTheme} onLanguage={setLanguage} />
+      ) : (
+        <>
       <section className="property-demo-intro">
         <div>
           <p className="property-demo-eyebrow">ONE PROJECT / BUILDING GRAPH</p>
@@ -689,6 +792,8 @@ export default function SkanskaPropertyDemo() {
         <span><ShieldCheck /> SYNTHETIC DEMO · no real SKANSKA Property asset, worker or project data</span>
         <span><Database /> BIM / CAFM / storage remain source systems · Nexus provides the relationship and operational intelligence layer</span>
       </footer>
+        </>
+      )}
     </main>
   );
 }
