@@ -276,3 +276,47 @@
 .spark-tabs.nosmo-demo-tabs button.active{background:#0d0d0d;color:#fff;border-color:#242424;box-shadow:none}
 .spark-tabs.nosmo-demo-tabs button.active::before{content:"";position:absolute;left:8px;right:8px;bottom:0;height:3px;background:var(--accent)}
 @media(max-width:720px){.spark-brand-copy{display:none}}
+
+/* One-line NOSMO header lock */
+.spark-topbar{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  gap:8px!important;
+  min-height:52px;
+  height:52px;
+  overflow:hidden
+}
+.spark-brand{
+  flex:0 0 auto!important;
+  min-width:0;
+  display:flex;
+  align-items:center
+}
+.spark-tabs.nosmo-demo-tabs{
+  flex:1 1 auto!important;
+  min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space:nowrap;
+  scrollbar-width:none
+}
+.spark-tabs.nosmo-demo-tabs::-webkit-scrollbar{display:none}
+.spark-tabs.nosmo-demo-tabs button{flex:0 0 auto}
+.spark-truth-inline{
+  flex:0 1 360px;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  align-self:center
+}
+@media(max-width:1050px){
+  .spark-truth-inline{display:none!important}
+}
+@media(max-width:720px){
+  .spark-topbar{height:48px;min-height:48px;padding:0 8px!important}
+  .spark-brand img{height:32px}
+  .spark-tabs.nosmo-demo-tabs{height:48px}
+}
