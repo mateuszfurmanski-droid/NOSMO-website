@@ -263,3 +263,8 @@
 .spark-status-recycle{color:var(--accent)}
 .spark-status-in-use{color:var(--accent)}
 .spark-truth-inline{color:var(--feature-muted)}
+
+/* Settings-tab priority: selected tab uses active NOSMO colour, inactive tabs stay on dark shell. */
+.spark-tabs.nosmo-demo-tabs{background:var(--navy)}
+.spark-tabs.nosmo-demo-tabs button{background:var(--navy);color:var(--feature-muted);border-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.spark-tabs.nosmo-demo-tabs button.active{background:var(--accent);color:var(--on-accent);border-color:var(--accent);box-shadow:none}
