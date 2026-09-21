@@ -15,6 +15,22 @@ const objectProfiles = ["MATERIAL", "PRODUCT", "ASSET", "COMPONENT", "EQUIPMENT"
 type ObjectProfile = (typeof objectProfiles)[number];
 
 type DemoLanguage = "en" | "pl";
+type DemoTheme = "midnight-black" | "nexus-blue" | "eco-green" | "silent-gold" | "windows-grey" | "arctic-white";
+
+const themeStorageKey = "nosmo-theme-preset";
+const demoThemes: Array<{ id: DemoTheme; label: string; description: string }> = [
+  { id: "midnight-black", label: "Midnight Black", description: "Black + greyscale" },
+  { id: "nexus-blue", label: "Nexus Blue", description: "Navy + electric blue" },
+  { id: "eco-green", label: "Eco Green", description: "Forest + mint" },
+  { id: "silent-gold", label: "Silent Gold", description: "Graphite + gold" },
+  { id: "windows-grey", label: "Windows Grey", description: "Steel + teal" },
+  { id: "arctic-white", label: "Architect White", description: "White + blue" },
+];
+function loadTheme(): DemoTheme {
+  if (typeof window === "undefined") return "midnight-black";
+  const stored = window.localStorage.getItem(themeStorageKey);
+  return demoThemes.some((item) => item.id === stored) ? stored as DemoTheme : "midnight-black";
+}
 
 const polishUi: Record<string, string> = {
   "Project": "Projekt", "Environmental": "Środowisko", "Project structure": "Struktura projektu",
@@ -225,6 +241,7 @@ function buildReportCsv(
 
 export default function SparkSkanskaDemo() {
   const [language, setLanguage] = useState<DemoLanguage>("en");
+  const [theme, setTheme] = useState<DemoTheme>(loadTheme);
   const [view, setView] = useState<"project" | "environment">("project");
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -236,6 +253,9 @@ export default function SparkSkanskaDemo() {
   const [recordEditAudit, setRecordEditAudit] = useState<RecordEditAuditEntry[]>(() => loadArray(recordEditStorageKey));
   const [createdObjects, setCreatedObjects] = useState<CreatedObjectEntry[]>(() => loadArray(createdObjectStorageKey));
 
+  useEffect(() => {
+    try { window.localStorage.setItem(themeStorageKey, theme); } catch { /* best effort */ }
+  }, [theme]);
   useEffect(() => {
     try { window.localStorage.setItem(decisionStorageKey, JSON.stringify(decisionAudit)); } catch { /* best effort */ }
   }, [decisionAudit]);
@@ -330,7 +350,7 @@ export default function SparkSkanskaDemo() {
   });
 
   return (
-    <div key={language} className="spark-workbench" lang={language}>
+    <div key={language} className="spark-workbench" lang={language} data-skin={theme}>
       <header className="spark-topbar">
         <div className="spark-brand">
           <img
@@ -349,6 +369,20 @@ export default function SparkSkanskaDemo() {
           onClick={() => setLanguage((current) => current === "en" ? "pl" : "en")}
           style={{ border: "1px solid #3d4652", background: "#121820", color: "#fff", borderRadius: 4, padding: "5px 8px", cursor: "pointer", fontSize: 18 }}
         >{language === "en" ? "🇵🇱" : "🇬🇧"}</button>
+        <details className="nosmo-theme-menu">
+          <summary aria-label="Change colour system" title="Appearance">
+            <span className="nosmo-theme-current" aria-hidden="true" />
+            <span className="nosmo-theme-current-label">{demoThemes.find((item) => item.id === theme)?.label}</span>
+          </summary>
+          <div className="nosmo-theme-popover">
+            {demoThemes.map((item) => (
+              <button key={item.id} type="button" className={theme === item.id ? "active" : ""} onClick={() => setTheme(item.id)}>
+                <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
+                <span><b>{item.label}</b><small>{item.description}</small></span>
+              </button>
+            ))}
+          </div>
+        </details>
         <div className="spark-truth-inline">SYNTHETIC DEMO · no real SKANSKA project data · no fabricated CO₂ values</div>
       </header>
 
