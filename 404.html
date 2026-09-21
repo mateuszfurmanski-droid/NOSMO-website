@@ -10,6 +10,11 @@
       const nexusPrefix = "/apps/nexus/";
       const pathname = window.location.pathname;
 
+      if (pathname === "/nexus/skanska-property" || pathname === "/nexus/skanska-property/") {
+        window.location.replace("/skanska-property.html");
+        return;
+      }
+
       if (pathname.startsWith(nexusPrefix)) {
         const route = pathname
           .slice(nexusPrefix.length)
