@@ -1,74 +1,36 @@
 # NOSMO public website scope
-
 Updated: 2026-09-21
 
 ## Primary public navigation
-- Home
-- Software
-- Hardware
-- Recycling
-- R&D
-- Team
+Home / Software / Hardware / Recycling / R&D / Team
 
-## Public software architecture
+## Public software tree
+NOSMO Nexus
+- NOSMO Workforce
+  - Worker App
+  - Agency Desk
+  - Person Card
+  - Emergency
+- NOSMO BIM
+  - WorkSuite
+    - DoorSuite
+    - Fire Door Register & Inspection
+    - Electrical Commissioning
+    - future focused trade applications where justified
 
-### NOSMO Nexus
-Connective construction operating layer.
+Do not present Worker App and Agency Desk as separate top-level NOSMO product families.
+Do not lead publicly with DoorFlow; DoorSuite is the public name. Keep legacy routes for compatibility.
+WorkSuite sits inside NOSMO BIM; NOSMO BIM and NOSMO Workforce sit inside Nexus.
 
-### NOSMO Workforce
-A major branch inside NOSMO Nexus. One workforce package. Do not present NOSMO Work and NOSMO Agency as separate product families.
-
-Built into NOSMO Workforce:
-- Worker App
-- Agency Desk
-- Person Card / Worker identity
-- Emergency
-
-Worker App and Agency Desk may remain technically separate deployments/interfaces, but public architecture treats them as parts of NOSMO Workforce.
-
-### NOSMO BIM
-A major branch inside NOSMO Nexus for BIM-linked project execution, inspection, commissioning and evidence.
-
-### NOSMO WorkSuite
-Specialist construction application family inside NOSMO BIM. Do not confuse WorkSuite with Workforce.
-
-Current named modules:
-- DoorSuite — new public name replacing DoorFlow
-- NOSMO Electrical Commissioning
-- NOSMO Fire Door Register & Inspection
-
-The old DoorFlow name and routes remain only for technical compatibility and historical source continuity.
-
-## Canonical public pages
-- index.html
-- software.html
-- nexus.html
-- workforce.html
-- bim.html
-- work.html — Worker App module page
-- agency.html — Agency Desk module page
-- emergency.html — Workforce Emergency module page
-- worksuite.html
-- doorsuite.html
-- construction-hardware.html
-- greenloop.html
-- innovation-lab.html
-- team.html
-
-## Product-status rule
-Clearly distinguish active build, public prototype, demonstrator, prototype, R&D and planned work.
-
-## Private SKANSKA review surfaces
-Keep direct-link only and noindex,nofollow,noarchive:
-- /skanska.html
-- /skanska-property.html
-- /nexus/spark/
-- /nexus/skanska-property/
-
-Do not add these to homepage, public Software navigation or sitemap.
+## Private review surfaces
+/skanska.html
+/skanska-property.html
+/nexus/spark/
+/nexus/skanska-property/
+Keep direct-link only and noindex,nofollow,noarchive. Do not add to public navigation, homepage or sitemap.
 
 ## Archive
-Older Person Card iterations, Nexus previews, DoorFlow-named source, apps/, demos/ and previews/ remain for history, QA, compatibility and recovery. Do not delete them just because public naming changed.
+Preserve old Person Card iterations, Nexus previews, DoorFlow-named source, apps/, demos/ and previews/ for history, QA and recovery.
 
 ## Domain
 CNAME remains nosmotechnology.co.uk. Do not change DNS, CNAME or @nosmo.tech mail configuration without explicit approval.
