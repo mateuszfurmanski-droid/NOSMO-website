@@ -1,3 +1,49 @@
+/* NOSMO Worker shared palette bridge */
+.spark-workbench {
+  --spark-bg: var(--bg);
+  --spark-panel: var(--surface);
+  --spark-panel-soft: var(--surface-soft);
+  --spark-line: var(--line);
+  --spark-line-soft: color-mix(in srgb,var(--line) 62%,transparent);
+  --spark-text: var(--ink);
+  --spark-muted: var(--muted);
+  --spark-accent: var(--accent);
+  --spark-blue: var(--accent);
+  --spark-amber: #e9b949;
+  --spark-red: #e56b63;
+  --spark-teal: var(--accent-strong);
+  background:var(--bg);
+}
+.spark-topbar{background:var(--navy);border-bottom-color:var(--line)}
+.spark-brand{background:var(--navy)}
+.spark-tabs button{color:var(--muted)}
+.spark-tabs button.active{color:var(--ink);background:var(--surface-soft);border-color:var(--line);box-shadow:inset 0 -2px var(--accent)}
+.spark-contextbar,.spark-summary{background:var(--surface-soft);border-color:var(--line)}
+.spark-tree-panel,.spark-detail-panel{background:var(--surface)}
+.spark-register{background:var(--bg)}
+.spark-toolbar{background:var(--surface);border-color:var(--line)}
+.spark-toolbar input,.spark-toolbar select{background:var(--field);border-color:var(--line);color:var(--ink)}
+.spark-register-table th{background:var(--surface-soft);color:var(--muted);border-color:var(--line)}
+.spark-register-table td{border-color:color-mix(in srgb,var(--line) 55%,transparent)}
+.spark-register-table tbody tr:hover{background:var(--accent-soft)}
+.spark-register-table tbody tr.selected{background:var(--accent-soft);box-shadow:inset 3px 0 var(--accent)}
+.spark-tree-list button.selected,.spark-tree-list button:hover{background:var(--accent-soft);color:var(--accent)}
+.spark-detail-head{background:var(--surface-soft);border-color:var(--line)}
+.spark-detail-head .spark-mono,.spark-section-title,.spark-detail-section h3{color:var(--accent)}
+.spark-save-decision{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.spark-decision-controls button{background:var(--surface-soft);border-color:var(--line);color:var(--muted)}
+.spark-decision-controls button.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.spark-decision-form input,.spark-decision-form textarea,.spark-record-form input,.spark-record-form textarea{background:var(--field);border-color:var(--line);color:var(--ink)}
+.spark-report-buttons button,.spark-report-buttons a{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.spark-report-buttons button:hover,.spark-report-buttons a:hover{background:var(--accent-soft);border-color:var(--accent)}
+.spark-badge{border-color:var(--line)}
+.spark-status-reusable,.spark-attention-text.low{color:#39b878}
+.spark-status-recover,.spark-attention-text.medium{color:#d39b21}
+.spark-status-waste,.spark-attention-text.high{color:#d95c56}
+.spark-status-recycle{color:var(--accent)}
+.spark-status-in-use{color:var(--accent)}
+.spark-truth-inline{color:var(--feature-muted)}
+
 :root {
   --spark-bg: #08110f;
   --spark-panel: #0c1714;
