@@ -485,32 +485,50 @@ function DemoSettings({
   onTheme: (theme: DemoTheme) => void;
   onLanguage: (language: DemoLanguage) => void;
 }) {
+  const currentTheme = demoThemes.find((item) => item.id === theme) ?? demoThemes[0];
   return (
     <section className="nosmo-demo-settings" aria-label="Demo settings">
       <header className="nosmo-demo-settings-head">
         <small>NOSMO NEXUS</small>
-        <h2>Appearance & language</h2>
-        <p>These preferences are stored on this device and shared by both SKANSKA demonstrators.</p>
+        <h2>Settings</h2>
+        <p>Preferences for both SKANSKA demonstrators on this device.</p>
       </header>
-      <div className="nosmo-demo-setting-row">
-        <div><h3>Language</h3><p>Interface language</p></div>
-        <div className="nosmo-demo-language-grid">
-          <button type="button" className={language === "en" ? "active" : ""} onClick={() => onLanguage("en")}><b>🇬🇧 English</b><small>English interface</small></button>
-          <button type="button" className={language === "pl" ? "active" : ""} onClick={() => onLanguage("pl")}><b>🇵🇱 Polish</b><small>Polski interfejs</small></button>
+      <p className="nosmo-demo-preferences-label">Preferences</p>
+
+      <details className="nosmo-settings-collapsible">
+        <summary>
+          <span className="nosmo-settings-summary-copy"><b>Appearance</b><small>NOSMO colour system</small></span>
+          <span className="nosmo-settings-summary-value">
+            <span className={"nosmo-theme-swatch " + currentTheme.id} aria-hidden="true"><i /><i /></span>
+            <b>{currentTheme.label}</b><span className="nosmo-settings-chevron">⌄</span>
+          </span>
+        </summary>
+        <div className="nosmo-settings-body">
+          <div className="nosmo-demo-theme-grid">
+            {demoThemes.map((item) => (
+              <button type="button" key={item.id} className={theme === item.id ? "active" : ""} onClick={() => onTheme(item.id)}>
+                <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
+                <span><b>{item.label}</b><small>{item.description}</small></span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <div className="nosmo-demo-setting-row">
-        <div><h3>Colour system</h3><p>The same NOSMO colour presets used by NOSMO Worker.</p></div>
-        <div className="nosmo-demo-theme-grid">
-          {demoThemes.map((item) => (
-            <button type="button" key={item.id} className={theme === item.id ? "active" : ""} onClick={() => onTheme(item.id)}>
-              <span className={"nosmo-theme-swatch " + item.id} aria-hidden="true"><i /><i /></span>
-              <span><b>{item.label}</b><small>{item.description}</small></span>
-            </button>
-          ))}
+      </details>
+
+      <details className="nosmo-settings-collapsible">
+        <summary>
+          <span className="nosmo-settings-summary-copy"><b>Language</b><small>Interface language</small></span>
+          <span className="nosmo-settings-summary-value"><b>{language === "pl" ? "Polski" : "English"}</b><span className="nosmo-settings-chevron">⌄</span></span>
+        </summary>
+        <div className="nosmo-settings-body">
+          <div className="nosmo-demo-language-grid">
+            <button type="button" className={language === "en" ? "active" : ""} onClick={() => onLanguage("en")}><b>🇬🇧 English</b><small>English interface</small></button>
+            <button type="button" className={language === "pl" ? "active" : ""} onClick={() => onLanguage("pl")}><b>🇵🇱 Polski</b><small>Polski interfejs</small></button>
+          </div>
         </div>
-      </div>
-      <div className="nosmo-demo-settings-note">Active top navigation uses the selected NOSMO accent. Inactive navigation remains on the dark Nexus shell.</div>
+      </details>
+
+      <div className="nosmo-demo-settings-note">Colour and language are stored locally and shared between the Residential and Property demos.</div>
     </section>
   );
 }
