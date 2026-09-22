@@ -196,6 +196,14 @@ p{color:var(--muted);font-size:16px}.lead{max-width:800px;font-size:clamp(18px,2
 .software-logo-list img,.software-logo-list .integration-function-icon{display:block;width:20px;height:20px;flex:0 0 20px;box-sizing:border-box}
 .software-logo-list img{object-fit:contain;background:#f5f7f9;padding:2px}
 .software-logo-list .integration-function-icon{padding:3px}
+.software-logo-list>span.target{opacity:.52;color:#aeb5be}
+.software-logo-list>span.target img{filter:grayscale(1);background:#c7cbd0}
+.software-logo-list>span.available{border-color:rgba(53,201,120,.42);color:#edf8f2}
+.software-logo-list>span.available img{background:#fff}
+.status-dot{display:inline-block;width:7px;height:7px;margin:0 4px 0 8px;vertical-align:middle}
+.status-dot:first-child{margin-left:0}
+.status-dot.current{background:var(--eco-green)}
+.status-dot.planned{background:#777f89}
 .software-nexus-row{grid-template-columns:155px minmax(220px,.75fr) 1.25fr;background:linear-gradient(90deg,rgba(47,120,255,.14),rgba(16,19,23,.24))}
 .software-nexus-copy{align-self:center;padding:10px 12px}
 .software-nexus-copy strong{font-size:14px}
