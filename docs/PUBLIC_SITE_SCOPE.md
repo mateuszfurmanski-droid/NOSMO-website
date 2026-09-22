@@ -1,8 +1,8 @@
 # NOSMO public website scope
-Updated: 2026-09-21
+Updated: 2026-09-22
 
 ## Primary public navigation
-Home / Software / Hardware / Recycling / R&D / Team
+Home / Software / Hardware / GreenLoop / R&D / Team
 
 ## Public software tree
 NOSMO Nexus
@@ -12,15 +12,21 @@ NOSMO Nexus
   - Person Card
   - Emergency
 - NOSMO BIM
-  - WorkSuite
-    - DoorSuite
-    - Fire Door Register & Inspection
-    - Electrical Commissioning
-    - future focused trade applications where justified
+  - model and object context
+  - coordination relationships
+  - asset and handover history
+  - digital twin direction
+- NOSMO WorkSuite
+  - DoorSuite
+  - Fire Door Register & Inspection
+  - Electrical Commissioning
+  - future focused trade applications where justified
+
+Nexus also provides the integration direction across existing construction and workforce platforms, BIM tools, document sources, email, messaging and contacts. It is an overlay and does not require every useful source system to be replaced.
 
 Do not present Worker App and Agency Desk as separate top-level NOSMO product families.
 Do not lead publicly with DoorFlow; DoorSuite is the public name. Keep legacy routes for compatibility.
-WorkSuite sits inside NOSMO BIM; NOSMO BIM and NOSMO Workforce sit inside Nexus.
+NOSMO Workforce, NOSMO BIM and NOSMO WorkSuite sit alongside each other inside Nexus. WorkSuite is the home for trade applications; BIM is the model and object-context module. WorkSuite applications can reference BIM objects through Nexus where useful.
 
 ## Private review surfaces
 /skanska.html
