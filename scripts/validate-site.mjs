@@ -16,7 +16,6 @@ const publicPages = [
   "doorsuite.html",
   "fire-door-register.html",
   "electrical-commissioning.html",
-  "construction-hardware.html",
   "greenloop.html",
   "innovation-lab.html",
   "team.html",
@@ -27,7 +26,8 @@ const privatePages = [
   "skanska-property.html",
   "nexus/skanska-property/index.html",
 ];
-const requiredNav = ["Home", "Software", "Hardware", "GreenLoop", "R&amp;D", "Team"];
+const requiredNav = ["Home", "Software", "GreenLoop", "R&amp;D", "Team"];
+const legacyPages = ["construction-hardware.html"];
 const failures = [];
 
 function fail(file, message) {
@@ -87,6 +87,13 @@ for (const file of publicPages) {
   }
 }
 
+for (const file of legacyPages) {
+  const html = await readFile(path.join(root, file), "utf8");
+  if (!html.includes('<meta http-equiv="refresh" content="0; url=/innovation-lab.html#exo-01">')) fail(file, "missing R&D redirect");
+  if (!html.includes('<link rel="canonical" href="https://nosmotechnology.co.uk/innovation-lab.html">')) fail(file, "wrong legacy canonical");
+  if (!html.includes('<meta name="robots" content="noindex,follow">')) fail(file, "legacy route must be noindex,follow");
+}
+
 for (const file of privatePages) {
   const html = await readFile(path.join(root, file), "utf8");
   if (!/<meta name="robots" content="noindex,nofollow,noarchive">/.test(html)) {
@@ -102,6 +109,7 @@ for (const file of publicPages) {
   if (!sitemap.includes(`<loc>${url}</loc>`)) fail("sitemap.xml", `missing ${url}`);
 }
 if (/skanska/i.test(sitemap)) fail("sitemap.xml", "private SKANSKA route is listed");
+if (/construction-hardware/i.test(sitemap)) fail("sitemap.xml", "legacy Hardware route is listed");
 
 const css = await readFile(path.join(root, "assets/site-v2.css"), "utf8");
 const openBraces = (css.match(/{/g) ?? []).length;
@@ -114,4 +122,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Site validation passed: ${publicPages.length} public pages, ${privatePages.length} private routes, local links and metadata checked.`);
+console.log(`Site validation passed: ${publicPages.length} public pages, ${legacyPages.length} legacy redirect, ${privatePages.length} private routes, local links and metadata checked.`);
