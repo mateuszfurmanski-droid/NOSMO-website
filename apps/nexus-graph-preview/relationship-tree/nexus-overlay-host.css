@@ -1,0 +1,90 @@
+/* NEXUS_OVERLAY_HOST_ADDON_059_V1
+   Same-shell iframe windows above the canonical Relationship Tree.
+   Person Card and File Loader sources remain untouched. */
+
+.nexus-overlay-window{
+  display:none;
+  width:min(520px,calc(100vw - 16px));
+  height:min(74dvh,720px);
+  min-width:280px;
+  min-height:220px;
+  border:1px solid rgba(91,207,255,.34);
+  border-radius:20px;
+  background:rgba(4,13,24,.985);
+  color:#eef7ff;
+  box-shadow:0 24px 70px rgba(0,0,0,.52),inset 0 0 0 1px rgba(255,255,255,.03);
+  overflow:hidden;
+  contain:layout paint;
+}
+
+.nexus-overlay-window.open{display:block}
+
+.nexus-overlay-window[data-nexus-overlay-kind="person"]{
+  width:min(430px,calc(100vw - 16px));
+  height:min(78dvh,760px);
+}
+
+.nexus-overlay-window[data-nexus-overlay-kind="files"]{
+  width:min(620px,calc(100vw - 16px));
+  height:min(78dvh,760px);
+}
+
+.nexus-overlay-frame{
+  display:block;
+  width:100%;
+  height:100%;
+  border:0;
+  background:#07131f;
+}
+
+.nexus-overlay-close{
+  position:absolute;
+  z-index:2147483600;
+  top:7px;
+  right:8px;
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:50%;
+  background:rgba(7,17,28,.90);
+  color:#b9d5e4;
+  padding:0;
+  font:900 13px/1 Inter,system-ui,sans-serif;
+  cursor:pointer;
+}
+
+.nexus-overlay-close:hover,
+.nexus-overlay-close:focus-visible{
+  background:rgba(120,28,42,.88);
+  border-color:rgba(255,103,122,.52);
+  color:#fff;
+  outline:none;
+}
+
+.nexus-overlay-loading{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+  color:#7ddcff;
+  font:800 10px/1.3 Inter,system-ui,sans-serif;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  background:linear-gradient(180deg,rgba(4,13,24,.96),rgba(4,13,24,.70));
+}
+
+.nexus-overlay-window.loaded .nexus-overlay-loading{display:none}
+
+@media(max-width:760px){
+  .nexus-overlay-window,
+  .nexus-overlay-window[data-nexus-overlay-kind="person"],
+  .nexus-overlay-window[data-nexus-overlay-kind="files"]{
+    width:calc(100vw - 12px);
+    height:min(72dvh,690px);
+    min-width:0;
+    border-radius:18px;
+  }
+}

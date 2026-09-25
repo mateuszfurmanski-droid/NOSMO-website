@@ -1,0 +1,119 @@
+name: Validate Relationship Tree ADDON 059
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/relationship-tree-addon059-canonical
+    paths:
+      - apps/nexus-graph-preview/relationship-tree/**
+      - .github/workflows/validate-relationship-tree-addon059.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Validate add-on JavaScript
+        run: |
+          set -euo pipefail
+          node --check apps/nexus-graph-preview/relationship-tree/nexus-window-manager.js
+
+      - name: Validate canonical tree boundary
+        run: |
+          set -euo pipefail
+          INDEX=apps/nexus-graph-preview/relationship-tree/index.html
+          WINDOW=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.js
+          CSS=apps/nexus-graph-preview/relationship-tree/nexus-window-manager.css
+          OVERLAY=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.js
+          OVERLAY_CSS=apps/nexus-graph-preview/relationship-tree/nexus-overlay-host.css
+          SEMANTIC=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.js
+          SEMANTIC_CSS=apps/nexus-graph-preview/relationship-tree/nexus-semantic-drag.css
+          PEOPLE=apps/nexus-graph-preview/relationship-tree/nexus-people-panel.js
+          BRIDGE=apps/nexus-graph-preview/relationship-tree/nexus-core-browser-bridge.js
+          BRIDGE_CSS=apps/nexus-graph-preview/relationship-tree/nexus-core-browser-bridge.css
+          test -s "$WINDOW"
+          test -s "$CSS"
+          test -s "$OVERLAY"
+          test -s "$OVERLAY_CSS"
+          test -s "$SEMANTIC"
+          test -s "$SEMANTIC_CSS"
+          test -s "$PEOPLE"
+          test -s "$BRIDGE"
+          test -s "$BRIDGE_CSS"
+          node --check "$BRIDGE"
+          node --check "$OVERLAY"
+          node --check "$SEMANTIC"
+          grep -Fq 'nexus-window-manager.css?v=addon059-window-v1a' "$INDEX"
+          grep -Fq 'nexus-window-manager.js?v=addon059-window-v1a' "$INDEX"
+          grep -Fq 'nexus-overlay-host.css?v=addon059-overlay-v1' "$INDEX"
+          grep -Fq 'nexus-overlay-host.js?v=addon059-overlay-v1' "$INDEX"
+          grep -Fq 'nexus-semantic-drag.css?v=addon059-semantic-v1' "$INDEX"
+          grep -Fq 'nexus-semantic-drag.js?v=addon059-semantic-v1' "$INDEX"
+          grep -Fq 'nexus-core-browser-bridge.css?v=addon059-core-bridge-v1' "$INDEX"
+          grep -Fq 'nexus-core-browser-bridge.js?v=addon059-core-bridge-v1' "$INDEX"
+          grep -Fq '/apps/nexus-graph-preview/assets/index-CWI-Glgh.js' "$INDEX"
+          grep -Fq '#nexusProjectTimeIso' "$WINDOW"
+          grep -Fq '#nexusCloudPanel' "$WINDOW"
+          grep -Fq '#nexusIntegrationsPanel' "$WINDOW"
+          grep -Fq '#nexusSoftwarePanel' "$WINDOW"
+          grep -Fq 'data-nexus-windowable' "$CSS"
+          grep -Fq 'pointerdown' "$WINDOW"
+          grep -Fq 'localStorage' "$WINDOW"
+          grep -Fq '/person-card-kamil.html?v=v47top1' "$OVERLAY"
+          grep -Fq '/apps/nexus-file-loader/' "$OVERLAY"
+          grep -Fq 'NexusWindowManager' "$OVERLAY"
+          grep -Fq 'nexusWindowTitle' "$OVERLAY"
+          grep -Fq 'dblclick' "$OVERLAY"
+          grep -Fq 'data-nexus-action="file-loader"' "$OVERLAY"
+          grep -Fq "accessProfile!=='manager'" "$SEMANTIC"
+          grep -Fq "document.querySelectorAll('[data-node-id]')" "$SEMANTIC"
+          grep -Fq "nexus:semantic-drop-request" "$SEMANTIC"
+          grep -Fq "schema:'nexus-semantic-drop-request/v1'" "$SEMANTIC"
+          grep -Fq "workPackage:isPackage" "$SEMANTIC"
+          grep -Fq "app-worksuite" "$SEMANTIC"
+          grep -Fq "Evidence requirement" "$SEMANTIC"
+          grep -Fq "paletteCapability:true" "$SEMANTIC"
+          grep -Fq "canonicalPersonId" "$SEMANTIC"
+          grep -Fq "node.dataset.canonicalPersonId" "$PEOPLE"
+          grep -Fq "personId:typeof data.id==='string'?data.id" "$PEOPLE"
+          ! grep -Fq "person-kamil-karaszewski" "$SEMANTIC"
+          grep -Fq "SESSION_KEY='nexus-core-staging-device-session/v1'" "$BRIDGE"
+          grep -Fq "credentials:'omit'" "$BRIDGE"
+          grep -Fq "authorization','Bearer " "$BRIDGE"
+          grep -Fq "canonicalPersonId" "$BRIDGE"
+          grep -Fq "semanticIntent:'assign-work-package'" "$BRIDGE"
+          grep -Fq "nexus:semantic-drop-authoritative-result" "$BRIDGE"
+          grep -Fq "nexus:core-authoritative-projection" "$BRIDGE"
+          grep -Fq "CORE_BROWSER_ENDPOINT_NOT_CONFIGURED" "$BRIDGE"
+          grep -Fq "WORK_PACKAGE_REQUIRED" "$BRIDGE"
+          grep -Fq "nexus-staging.nosmo.tech" "$BRIDGE"
+          ! grep -Fq "_vercel_share" "$BRIDGE"
+          ! grep -Fq "vercel-protection-bypass" "$BRIDGE"
+          grep -Fq "Composition ≠ assignment" "$SEMANTIC"
+          grep -Fq "awaiting Core authority" "$SEMANTIC"
+          grep -Fq '.nexus-semantic-drop-target' "$SEMANTIC_CSS"
+          ! grep -Fq 'innerHTML=' "$WINDOW"
+          ! grep -Fq 'fetch=' "$WINDOW"
+          ! grep -Fq 'fetch=' "$OVERLAY"
+          ! grep -Fq 'fetch=' "$SEMANTIC"
+          ! grep -Fq 'localStorage' "$SEMANTIC"
+          ! grep -Fq 'sessionStorage' "$SEMANTIC"
+          git diff --exit-code origin/main -- person-card-kamil.html person-card-kamil-v47.html apps/nexus-file-loader/index.html apps/nexus-file-loader/app.js apps/nexus-file-loader/styles.css
+          echo RELATIONSHIP_TREE_ADDON059_WINDOW_BOUNDARY_PASS
+
+      - name: Prove graph bundle untouched
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          git diff --exit-code origin/main -- apps/nexus-graph-preview/assets/index-CWI-Glgh.js
+          echo RELATIONSHIP_TREE_GRAPH_BUNDLE_UNTOUCHED
