@@ -1,0 +1,140 @@
+/* NEXUS_WINDOW_MANAGER_ADDON_059_V1
+   Additive shell only. Does not replace or mutate the Relationship Tree graph runtime. */
+
+[data-nexus-windowable="true"]{
+  --nx-window-z:2147483150;
+}
+
+[data-nexus-windowable="true"].nx-window-free{
+  position:fixed!important;
+  left:var(--nx-window-left,12px)!important;
+  top:var(--nx-window-top,72px)!important;
+  right:auto!important;
+  bottom:auto!important;
+  margin:0!important;
+  transform:none!important;
+  translate:none!important;
+  z-index:var(--nx-window-z)!important;
+  max-width:calc(100vw - 12px)!important;
+  box-sizing:border-box!important;
+}
+
+[data-nexus-windowable="true"].nx-window-front{
+  z-index:2147483300!important;
+}
+
+.nexus-window-handle{
+  position:absolute;
+  z-index:2147483500;
+  top:5px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  width:max-content;
+  max-width:calc(100% - 12px);
+  height:24px;
+  padding:0 5px 0 8px;
+  border:1px solid rgba(124,211,255,.28);
+  border-radius:999px;
+  background:rgba(3,12,22,.88);
+  color:#c9ecff;
+  box-shadow:0 6px 18px rgba(0,0,0,.30),inset 0 0 0 1px rgba(255,255,255,.025);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  font:800 8px/1 Inter,system-ui,sans-serif;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+  cursor:grab;
+  opacity:.74;
+  transition:opacity .15s ease,border-color .15s ease,background .15s ease;
+}
+
+[data-nexus-windowable="true"]:hover>.nexus-window-handle,
+[data-nexus-windowable="true"].nx-window-dragging>.nexus-window-handle{
+  opacity:1;
+  border-color:rgba(91,207,255,.62);
+  background:rgba(4,19,32,.96);
+}
+
+.nexus-window-handle:active{cursor:grabbing}
+
+.nexus-window-grip{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  color:#5fd5ff;
+  font-size:10px;
+  letter-spacing:-1px;
+}
+
+.nexus-window-title{
+  overflow:hidden;
+  max-width:130px;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.nexus-window-btn{
+  display:grid;
+  place-items:center;
+  width:19px;
+  min-width:19px;
+  height:19px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.055);
+  color:#a9c9da;
+  padding:0;
+  font:900 11px/1 Inter,system-ui,sans-serif;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+
+.nexus-window-btn:hover,
+.nexus-window-btn:focus-visible{
+  background:rgba(91,207,255,.16);
+  color:#fff;
+  outline:none;
+}
+
+[data-nexus-windowable="true"].nx-window-minimized{
+  display:block!important;
+  width:190px!important;
+  min-width:190px!important;
+  height:34px!important;
+  min-height:34px!important;
+  max-height:34px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border-radius:15px!important;
+}
+
+[data-nexus-windowable="true"].nx-window-minimized>*:not(.nexus-window-handle){
+  display:none!important;
+}
+
+[data-nexus-windowable="true"].nx-window-minimized>.nexus-window-handle{
+  top:4px;
+  width:calc(100% - 8px);
+  max-width:none;
+  opacity:1;
+}
+
+@media(max-width:760px){
+  .nexus-window-handle{
+    height:26px;
+    max-width:calc(100% - 10px);
+    font-size:7.5px;
+  }
+  .nexus-window-btn{
+    width:21px;
+    min-width:21px;
+    height:21px;
+  }
+}
