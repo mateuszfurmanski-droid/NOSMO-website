@@ -1,0 +1,42 @@
+name: Deploy Spark Demo Preview
+
+on:
+  push:
+    branches:
+      - codex/spark-skanska-demo-public
+  pull_request:
+    paths:
+      - spark-skanska-demo.html
+      - .github/workflows/deploy-spark-demo-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: spark-demo-pages-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}spark-skanska-demo.html
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout isolated public mirror branch
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static site snapshot
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+      - name: Deploy preview snapshot
+        id: deployment
+        uses: actions/deploy-pages@v4
