@@ -4,11 +4,19 @@
   if(window.__NEXUS_SOFTWARE_CONNECTORS_PANEL__)return;
   window.__NEXUS_SOFTWARE_CONNECTORS_PANEL__=true;
 
+  const contextUrl=new URL(window.location.href);
+  const sourceWorld=['dev','esafe-demo'].includes(contextUrl.searchParams.get('world'))?contextUrl.searchParams.get('world'):'dev';
+  const requestedObject=contextUrl.searchParams.get('bimObject');
+  const selectedObject=/^NXS-MEP-00[1-8]$/.test(requestedObject||'')?requestedObject:'NXS-MEP-001';
+  const demoUrl=new URL('https://nexus-skanska-mvp.mateusz-furmanski.chatgpt.site/bim-overlay/');
+  demoUrl.searchParams.set('world',sourceWorld);
+  demoUrl.searchParams.set('object',selectedObject);
+
   const systems=[
     {id:'work-wallet',icon:'▣',name:'Work Wallet',type:'Safety / Compliance',level:'REFERENCE',state:'ref',copy:'Inductions, RAMS, permits, competence and safety status referenced against Person Cards, Tasks and Projects.'},
     {id:'google-drive',icon:'☁',name:'Google Drive',type:'Nexus Cloud',level:'LINKED LAYER',state:'live',copy:'Project folders, evidence files and document locations mapped into the Nexus Cloud panel and Project Graph.'},
     {id:'microsoft-365',icon:'▤',name:'Microsoft 365',type:'Files / Teams / Outlook',level:'PLANNED',state:'plan',copy:'SharePoint, OneDrive, Teams and Outlook records to be linked through connector actions, not copied blindly.'},
-    {id:'bim-fabstation',icon:'▦',name:'BIM / FabStation',type:'Spatial / Objects',level:'DEMO',state:'ref',href:'https://nexus-skanska-mvp.mateusz-furmanski.chatgpt.site/bim-overlay/index.html',copy:'Nexus installation and handover demo: objects, people, readiness, evidence and inspection. Synthetic data, local save, owner access required. FabStation is not connected.'},
+    {id:'bim-fabstation',icon:'▦',name:'BIM / FabStation',type:'Spatial / Objects',level:'DEMO',state:'ref',href:demoUrl.href,copy:'Nexus installation and handover demo: objects, people, readiness, evidence and inspection. Synthetic data, local save, owner access required. FabStation is not connected.'},
     {id:'companycam',icon:'◉',name:'CompanyCam',type:'Photos / Video',level:'PLANNED',state:'plan',copy:'Site photos, progress evidence, inspection images and comments as external evidence sources.'},
     {id:'hilti',icon:'⌁',name:'Hilti / Assets',type:'Tools / Equipment',level:'PLANNED',state:'plan',copy:'Tools, plant, consumables and asset readiness connected to people, tasks and project requirements.'},
     {id:'procore-dalux',icon:'◇',name:'Procore / Dalux',type:'Project Platforms',level:'FUTURE',state:'plan',copy:'Keep specialist platforms as source systems; Nexus stores relationship, context, handoff and decision memory.'},
@@ -35,6 +43,7 @@
   const scrim=()=>document.getElementById('nexusShellScrim');
   const closePanel=()=>{
     document.getElementById('nexusSoftwarePanel')?.classList.remove('open');
+    document.getElementById('nexusSoftwarePanel')?.setAttribute('aria-hidden','true');
     document.getElementById('nexusSoftwareDockTile')?.classList.remove('active');
     scrim()?.classList.remove('open');
   };
@@ -57,7 +66,7 @@
         el('strong',{text:item.name}),
         el('small',{text:item.type}),
         el('p',{text:item.copy}),
-        item.href?el('a',{href:item.href,target:'_top',class:'nx-soft-demo-link',style:'display:inline-block;margin-top:8px;padding:10px 12px;border:1px solid currentColor;border-radius:8px;color:#75e6ff;font-weight:600;',text:'Open BIM installation demo →'}):null
+        item.href?el('a',{href:item.href,target:'_top',class:'nx-soft-demo-link',style:'display:inline-block;margin-top:8px;padding:10px 12px;border:1px solid currentColor;border-radius:8px;color:#75e6ff;font-weight:600;',text:requestedObject===selectedObject?'Resume '+selectedObject+' →':'Open BIM installation demo →'}):null
       ]),
       el('div',{class:'nx-soft-state'},[
         el('span',{class:`nx-soft-led ${item.state}`}),
@@ -132,6 +141,7 @@
   };
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
+  if(window.location.hash==='#bim')setTimeout(openPanel,1000);
   window.addEventListener('resize',schedule,{passive:true});
   window.addEventListener('orientationchange',()=>setTimeout(schedule,220),{passive:true});
   const observer=new MutationObserver(schedule);
