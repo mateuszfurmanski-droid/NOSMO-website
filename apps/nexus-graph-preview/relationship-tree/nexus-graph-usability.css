@@ -32,3 +32,4 @@ html[data-nexus-theme=light] #root:has(.nx-group-guide),html[data-nexus-theme=li
 
 #root .nx-group-mosaic img{position:static!important;width:24px!important;height:24px!important;max-width:24px!important;max-height:24px!important;object-fit:contain!important;transform:none!important;margin:0!important}
 #root [data-node-id] button>span.rounded-full{background:#edf8fb;color:#42616c;border-color:#9cbdc8}
+#root .nx-group-mosaic svg[data-nosmo-file-icon]{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;max-width:24px!important;max-height:24px!important;filter:none!important;overflow:hidden!important}
