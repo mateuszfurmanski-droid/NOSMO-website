@@ -4,10 +4,12 @@ function AU(){
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
   const key='nosmo-tile-groups:v2:'+world;
   const esafe={proj:['e-SAFE Catania Real Pilot','project'],'p-mateusz':['Structural / Seismic','task'],'p-sitemgr':['MEP / Energy','task'],'p-architect':['Electrical / Controls','task'],'p-client':['BIM / Digital','task'],'p-team':['Fabrication / Installation','task'],'d-groundfloor':['Survey / QA','task'],'d-doorschedule':['Project / General','task'],'d-snaglist':['D5.1 Detailed survey','document'],'d-firecerts':['D2.2 3D models','document'],'t-install':['D5.5 Monitoring','document'],'t-snag':['D5.4 Production delivery','document'],'t-fire':['D5.3 Detailed design','document'],'t-walkthrough':['Pilot Actions','task']};
-  const objects=b.useMemo(()=>world==='esafe-demo'?ns.filter(o=>esafe[o.id]).map(o=>({...o,label:esafe[o.id][0],type:esafe[o.id][1]})):ns,[world]);
+  const catalog=b.useMemo(()=>world==='esafe-demo'?nxEsafeCatalog(window.ESAFE_RECORDS||[]):[],[world]);
+  const objects=b.useMemo(()=>world==='esafe-demo'?[...ns.filter(o=>esafe[o.id]&&esafe[o.id][1]!=='document').map(o=>({...o,label:esafe[o.id][0],type:esafe[o.id][1]})),...catalog.map(file=>({...file,label:file.name,type:'document',Icon:ns.find(o=>o.type==='document')?.Icon||Dt}))]:ns,[world,catalog]);
+  const [library,setLibrary]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('files')==='all'),[libraryFile,setLibraryFile]=b.useState(null),[fileFocus,setFileFocus]=b.useState(()=>new URLSearchParams(window.location.search).get('file'));
   const ids=b.useMemo(()=>objects.map(o=>o.id),[objects]);
   const [state,setState]=b.useState(()=>{try{return nxCleanWorkspace(JSON.parse(localStorage.getItem(key)),ids)}catch{return nxCleanWorkspace(null,ids)}});
-  const [open,setOpen]=b.useState(null),[selected,setSelected]=b.useState('proj');
+  const [open,setOpen]=b.useState(()=>state.groups.find(group=>group.members.includes(fileFocus))?.id||null),[selected,setSelected]=b.useState(fileFocus||'proj');
   const [zoom,setZoom]=b.useState(window.innerWidth<720?.52:.72),[pan,setPan]=b.useState({x:0,y:0});
   const [size,setSize]=b.useState({w:0,h:0}),[drag,setDrag]=b.useState(null),[hover,setHover]=b.useState(null);
   const [notice,setNotice]=b.useState('Drag one tile onto another to create a node'),[undo,setUndo]=b.useState(null),[mode,setMode]=b.useState('map');
@@ -17,12 +19,15 @@ function AU(){
   const all=[...objects,...groupNodes],byId=new Map(all.map(o=>[o.id,o]));
   const members=new Set(state.groups.flatMap(g=>g.members));
   const opened=state.groups.find(g=>g.id===open);
-  const visible=all.filter(o=>!members.has(o.id)||opened?.members.includes(o.id));
-  const edges=nxGroupEdges(objects,state.groups,open);
-  const positions=EU(all.filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
+  const graphObjects=objects.filter(o=>!o.fileUrl||o.core||o.id===fileFocus||members.has(o.id));
+  const visible=all.filter(o=>(!o.fileUrl||o.core||o.id===fileFocus||members.has(o.id))&&(!members.has(o.id)||opened?.members.includes(o.id)));
+  const edges=nxGroupEdges(graphObjects,state.groups,open);
+  const positions=EU([...graphObjects,...groupNodes].filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
   if(opened){const center=positions.get(opened.id)||{x:0,y:0};nxPlaceMembers(center,opened.members,positions).forEach((point,id)=>positions.set(id,point))}
   if(drag&&state.pinned[drag])positions.set(drag,state.pinned[drag]);
   b.useLayoutEffect(()=>{const el=root.current;if(!el)return;const resize=()=>setSize({w:el.clientWidth,h:el.clientHeight});resize();const obs=new ResizeObserver(resize);obs.observe(el);return()=>obs.disconnect()},[mode]);
+  b.useEffect(()=>{if(world!=='esafe-demo')return;window.__NEXUS_NATIVE_ESAFE__=true;document.title='NOSMO Nexus — e-SAFE Catania';const openFiles=()=>openLibrary();window.addEventListener('nexus:open-project-files',openFiles);return()=>window.removeEventListener('nexus:open-project-files',openFiles)},[world]);
+  b.useEffect(()=>{if(!fileFocus)return;const point=positions.get(fileFocus);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom})},[fileFocus,open]);
   b.useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[]);
   b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:groups-change'))},[state.groups,open]);
   const persist=(next,previous=null,message='Saved on this device')=>{
@@ -30,22 +35,26 @@ function AU(){
     if(previous)setUndo(previous);current.current=next;setState(next);setNotice(message);return true;
   };
   const fit=()=>{const pts=[...positions.values()];if(!pts.length)return;const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);const left=Math.min(...xs)-100,right=Math.max(...xs)+100,top=Math.min(...ys)-130,bottom=Math.max(...ys)+130;const z=Math.min(.95,Math.max(.3,Math.min(size.w/(right-left),(size.h-100)/(bottom-top))));setZoom(z);setPan({x:-(left+right)/2*z,y:-(top+bottom)/2*z})};
-  const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj')setOpen(null)};
+  const openLibrary=(id=null)=>{setLibraryFile(id);setLibrary(true);const url=new URL(window.location.href);url.searchParams.set('files','all');window.history.replaceState(null,'',url)};
+  const closeLibrary=()=>{setLibrary(false);const url=new URL(window.location.href);url.searchParams.delete('files');window.history.replaceState(null,'',url)};
+  const revealFile=id=>{setFileFocus(id);setSelected(id);setOpen(state.groups.find(g=>g.members.includes(id))?.id||null);closeLibrary();const point=positions.get(id);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom});const url=new URL(window.location.href);url.searchParams.set('file',id);window.history.replaceState(null,'',url);setNotice('File shown in tree · drag it onto another tile to connect')};
+  const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj'){setOpen(null);if(world==='esafe-demo')openLibrary()}else if(o.fileUrl)openLibrary(o.id)};
   const startPinch=()=>{const [a,c]=[...touches.current.values()];if(!a||!c)return;const r=root.current.getBoundingClientRect(),mid={x:(a.x+c.x)/2-r.left,y:(a.y+c.y)/2-r.top};const previous=gesture.current?.before;if(previous){current.current=previous;setState(previous)}gesture.current={mode:'pinch',distance:Math.max(1,Math.hypot(a.x-c.x,a.y-c.y)),zoom,world:{x:(mid.x-size.w/2-pan.x)/zoom,y:(mid.y-size.h/2-pan.y)/zoom}};setDrag(null);setHover(null)};
   const down=e=>{
     if(e.target.closest('[data-control]')||e.button>0)return;
     if(e.pointerType==='touch')touches.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(touches.current.size>1){startPinch();try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}return}
     const id=e.target.closest('[data-node-id]')?.dataset.nodeId;
-    gesture.current={mode:id&&id!=='proj'?'node':'pan',id,pointer:e.pointerId,x:e.clientX,y:e.clientY,point:positions.get(id),zoom,pan,before:current.current,moved:false,target:null};
+    const face=id?e.target.closest('[data-node-id]')?.querySelector('[data-tile-face]')?.getBoundingClientRect():null;
+    gesture.current={offset:face?{x:e.clientX-face.left-face.width/2,y:e.clientY-face.top-face.height/2}:{x:0,y:0},mode:id&&id!=='proj'?'node':'pan',id,pointer:e.pointerId,x:e.clientX,y:e.clientY,point:positions.get(id),zoom,pan,before:current.current,moved:false,target:null};
   };
-  const targetAt=(e,id)=>{
+  const targetAt=(e,id,offset)=>{
     // Hit-test the visible icon, not its transparent translated wrapper or label.
     let best=null,distance=Infinity;
     root.current.querySelectorAll('[data-node-id]').forEach(el=>{const target=el.dataset.nodeId;if(target===id||target==='proj'||getComputedStyle(el).display==='none')return;
       if(state.groups.find(g=>g.id===target)?.members.includes(id))return;
       const tile=el.querySelector('[data-tile-face]'),r=tile?.getBoundingClientRect();if(!r)return;
-      const dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+      const dx=e.clientX-offset.x-(r.left+r.width/2),dy=e.clientY-offset.y-(r.top+r.height/2);
       if(Math.abs(dx)<=Math.max(28,r.width/2)&&Math.abs(dy)<=Math.max(28,r.height/2)&&dx*dx+dy*dy<distance){best=target;distance=dx*dx+dy*dy}});return best;
   };
   const moveNow=e=>{
@@ -57,7 +66,7 @@ function AU(){
     if(!g.moved&&Math.hypot(dx,dy)<(e.pointerType==='touch'?10:5))return;
     g.moved=true;try{root.current.setPointerCapture(e.pointerId)}catch{}
     if(g.mode==='pan'){setPan({x:g.pan.x+dx,y:g.pan.y+dy});return}
-    setDrag(g.id);g.target=targetAt(e,g.id);setHover(g.target);
+    setDrag(g.id);g.target=targetAt(e,g.id,g.offset);setHover(g.target);
     const next={...g.before,pinned:{...g.before.pinned,[g.id]:{x:g.point.x+dx/g.zoom,y:g.point.y+dy/g.zoom}}};current.current=next;setState(next);
   };
   const move=e=>{if(!gesture.current)return;e.preventDefault();pending.current={pointerId:e.pointerId,pointerType:e.pointerType,clientX:e.clientX,clientY:e.clientY};if(frame.current===null)frame.current=requestAnimationFrame(()=>{frame.current=null;const next=pending.current;pending.current=null;if(next)moveNow(next)})};
@@ -72,7 +81,7 @@ function AU(){
       if(cancel){current.current=g.before;setState(g.before);setNotice('Move cancelled')}
       else if(g.target){const point=positions.get(g.target)||g.point;const stable={...g.before,pinned:{...g.before.pinned,...Object.fromEntries(positions)}};const next=nxGroupDrop(stable,g.id,g.target,'nx-group-'+crypto.randomUUID(),point,ids);
         if(next!==g.before&&persist(next,g.before,'Node created · tap it to open')){setOpen(null);setSelected(next.groups[next.groups.length-1].id)}else{current.current=g.before;setState(g.before)}}
-      else if(!persist(current.current,g.before,'Position saved on this device')){current.current=g.before;setState(g.before)}
+      else {const member=g.before.groups.some(group=>group.members.includes(g.id));const next=member?nxDetachMember(g.before,g.id,current.current.pinned[g.id],Object.fromEntries(positions),ids):current.current;if(persist(next,g.before,member?'Tile moved out of node':'Position saved on this device')){if(open&&!next.groups.some(group=>group.id===open))setOpen(null)}else{current.current=g.before;setState(g.before)}}
     }}
     gesture.current=null;setDrag(null);setHover(null);try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{}
   };
@@ -80,6 +89,8 @@ function AU(){
   const reset=()=>{if(persist(nxCleanWorkspace(null,ids),state,'Demo reset · each tile connected only to project')){setOpen(null);setSelected('proj');setPan({x:0,y:0})}};
   if(mode==='workflow')return s.jsxs('div',{className:'relative h-[100dvh] overflow-hidden',children:[s.jsx('button',{'data-control':true,className:'nx-back-map',onClick:()=>setMode('map'),children:'Back to map'}),s.jsx(CU,{})]});
   return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,style:{'--nx-zoom':zoom},onDragStart:e=>e.preventDefault(),className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
+    library&&world==='esafe-demo'&&s.jsx(NexusProjectFiles,{files:catalog,initialFile:libraryFile,onClose:closeLibrary,onReveal:revealFile},libraryFile||'all'),
+    s.jsxs('div',{'data-control':true,className:'nx-project-access',children:[s.jsx('button',{'aria-label':'Switch project',onClick:()=>document.getElementById('nexusTopProject')?.click(),children:world==='esafe-demo'?'e-SAFE Catania ▾':'Riverside ▾'}),world==='esafe-demo'&&s.jsx('button',{'data-catania-file-count':catalog.length,onClick:()=>openLibrary(),children:catalog.length+' project files'})]}),
     s.jsxs('div',{'data-control':true,className:'nx-map-toolbar',children:[s.jsx('button',{onClick:fit,children:'Fit map'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z*1.15)),children:'+'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z/1.15)),children:'−'}),s.jsx('button',{onClick:reset,children:'Reset demo'}),s.jsx('button',{onClick:()=>setMode('workflow'),children:'Workflow'}),s.jsx('span',{children:objects.length+' objects · '+edges.length+' links'})]}),
     s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:hover?'Release to create a shared node':notice}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),s.jsx('button',{onClick:reset,'aria-label':'Reset demo',title:'Reset demo (undoable)',children:'↺'}),undo&&s.jsx('button',{onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{onClick:ungroup,children:'Ungroup'})]}),
     s.jsxs('div',{className:'absolute left-0 top-0 h-0 w-0 origin-top-left',style:{transform:`translate(${size.w/2+pan.x}px,${size.h/2+pan.y}px) scale(${zoom})`},children:[

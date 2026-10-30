@@ -72,6 +72,7 @@
       dispatch('nexus:dock-action',{action:'people'});
     },
     docs(){
+      if(window.__NEXUS_PROJECT_WORLD__==='esafe-demo'){closeShellScrim();dispatch('nexus:open-project-files');return;}
       if(clickId('nexusTopFiles'))return;
       if(clickFirst('[data-nexus-file-action="project-files"]'))return;
       dispatch('nexus:dock-action',{action:'docs'});

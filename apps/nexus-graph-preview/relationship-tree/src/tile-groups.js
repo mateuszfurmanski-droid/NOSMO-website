@@ -29,6 +29,14 @@ function nxGroupDrop(workspace, source, target, groupId, point, ids) {
 function nxUngroup(workspace, id, positions, ids) {
   return nxCleanWorkspace({groups:workspace.groups.filter(g=>g.id!==id),pinned:{...workspace.pinned,...positions}},ids);
 }
+// Dragging a member into empty space returns it to the project at the release point.
+function nxDetachMember(workspace, id, point, positions, ids) {
+  if (id === 'proj' || !ids.includes(id) || !Number.isFinite(point?.x) || !Number.isFinite(point?.y)) return workspace;
+  const owner=workspace.groups.find(group=>group.members.includes(id));
+  if (!owner) return workspace;
+  const groups=workspace.groups.map(group=>group===owner?{...group,members:group.members.filter(member=>member!==id)}:group).filter(group=>group.members.length>=2);
+  return nxCleanWorkspace({groups,pinned:{...workspace.pinned,...positions,[id]:point}},ids);
+}
 function nxGroupEdges(objects, groups, open) {
   const membership=new Set(groups.flatMap(g=>g.members));
   return [...objects.filter(o=>o.id!=='proj'&&!membership.has(o.id)).map(o=>({source:'proj',target:o.id})),

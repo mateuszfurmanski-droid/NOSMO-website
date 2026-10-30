@@ -45,13 +45,10 @@
   const tradeId=trade=>(tradeGroups.find(([label])=>label===trade)||tradeGroups[tradeGroups.length-1])[1];
 
   function loadData(){
-    if(Array.isArray(window.ESAFE_RECORDS)&&window.ESAFE_RECORDS.length)return;
-    try{
-      const request=new XMLHttpRequest();
-      request.open('GET','/apps/nexus-esafe-demo/data.js?v=2',false);
-      request.send(null);
-      if(request.status>=200&&request.status<300)(0,eval)(`${request.responseText}\n//# sourceURL=esafe-data.js`);
-    }catch(error){console.warn('[NOSMO] e-SAFE data bootstrap failed',error)}
+    for(const [ready,path] of [[()=>Array.isArray(window.ESAFE_RECORDS)&&window.ESAFE_RECORDS.length,'data.js'],[()=>window.ESAFE_FILES,'files.js']]){
+      if(ready())continue;
+      try{const request=new XMLHttpRequest();request.open('GET','/apps/nexus-esafe-demo/'+path+'?v=catania-library-20261030',false);request.send(null);if(request.status>=200&&request.status<300)(0,eval)(request.responseText);else console.warn('[NOSMO] e-SAFE catalog unavailable',path,request.status)}catch(error){console.warn('[NOSMO] e-SAFE catalog failed',path,error)}
+    }
   }
   loadData();
 
@@ -166,6 +163,7 @@
   }
 
   function render(progress=1){
+    if(window.__NEXUS_NATIVE_ESAFE__)return;
     applyIdentity();
     fallbackClean();
     const all=safeRecords().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
@@ -189,6 +187,7 @@
     if(selection&&selection.textContent==='No files selected')selection.textContent=`e-SAFE source library · ${totalFiles} visible files`;
   }
 
+  document.addEventListener('click',event=>{if(!event.target.closest('#nexusTopFiles'))return;if(!window.__NEXUS_NATIVE_ESAFE__)return;event.preventDefault();event.stopImmediatePropagation();document.querySelectorAll('.nexus-shell-panel.open').forEach(n=>n.classList.remove('open'));document.getElementById('nexusShellScrim')?.classList.remove('open');window.dispatchEvent(new CustomEvent('nexus:open-project-files'))},true);
   const scan=(attempt=0)=>{
     if(document.querySelector('[data-node-id="proj"]')){render(1);return}
     if(attempt<80)setTimeout(()=>scan(attempt+1),100);

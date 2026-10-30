@@ -33,3 +33,19 @@ html[data-nexus-theme=light] #root:has(.nx-group-guide),html[data-nexus-theme=li
 #root .nx-group-mosaic img{position:static!important;width:24px!important;height:24px!important;max-width:24px!important;max-height:24px!important;object-fit:contain!important;transform:none!important;margin:0!important}
 #root [data-node-id] button>span.rounded-full{background:#edf8fb;color:#42616c;border-color:#9cbdc8}
 #root .nx-group-mosaic svg[data-nosmo-file-icon]{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;max-width:24px!important;max-height:24px!important;filter:none!important;overflow:hidden!important}
+.nx-project-access{position:absolute;z-index:46;left:12px;right:12px;top:10px;display:flex;gap:8px;justify-content:center}
+.nx-project-access button{min-height:44px;padding:8px 14px;border:1px solid #71a7ba;border-radius:12px;background:#e9faff;color:#184f61;font:700 13px system-ui;cursor:pointer;box-shadow:0 3px 10px #0b566512}
+.nx-project-access+.nx-map-toolbar+.nx-group-guide{top:64px}
+#nexusProjectFiles{position:fixed;z-index:2147483200;inset:60px 12px 16px;max-width:900px;margin:auto;background:#f2f9fc;color:#183d4b;box-shadow:0 0 0 100vmax #061a2b99,0 16px 40px #07182755;border:1px solid #7eacbe;border-radius:18px;padding:16px;display:flex;flex-direction:column;box-sizing:border-box;font:14px/1.5 system-ui;touch-action:pan-y}
+#nexusProjectFiles header{display:flex;justify-content:space-between;gap:12px;align-items:center}
+#nexusProjectFiles h2{margin:0;font-size:22px}#nexusProjectFiles small{font-size:12px;color:#496a78}
+#nexusProjectFiles button,#nexusProjectFiles a,#nexusProjectFiles input{min-height:44px;box-sizing:border-box;border:1px solid #8eb6c7;border-radius:9px;background:#fff;color:#16516b;padding:9px 12px;font:600 13px/1.5 system-ui;cursor:pointer;text-decoration:none;touch-action:manipulation}
+#nexusProjectFiles [aria-pressed=true]{background:#116d86;color:white;border-color:#116d86}
+#nexusProjectFiles button:focus-visible,#nexusProjectFiles a:focus-visible,#nexusProjectFiles input:focus-visible{outline:3px solid #1ca5c0;outline-offset:2px}
+.nx-file-filters{display:flex;gap:8px;flex-wrap:wrap}.nx-file-filters label{flex:1;min-width:140px}.nx-file-filters input{width:100%;font-weight:400!important}
+.nx-source-note{margin:10px 0;font-size:12px;max-width:780px}.nx-file-result-count{margin:8px 0;font-size:12px}
+.nx-project-file-list{overflow:auto;overscroll-behavior:contain;min-height:0;flex:1;padding-right:8px;scrollbar-gutter:stable}
+.nx-project-file-list article{border-top:1px solid #b4ced9;padding:14px 0;overflow-wrap:anywhere}.nx-file-name{display:flex;align-items:start;gap:8px}.nx-file-kind{border:1px solid #86adbf;border-radius:6px;padding:2px 6px;font-size:11px;font-weight:700;flex-shrink:0}
+.nx-project-file-list article p{margin:6px 0;font-size:12px}.nx-file-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+body:has(#nexusProjectFiles) #root,body:has(#nexusProjectFiles) #root [data-node-id]>button,body:has(#nexusProjectFiles) #nexusTopRail{pointer-events:none!important}
+@media(max-width:600px){#nexusProjectFiles{inset:55px 6px 6px;padding:12px;border-radius:14px}#nexusProjectFiles h2{font-size:20px}.nx-project-access button{font-size:12px;padding:8px 10px}}
