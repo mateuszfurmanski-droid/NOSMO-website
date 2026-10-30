@@ -59,3 +59,9 @@ test('actual React map: drag hover, drop, add, undo, expand, reload, cancel, sav
  await act(()=>root.unmount());w.__NEXUS_PROJECT_WORLD__='another-demo';root=createRoot(w.document.getElementById('mount'));await render();assert.equal(w.document.querySelectorAll('[data-group-members]').length,0);assert.equal(w.localStorage.getItem('nosmo-tile-groups:v2:another-demo'),null);
  await act(()=>root.unmount());dom.window.close();
 });
+
+test('expanded members avoid neighbouring tiles and each other',()=>{
+ const occupied=new Map([['proj',{x:0,y:0}],['nx-group-1',{x:-300,y:-100}],['task',{x:-300,y:100}],['person',{x:-300,y:-290}]]);
+ const placed=c.nxPlaceMembers({x:-300,y:-100},['a','b','c','d'],occupied);
+ const points=[...occupied.values()];for(const p of placed.values()){assert.ok(points.every(q=>Math.abs(p.x-q.x)>155||Math.abs(p.y-q.y)>185));points.push(p)}assert.equal(placed.size,4);
+});

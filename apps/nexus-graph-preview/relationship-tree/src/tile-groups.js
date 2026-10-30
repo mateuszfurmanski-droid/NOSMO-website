@@ -35,3 +35,20 @@ function nxGroupEdges(objects, groups, open) {
     ...groups.map(g=>({source:'proj',target:g.id})),
     ...groups.filter(g=>g.id===open).flatMap(g=>g.members.map(id=>({source:g.id,target:id})))];
 }
+
+// Find free slots outside a group, keeping all existing tiles stationary.
+function nxPlaceMembers(center, members, occupied) {
+  const placed=new Map(), points=[...occupied.values()];
+  const outward=Math.atan2(center.y,center.x);
+  for(const id of members){
+    let point;
+    search: for(let ring=0;ring<20;ring++)for(let step=0;step<24;step++){
+      const angle=outward+(step%2?1:-1)*Math.ceil(step/2)*Math.PI/12;
+      const radius=210+ring*100;
+      const candidate={x:center.x+Math.cos(angle)*radius,y:center.y+Math.sin(angle)*radius};
+      if(points.every(p=>Math.abs(p.x-candidate.x)>155||Math.abs(p.y-candidate.y)>185)){point=candidate;break search}
+    }
+    point=point||{x:center.x-2300,y:center.y+placed.size*200};placed.set(id,point);points.push(point);
+  }
+  return placed;
+}

@@ -20,7 +20,7 @@ function AU(){
   const visible=all.filter(o=>!members.has(o.id)||opened?.members.includes(o.id));
   const edges=nxGroupEdges(objects,state.groups,open);
   const positions=EU(all.filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
-  if(opened){const center=positions.get(opened.id)||{x:0,y:0};opened.members.forEach((id,index)=>{const angle=-Math.PI/2+index*2*Math.PI/opened.members.length;positions.set(id,{x:center.x+Math.cos(angle)*205,y:center.y+Math.sin(angle)*205})})}
+  if(opened){const center=positions.get(opened.id)||{x:0,y:0};nxPlaceMembers(center,opened.members,positions).forEach((point,id)=>positions.set(id,point))}
   if(drag&&state.pinned[drag])positions.set(drag,state.pinned[drag]);
   b.useLayoutEffect(()=>{const el=root.current;if(!el)return;const resize=()=>setSize({w:el.clientWidth,h:el.clientHeight});resize();const obs=new ResizeObserver(resize);obs.observe(el);return()=>obs.disconnect()},[mode]);
   b.useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[]);

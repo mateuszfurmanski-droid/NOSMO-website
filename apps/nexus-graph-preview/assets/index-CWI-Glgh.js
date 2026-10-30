@@ -116,6 +116,23 @@ function nxGroupEdges(objects, groups, open) {
     ...groups.filter(g=>g.id===open).flatMap(g=>g.members.map(id=>({source:g.id,target:id})))];
 }
 
+// Find free slots outside a group, keeping all existing tiles stationary.
+function nxPlaceMembers(center, members, occupied) {
+  const placed=new Map(), points=[...occupied.values()];
+  const outward=Math.atan2(center.y,center.x);
+  for(const id of members){
+    let point;
+    search: for(let ring=0;ring<20;ring++)for(let step=0;step<24;step++){
+      const angle=outward+(step%2?1:-1)*Math.ceil(step/2)*Math.PI/12;
+      const radius=210+ring*100;
+      const candidate={x:center.x+Math.cos(angle)*radius,y:center.y+Math.sin(angle)*radius};
+      if(points.every(p=>Math.abs(p.x-candidate.x)>155||Math.abs(p.y-candidate.y)>185)){point=candidate;break search}
+    }
+    point=point||{x:center.x-2300,y:center.y+placed.size*200};placed.set(id,point);points.push(point);
+  }
+  return placed;
+}
+
 // Maintained source for the existing AU graph component in the deployed legacy bundle.
 // Rebuild with scripts/build-tile-groups.py; uses the bundle's React and icon imports.
 function AU(){
@@ -138,7 +155,7 @@ function AU(){
   const visible=all.filter(o=>!members.has(o.id)||opened?.members.includes(o.id));
   const edges=nxGroupEdges(objects,state.groups,open);
   const positions=EU(all.filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
-  if(opened){const center=positions.get(opened.id)||{x:0,y:0};opened.members.forEach((id,index)=>{const angle=-Math.PI/2+index*2*Math.PI/opened.members.length;positions.set(id,{x:center.x+Math.cos(angle)*205,y:center.y+Math.sin(angle)*205})})}
+  if(opened){const center=positions.get(opened.id)||{x:0,y:0};nxPlaceMembers(center,opened.members,positions).forEach((point,id)=>positions.set(id,point))}
   if(drag&&state.pinned[drag])positions.set(drag,state.pinned[drag]);
   b.useLayoutEffect(()=>{const el=root.current;if(!el)return;const resize=()=>setSize({w:el.clientWidth,h:el.clientHeight});resize();const obs=new ResizeObserver(resize);obs.observe(el);return()=>obs.disconnect()},[mode]);
   b.useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[]);
