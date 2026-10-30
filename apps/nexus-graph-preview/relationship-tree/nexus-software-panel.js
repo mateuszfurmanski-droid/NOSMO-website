@@ -48,10 +48,7 @@
     ]);
     url.search=demoUrl.search;
     details.querySelector('a').href=url.href;
-    details.addEventListener('toggle',()=>{
-      if(!details.open||details.querySelector('iframe'))return;
-      details.appendChild(el('iframe',{src:url.href,title:'Private saved BIM object status',loading:'lazy',referrerpolicy:'no-referrer',sandbox:'allow-scripts allow-same-origin allow-top-navigation-by-user-activation',style:'width:100%;height:410px;border:1px solid #34505f;border-radius:8px;'}));
-    });
+    details.appendChild(el('p',{text:'Opens your private account record in a separate tab. Use Refresh saved status there after saving in BIM. Graph tiles use separate demo data.',style:'color:#9eb6c5;font-size:12px;line-height:1.5;'}));
     return details;
   };
 
