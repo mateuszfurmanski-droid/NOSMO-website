@@ -20,7 +20,7 @@
     document.documentElement.toggleAttribute('data-nx-phase-highlight',highlight);
     const nodes=[...document.querySelectorAll('#root [data-node-id]')];
     let count=0;
-    for(const node of nodes){const match=selected.has(node.dataset.nodeId);if(match)count++;node.dataset.nxPhaseMatch=String(match||node.dataset.nodeId==='proj');}
+    for(const node of nodes){const match=selected.has(node.dataset.nodeId)||(node.dataset.groupMembers||" ").split(",").some(id=>selected.has(id));if(match)count++;node.dataset.nxPhaseMatch=String(match||node.dataset.nodeId==='proj');}
     root.querySelector('[data-phase-count]').textContent=highlight?count+' related objects highlighted · other objects remain visible':'All objects visible';
   }
   function update(){
@@ -38,6 +38,7 @@
     window.__NEXUS_PROJECT_TIME__={open,mode:'simulation',worldId:world,phase:phases[phase].name,phaseIndex:phase,highlight,source:'demo-phase-map'};
     window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:window.__NEXUS_PROJECT_TIME__}));
   }
+  window.addEventListener("nexus:groups-change",()=>{if(root)applyGraph()});
   function stop(){if(timer)clearInterval(timer);timer=null;}
   function select(index){phase=Math.max(0,Math.min(4,index));highlight=true;try{localStorage.setItem(key,String(phase))}catch{}update()}
   function boot(){

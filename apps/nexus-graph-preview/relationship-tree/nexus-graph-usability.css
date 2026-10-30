@@ -2,25 +2,20 @@
 html body #root{top:var(--nexus-top-h,50px)!important;bottom:calc(var(--nexus-bottom-dock-h,112px) + env(safe-area-inset-bottom,0px))!important;min-height:0!important}
 html body #root>div:first-child{height:100%!important;min-height:0!important;width:100%!important;margin-left:0!important;transform:none!important}
 html body #root [data-zoom]{height:100%!important;min-height:0!important}
-#root .nx-connect-handle{width:44px;height:44px;min-width:44px;min-height:44px;opacity:1!important;touch-action:manipulation;scale:calc(1 / var(--nx-zoom,1))}
-#nexusLinkEditor{position:fixed;inset:80px 12px auto;max-height:calc(100dvh - 110px);width:calc(100% - 24px);max-width:540px;margin:auto;overflow:auto;z-index:2147483200;padding:20px;box-sizing:border-box;border:1px solid #5b9bb6;border-radius:18px;background:#0b2130;color:#edf8ff;box-shadow:0 0 0 100vmax #0009;font:15px/1.5 Inter,system-ui,sans-serif;touch-action:pan-y}
-#nexusLinkEditor header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-#nexusLinkEditor h2{font-size:22px;margin:0}
-#nexusLinkEditor h3{font-size:15px;margin:18px 0 8px}
-#nexusLinkEditor p{margin:12px 0;overflow-wrap:anywhere}
-#nexusLinkEditor small{font-size:12px;color:#b1cbd8}
-#nexusLinkEditor label{display:block;margin:12px 0 5px;font-size:13px;font-weight:600}
-#nexusLinkEditor button,#nexusLinkEditor input,#nexusLinkEditor select{font:inherit;min-height:44px;border:1px solid #56849a;border-radius:8px;background:#15374a;color:#f2faff;padding:9px 12px;box-sizing:border-box;touch-action:manipulation}
-#nexusLinkEditor input,#nexusLinkEditor select{width:100%}
-#nexusLinkEditor button{cursor:pointer}
-#nexusLinkEditor button:disabled{opacity:.55;cursor:default}
-#nexusLinkEditor .nx-link-primary{width:100%;margin-top:12px;background:#116c83}
-#nexusLinkEditor [role=status]{color:#9aedd8}
-#nexusLinkEditor ul{list-style:none;padding:0;margin:0 0 16px}
-#nexusLinkEditor li{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #335365;padding:8px 0;font-size:13px}
-#nexusLinkEditor :focus-visible{outline:2px solid #8ceaff;outline-offset:2px}
-@media(prefers-reduced-motion:reduce){#root [data-node-id] *{transition:none!important}}
-/* Translated child buttons leave transparent wrapper boxes over adjacent tiles. */
+/* Only visible buttons receive pointer input; transparent node wrappers never block neighbours. */
 #root [data-node-id]{pointer-events:none}
 #root [data-node-id]>button{pointer-events:auto}
-body:has(#nexusLinkEditor) #root,body:has(#nexusLinkEditor) #root [data-node-id]>button,body:has(#nexusLinkEditor) #nexusTopRail{pointer-events:none!important}
+.nx-map-toolbar{position:absolute;z-index:50;display:flex;gap:8px;padding:8px;background:#10384b;border-radius:14px}
+.nx-group-guide{position:absolute;top:12px;left:12px;right:12px;z-index:45;display:flex;align-items:center;gap:8px;max-width:620px;margin:auto;padding:8px 12px;border:1px solid #81becb;border-radius:16px;background:#edfaffed;color:#174d5a;font:13px/1.35 system-ui;box-shadow:0 3px 14px #073a4c15}
+.nx-group-guide [role=status]{flex:1}
+.nx-group-guide button,.nx-map-toolbar button,.nx-back-map{min-height:44px;min-width:44px;padding:8px 12px;border:1px solid #86b6c3;border-radius:10px;background:#d7eff4;color:#174d5a;font:600 13px system-ui;cursor:pointer}
+.nx-back-map{position:fixed;right:12px;top:70px;z-index:100}
+#root .nx-tile-face{width:88px;height:88px;box-shadow:0 8px 20px #12425025;transition:transform 140ms ease,box-shadow 140ms ease;background:#e3f3f7}
+#root .nx-tile-selected{box-shadow:0 0 0 4px #47cddd40}
+#root [data-drop-target=true] .nx-tile-face{transform:scale(1.22);box-shadow:0 0 0 7px #21c4cd55,0 8px 25px #08a6b344;border-color:#049da8}
+#root [data-group-dragging] [data-node-id]{transition:none!important}
+#root .nx-group-face{border-color:#0d9dad;background:#d6f1f4;box-shadow:0 5px 0 -1px #9ccdd3,0 9px 0 -3px #c1e0e4}
+.nx-group-mosaic{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;padding:8px}
+.nx-group-mosaic>span{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px}
+.nx-group-count{position:absolute;right:-8px;bottom:-8px;border:2px solid #e7f6f8;border-radius:99px;padding:2px 6px;background:#126f7d;color:white;font:700 13px system-ui}
+@media(prefers-reduced-motion:reduce){#root .nx-tile-face{transition:none}}

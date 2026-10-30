@@ -158,7 +158,7 @@
     const allowed=new Set(['proj','p-sitemgr',...tradeGroups.map(([,id])=>id),...coreDocs.map(doc=>doc.id),...Object.values(fallbackIds),...fallbackDocs.map(([id])=>id)]);
     document.querySelectorAll('[data-node-id]').forEach(node=>{
       const id=node.getAttribute('data-node-id');
-      if(!id||allowed.has(id))return;
+      if(!id||allowed.has(id)||node.hasAttribute("data-group-members"))return;
       node.style.display='none';
       node.dataset.esafeHiddenRiverside='true';
     });
