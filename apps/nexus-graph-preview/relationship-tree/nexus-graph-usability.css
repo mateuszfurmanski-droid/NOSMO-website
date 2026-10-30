@@ -25,3 +25,7 @@ html body #root [data-zoom]{height:100%!important;min-height:0!important}
 #root [data-node-id] .text-muted-foreground{color:#42616c}
 #root [data-node-id] img{-webkit-user-drag:none}
 #root [data-group-dragging] .nx-tile-face{transition:transform 100ms ease}
+
+/* The new canvas uses explicit colours, so do not invert it a second time. */
+html[data-nexus-theme=light] #root:has(.nx-group-guide),html[data-nexus-theme=light] #root:has(.nx-group-guide) img{filter:none}
+@media(max-width:600px){.nx-group-guide{flex-wrap:wrap;gap:6px}.nx-group-guide [role=status]{flex-basis:100%}}
