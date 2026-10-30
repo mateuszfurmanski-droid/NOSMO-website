@@ -2,7 +2,7 @@
 (()=>{
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
-  const version='functional-phases-20261030';
+  const version='functional-phases-world-20261030';
   const tuneVersion='project-time-thin-status-knob-20260817a';
   const dockVersion='bottom-dock-time-tile-polished-20260817a';
   const timeChipVersion='top-time-chip-20260817a';

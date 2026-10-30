@@ -15,7 +15,8 @@
   try{const n=Number(localStorage.getItem(key));if(Number.isInteger(n)&&n>=0&&n<phases.length)phase=n}catch{}
   let root;
   function applyGraph(){
-    const selected=new Set(phases[phase][world==='dev'?'dev':'esafe']);
+    const fallback={'esafe-core-6260847':'d-snaglist','esafe-core-6497142':'d-firecerts','esafe-core-19126674':'t-fire','esafe-core-19126519':'t-snag','esafe-core-19114712':'t-install','esafe-trade-survey':'d-groundfloor','esafe-trade-bim':'p-client','esafe-trade-fabrication':'p-team','esafe-trade-mep':'p-sitemgr'};
+    const selected=new Set(phases[phase][world==='dev'?'dev':'esafe'].map(id=>document.querySelector(`[data-node-id="${id}"]`)?id:fallback[id]||id));
     document.documentElement.toggleAttribute('data-nx-phase-highlight',highlight);
     const nodes=[...document.querySelectorAll('#root [data-node-id]')];
     let count=0;

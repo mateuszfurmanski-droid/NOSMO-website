@@ -30,11 +30,12 @@ test('connection editor reports save, blocks duplicates, removes only manual edg
  const source=fs.readFileSync('apps/nexus-graph-preview/assets/index-CWI-Glgh.js','utf8');
  const fn=source.slice(source.indexOf('function NexusLinkEditor'),source.indexOf('function AU(){'));
  let state=[],cursor=0;const objects=[{id:'a',label:'Document A',type:'document'},{id:'b',label:'Task B',type:'task'},{id:'c',label:'Person C',type:'person'}];let edges=[{id:'a|c',source:'a',target:'c'}],failure=false;
- const context={b:{useState(init){const n=cursor++;if(!(n in state))state[n]=init;return[state[n],v=>state[n]=v]},useEffect(){}},s:{jsx:(type,props)=>({type,...props}),jsxs:(type,props)=>({type,...props})},ko:{createPortal:x=>x},document:{body:{}},Nk:(a,b)=>[a,b].sort().join('|')};vm.createContext(context);vm.runInContext(fn,context);
+ const context={window:{},b:{useState(init){const n=cursor++;if(!(n in state))state[n]=init;return[state[n],v=>state[n]=v]},useEffect(){}},s:{jsx:(type,props)=>({type,...props}),jsxs:(type,props)=>({type,...props})},ko:{createPortal:x=>x},document:{body:{}},Nk:(a,b)=>[a,b].sort().join('|')};vm.createContext(context);vm.runInContext(fn,context);
  const render=()=>{cursor=0;return context.NexusLinkEditor({source:'a',objects,edges,onSave:next=>{if(failure)return false;edges=[edges[0],...next];return true},onClose(){}})};
  const find=(node,predicate)=>{if(!node||typeof node!=='object')return null;if(predicate(node))return node;for(const child of [node.children].flat(Infinity)){const found=find(child,predicate);if(found)return found}return null};
  let tree=render();find(tree,n=>n.id==='nx-link-target').onChange({target:{value:'b'}});tree=render();find(tree,n=>n.className==='nx-link-primary').onClick();tree=render();assert.match(find(tree,n=>n.role==='status').children,/Connected: Document A/);assert.equal(edges.length,2);assert.equal(find(tree,n=>n.className==='nx-link-primary').disabled,true);
  assert.equal(find(tree,n=>n['aria-label']==='Remove connection to Person C'),null);
  find(tree,n=>n['aria-label']==='Remove connection to Task B').onClick();tree=render();assert.equal(edges.length,1);
+ context.window.__NEXUS_PROJECT_WORLD__='esafe-demo';context.window.__NEXUS_GRAPH_LABELS__={a:{label:'Survey record',type:'document'},b:{label:'Pilot task',type:'task'},c:{label:'Coordinator',type:'person'}};tree=render();assert.ok(find(tree,n=>n.type==='p'&&n.children==='From: Survey record'));
  failure=true;find(tree,n=>n.className==='nx-link-primary').onClick();tree=render();assert.match(find(tree,n=>n.role==='status').children,/Could not save/);assert.equal(edges.length,1);
 });

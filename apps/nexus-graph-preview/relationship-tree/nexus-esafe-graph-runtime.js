@@ -108,6 +108,8 @@
     const node=document.querySelector(`[data-node-id="${id}"]`);
     const {button,typeSpan,labelSpan,subSpan}=nodeParts(node);
     if(!button)return false;
+    (window.__NEXUS_GRAPH_LABELS__??={})[id]={label,type};
+    button.querySelector('.nx-connect-handle')?.setAttribute('aria-label','Connections for '+label);
     if(labelSpan)labelSpan.textContent=label;
     if(typeSpan&&type)typeSpan.textContent=String(type).toUpperCase();
     if(subSpan&&sublabel)subSpan.textContent=sublabel;

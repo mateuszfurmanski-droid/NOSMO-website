@@ -12,6 +12,7 @@ def replace(old,new):
     s=s.replace(old,new)
 component=r'''
 function NexusLinkEditor({source,objects,edges,onSave,onClose}){
+ const presentation=window.__NEXUS_GRAPH_LABELS__;if(presentation&&window.__NEXUS_PROJECT_WORLD__==='esafe-demo')objects=objects.filter(o=>presentation[o.id]).map(o=>({...o,...presentation[o.id]}));
  const [query,setQuery]=b.useState(''),[target,setTarget]=b.useState(''),[message,setMessage]=b.useState('');
  const sourceNode=objects.find(o=>o.id===source);
  const linked=edges.filter(e=>e.source===source||e.target===source);
@@ -38,7 +39,7 @@ replace('localStorage.removeItem("nosmo-persistent-workspace")','localStorage.se
 start=s.index('g&&s.jsxs("div",{"data-control":!0,className:"absolute left-1/2 top-16')
 end=s.index(',s.jsxs("div",{className:"absolute left-0 top-0 h-0 w-0 origin-top-left"',start)
 s=s[:start]+'g&&s.jsx(NexusLinkEditor,{source:g,objects:ns,edges:ce,onClose:()=>y(null),onSave:edges=>{if(!xe(H.current,edges))return false;I.current=edges;f(edges);return true}},g)'+s[end:]
-replace('role:"button",tabIndex:0,onClick:vn=>{vn.stopPropagation(),y(B.id)}','role:"button",tabIndex:0,"aria-label":"Connections for "+B.label,title:"Connect objects",onKeyDown:vn=>{if(vn.key==="Enter"||vn.key===" "){vn.preventDefault();vn.stopPropagation();y(B.id)}},onClick:vn=>{vn.stopPropagation(),y(B.id)}')
+replace('role:"button",tabIndex:0,onClick:vn=>{vn.stopPropagation(),y(B.id)}','role:"button",tabIndex:0,"aria-label":"Connections for "+(window.__NEXUS_GRAPH_LABELS__?.[B.id]?.label||B.label),title:"Connect objects",onKeyDown:vn=>{if(vn.key==="Enter"||vn.key===" "){vn.preventDefault();vn.stopPropagation();y(B.id)}},onClick:vn=>{vn.stopPropagation(),y(B.id)}')
 # Fast, frame-coalesced motion. Do not animate each SVG endpoint for a second on every move.
 replace('const Pw={type:"tween",duration:1,','const Pw={type:"tween",duration:.18,')
 replace('transition:Ze?{duration:0}:Pw','transition:T?{duration:0}:Pw')
