@@ -2,7 +2,7 @@
 (()=>{
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
-  const version='ticker-single-safe-20260817a';
+  const version='functional-phases-20261030';
   const tuneVersion='project-time-thin-status-knob-20260817a';
   const dockVersion='bottom-dock-time-tile-polished-20260817a';
   const timeChipVersion='top-time-chip-20260817a';
@@ -29,7 +29,7 @@
   };
   const loadCss=()=>{
     appendCss('nexusProjectTimeIsoCss',`./nexus-project-time-instrument.css?v=${version}`);
-    appendCss('nexusProjectTimeIsoTuneCss',`./nexus-project-time-instrument-tune.css?v=${tuneVersion}`);
+
     appendCss('nexusCompactTopShellCss',`./nexus-compact-top-shell.css?v=${compactTopVersion}`);
     appendCss('nexusIntegrationsPanelCss',`./nexus-integrations-panel.css?v=${integrationsVersion}`);
     appendCss('nexusCloudPanelCss',`./nexus-cloud-panel.css?v=${cloudVersion}`);

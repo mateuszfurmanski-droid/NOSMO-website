@@ -1,23 +1,67 @@
-// NEXUS_PROJECT_TIME_INSTRUMENT_ISOLATED_20260817
+// Working, explicitly synthetic phase navigator for the existing graph.
 (()=>{
   if(window.__NEXUS_PROJECT_TIME_INSTRUMENT_ISO__)return;
   window.__NEXUS_PROJECT_TIME_INSTRUMENT_ISO__=true;
-  const records=[['2024-11-22','Energy Retrofit Potential in the Public Housing Stock',1,true],['2025-03-24','e-SAFE 7th Newsletter',1,false],['2025-06-25','Seismic and Energy Renovation of RC-Framed Buildings',1,false],['2025-09-15','e-SAFE Newsletter #8',1,false],['2026-03-19','Report on monitoring activities',1,true],['2026-03-20','Production and delivery of the real pilot',1,true],['2026-03-20','Detailed design for the renovation',1,true],['2026-03-21','Final e-SAFE engagement protocol',1,false]].map((r,i)=>({id:'pt-'+i,date:r[0],title:r[1],files:r[2],core:r[3]}));
-  const $=id=>document.getElementById(id);
-  const esc=v=>String(v||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const fmt=d=>new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric'}).format(new Date(d+'T00:00:00Z')).toUpperCase();
-  let open=false,mode='simulation',playing=false,recording=false,screen=false,knob='VOL',eventOpen=false,knobMenu=false;
-  const current={date:'2026-08-05',source:'05 NOV 2025',compression:'5.3×',phase:'CONSTRUCTION',docs:4,files:4,latest:records[3]};
-  function ensureCss(){if($('nexusProjectTimeIsoCss'))return;const link=document.createElement('link');link.id='nexusProjectTimeIsoCss';link.rel='stylesheet';link.href='./nexus-project-time-instrument.css?v=ticker-single-safe-20260817a';document.head.appendChild(link)}
-  function setTile(state){const sub=$('nexusTopTimeSub');const tile=$('nexusTopTime');if(sub)sub.textContent=state?'ON':'LIVE';if(tile)tile.classList.toggle('active',!!state)}
-  function tickerMarkup(){
-    return `<div class="nx-pti-ticker-text"><b>PROJECT TIME</b><strong>${esc(fmt(current.date))}</strong><span>SOURCE ${esc(current.source)}</span><em>${esc(current.compression)}</em><span>${esc(current.phase)}</span><span>${current.docs} DOCS</span><span>${current.files} FILES</span></div>`;
+  const world=window.__NEXUS_PROJECT_WORLD__==='esafe-demo'?'esafe-demo':'dev';
+  const phases=[
+    {name:'Survey',dev:['d-groundfloor','t-walkthrough'],esafe:['esafe-core-6260847','esafe-trade-survey']},
+    {name:'Design + BIM',dev:['d-groundfloor','d-doorschedule'],esafe:['esafe-core-6497142','esafe-core-19126674','esafe-trade-bim']},
+    {name:'Procurement',dev:['d-doorschedule','t-doorkits'],esafe:['esafe-core-19126519','esafe-trade-fabrication']},
+    {name:'Construction',dev:['t-install','t-fire','d-siteinstructions'],esafe:['esafe-core-19126519','esafe-trade-fabrication','esafe-trade-mep']},
+    {name:'Testing + handover',dev:['t-snag','d-snaglist','d-firecerts'],esafe:['esafe-core-19114712','esafe-trade-survey']}
+  ];
+  const key='nexus.demoPhase:'+world;
+  let phase=0,open=false,timer=null,highlight=false;
+  try{const n=Number(localStorage.getItem(key));if(Number.isInteger(n)&&n>=0&&n<phases.length)phase=n}catch{}
+  let root;
+  function applyGraph(){
+    const selected=new Set(phases[phase][world==='dev'?'dev':'esafe']);
+    document.documentElement.toggleAttribute('data-nx-phase-highlight',highlight);
+    const nodes=[...document.querySelectorAll('#root [data-node-id]')];
+    let count=0;
+    for(const node of nodes){const match=selected.has(node.dataset.nodeId);if(match)count++;node.dataset.nxPhaseMatch=String(match||node.dataset.nodeId==='proj');}
+    root.querySelector('[data-phase-count]').textContent=highlight?count+' related objects highlighted · other objects remain visible':'All objects visible';
   }
-  function render(){ensureCss();let root=$('nexusProjectTimeIso');if(!root){root=document.createElement('section');root.id='nexusProjectTimeIso';root.setAttribute('aria-label','Project Time');document.body.appendChild(root)}
-    root.className=open?'nx-pti-open':'';
-    root.innerHTML=`<div class="nx-pti-console"><div class="nx-pti-left"><div class="nx-pti-ticker">${tickerMarkup()}</div><div class="nx-pti-transport"><button class="nx-pti-btn nx-led-green ${playing?'nx-active':''}" data-cmd="play" data-icon="▶" aria-label="Play"></button><button class="nx-pti-btn nx-led-blue" data-cmd="rev" data-icon="◀◀" aria-label="Reverse"></button><button class="nx-pti-btn nx-led-blue" data-cmd="ffd" data-icon="▶▶" aria-label="Fast forward"></button><button class="nx-pti-btn nx-led-blue" data-cmd="rwd" data-icon="◀" aria-label="Rewind"></button><button class="nx-pti-btn nx-led-red ${recording?'nx-active':''}" data-cmd="rec" data-icon="●" aria-label="Record"></button><button class="nx-pti-btn nx-led-red ${screen?'nx-active':''}" data-cmd="scrn" data-icon="▣" aria-label="Record screen"></button></div><div class="nx-pti-mode"><button data-mode="real" class="${mode==='real'?'nx-active':''}">REAL</button><button data-mode="replay" class="${mode==='replay'?'nx-active':''}">REPLAY</button><button data-mode="simulation" class="${mode==='simulation'?'nx-active':''}">SIMULATION</button></div></div><div class="nx-pti-knob-zone ${knobMenu?'nx-open':''}"><button class="nx-pti-knob" type="button" aria-label="Knob"></button><div class="nx-pti-knob-label">${esc(knob)}</div><div class="nx-pti-knob-menu"><button class="${knob==='VOL'?'nx-active':''}" data-knob="VOL">VOL</button><button class="${knob==='TIME'?'nx-active':''}" data-knob="TIME">TIME</button><button class="${knob==='CHAN'?'nx-active':''}" data-knob="CHAN">CHAN</button></div></div></div><div class="nx-pti-phase"><span>SURVEY</span><span>DESIGN + BIM</span><span>PROCUREMENT</span><span class="nx-active">CONSTRUCTION</span><span>TESTING + HANDOVER</span></div><div class="nx-pti-meta"><span>SOURCE 22 NOV 2024</span><span>3-MONTH DEMO WORLD · 19.0× TIME COMPRESSION</span><span>SOURCE 21 MAR 2026</span></div><div class="nx-pti-rail"><div class="nx-pti-progress"></div><div class="nx-pti-thumb"></div></div><div class="nx-pti-status"><div class="nx-pti-stat"><b>${current.docs}</b> DOCS</div><div class="nx-pti-stat"><b>${current.files}</b> FILES</div><div class="nx-pti-stat"><b>${esc(current.phase)}</b> PHASE</div></div><button class="nx-pti-event" type="button"><small>LATEST EVENT</small><strong>${esc(current.latest.title)}</strong><span>${esc(fmt(current.latest.date))} · ${current.latest.files} file · source record</span></button><div class="nx-pti-event-list ${eventOpen?'nx-open':''}">${records.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`<button class="nx-pti-row" type="button" data-event="${esc(r.id)}"><time>${esc(fmt(r.date))}</time><strong>${esc(r.title)}</strong></button>`).join('')}</div>`;
-    wire(root);setTile(open);window.__NEXUS_PROJECT_TIME__={open,mode,source:'isolated-project-time-instrument'};window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:window.__NEXUS_PROJECT_TIME__}))}
-  function wire(root){root.querySelectorAll('[data-cmd]').forEach(btn=>btn.onclick=()=>{const c=btn.dataset.cmd;if(c==='play')playing=!playing;if(c==='rec')recording=!recording;if(c==='scrn')screen=!screen;render()});root.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{mode=btn.dataset.mode;render()});root.querySelector('.nx-pti-knob')?.addEventListener('click',()=>{knobMenu=!knobMenu;render()});root.querySelectorAll('[data-knob]').forEach(btn=>btn.onclick=()=>{knob=btn.dataset.knob;knobMenu=false;render()});root.querySelector('.nx-pti-event')?.addEventListener('click',()=>{eventOpen=!eventOpen;render()});root.querySelectorAll('[data-event]').forEach(btn=>btn.onclick=()=>{const rec=records.find(r=>r.id===btn.dataset.event);if(rec)current.latest=rec;eventOpen=false;render()})}
-  function bind(){const time=$('nexusTopTime');if(time&&!time.dataset.nxPtiBound){time.dataset.nxPtiBound='1';time.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();open=!open;render()},true)}render()}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+  function update(){
+    root.classList.toggle('nx-pti-open',open);
+    root.querySelector('[data-phase-name]').textContent=phases[phase].name;
+    root.querySelectorAll('[data-phase]').forEach(b=>{const active=Number(b.dataset.phase)===phase;b.setAttribute('aria-pressed',String(active));b.classList.toggle('nx-active',active)});
+    root.querySelector('input').value=phase;
+    root.querySelector('input').setAttribute('aria-valuetext',phases[phase].name);
+    root.querySelector('[data-cmd="previous"]').disabled=phase===0;
+    root.querySelector('[data-cmd="next"]').disabled=phase===4;
+    root.querySelector('[data-cmd="play"]').textContent=timer?'Pause':'Play phases';
+    root.querySelector('[data-cmd="play"]').setAttribute('aria-pressed',String(!!timer));
+    const sub=document.getElementById('nexusTopTimeSub');if(sub)sub.textContent=open?'ON':'OFF';
+    applyGraph();
+    window.__NEXUS_PROJECT_TIME__={open,mode:'simulation',worldId:world,phase:phases[phase].name,phaseIndex:phase,highlight,source:'demo-phase-map'};
+    window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:window.__NEXUS_PROJECT_TIME__}));
+  }
+  function stop(){if(timer)clearInterval(timer);timer=null;}
+  function select(index){phase=Math.max(0,Math.min(4,index));highlight=true;try{localStorage.setItem(key,String(phase))}catch{}update()}
+  function boot(){
+    root=document.createElement('section');root.id='nexusProjectTimeIso';root.setAttribute('aria-label','Project phases');
+    root.innerHTML=`<header><div><small>${world==='dev'?'RIVERSIDE':'e-SAFE'} · DEMO TIMELINE</small><h2>Project phases</h2></div><button type="button" data-cmd="close" aria-label="Close project phases">×</button></header>
+      <p>Choose a phase to highlight related objects. This is a demo mapping, not a verified project schedule.</p>
+      <div class="nx-pti-phase" role="group" aria-label="Project phase">${phases.map((p,i)=>`<button type="button" data-phase="${i}" aria-pressed="false">${p.name}</button>`).join('')}</div>
+      <label for="nx-phase-slider">Selected phase: <strong data-phase-name></strong></label><input id="nx-phase-slider" type="range" min="0" max="4" step="1" aria-label="Project phase position">
+      <div class="nx-pti-transport"><button type="button" data-cmd="previous">Previous</button><button type="button" data-cmd="play">Play phases</button><button type="button" data-cmd="next">Next</button><button type="button" data-cmd="clear">Show all objects</button></div>
+      <p role="status" data-phase-count></p>`;
+    document.body.appendChild(root);
+    root.querySelectorAll('[data-phase]').forEach(b=>b.onclick=()=>{stop();select(Number(b.dataset.phase))});
+    root.querySelector('input').oninput=e=>{stop();select(Number(e.target.value))};
+    root.querySelectorAll('[data-cmd]').forEach(b=>b.onclick=()=>{switch(b.dataset.cmd){
+      case 'close':open=false;stop();update();break;
+      case 'clear':stop();highlight=false;update();break;
+      case 'previous':stop();select(phase-1);break;
+      case 'next':stop();select(phase+1);break;
+      case 'play':if(timer){stop();update()}else{if(phase===4)phase=0;highlight=true;timer=setInterval(()=>{if(phase>=3){stop();select(4)}else select(phase+1)},2000);update()}break;
+    }});
+    const time=document.getElementById('nexusTopTime');
+    time?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();open=!open;if(!open)stop();update()},true);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){open=false;stop();update()}});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();update()}});
+    update();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

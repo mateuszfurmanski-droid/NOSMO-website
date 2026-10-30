@@ -1,0 +1,22 @@
+/* Graph viewport must fit the space between the existing top rail and tile dock. */
+html body #root{top:var(--nexus-top-h,50px)!important;bottom:calc(var(--nexus-bottom-dock-h,112px) + env(safe-area-inset-bottom,0px))!important;min-height:0!important}
+html body #root>div:first-child{height:100%!important;min-height:0!important;width:100%!important;margin-left:0!important;transform:none!important}
+html body #root [data-zoom]{height:100%!important;min-height:0!important}
+#root .nx-connect-handle{width:44px;height:44px;min-width:44px;min-height:44px;opacity:1!important;touch-action:manipulation;scale:calc(1 / var(--nx-zoom,1))}
+#nexusLinkEditor{position:fixed;inset:80px 12px auto;max-height:calc(100dvh - 110px);width:calc(100% - 24px);max-width:540px;margin:auto;overflow:auto;z-index:2147483200;padding:20px;box-sizing:border-box;border:1px solid #5b9bb6;border-radius:18px;background:#0b2130;color:#edf8ff;box-shadow:0 0 0 100vmax #0009;font:15px/1.5 Inter,system-ui,sans-serif;touch-action:pan-y}
+#nexusLinkEditor header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#nexusLinkEditor h2{font-size:22px;margin:0}
+#nexusLinkEditor h3{font-size:15px;margin:18px 0 8px}
+#nexusLinkEditor p{margin:12px 0;overflow-wrap:anywhere}
+#nexusLinkEditor small{font-size:12px;color:#b1cbd8}
+#nexusLinkEditor label{display:block;margin:12px 0 5px;font-size:13px;font-weight:600}
+#nexusLinkEditor button,#nexusLinkEditor input,#nexusLinkEditor select{font:inherit;min-height:44px;border:1px solid #56849a;border-radius:8px;background:#15374a;color:#f2faff;padding:9px 12px;box-sizing:border-box;touch-action:manipulation}
+#nexusLinkEditor input,#nexusLinkEditor select{width:100%}
+#nexusLinkEditor button{cursor:pointer}
+#nexusLinkEditor button:disabled{opacity:.55;cursor:default}
+#nexusLinkEditor .nx-link-primary{width:100%;margin-top:12px;background:#116c83}
+#nexusLinkEditor [role=status]{color:#9aedd8}
+#nexusLinkEditor ul{list-style:none;padding:0;margin:0 0 16px}
+#nexusLinkEditor li{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #335365;padding:8px 0;font-size:13px}
+#nexusLinkEditor :focus-visible{outline:2px solid #8ceaff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){#root [data-node-id] *{transition:none!important}}
