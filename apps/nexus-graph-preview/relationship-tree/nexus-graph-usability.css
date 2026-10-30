@@ -20,3 +20,7 @@ html body #root [data-zoom]{height:100%!important;min-height:0!important}
 #nexusLinkEditor li{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #335365;padding:8px 0;font-size:13px}
 #nexusLinkEditor :focus-visible{outline:2px solid #8ceaff;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){#root [data-node-id] *{transition:none!important}}
+/* Translated child buttons leave transparent wrapper boxes over adjacent tiles. */
+#root [data-node-id]{pointer-events:none}
+#root [data-node-id]>button{pointer-events:auto}
+body:has(#nexusLinkEditor) #root,body:has(#nexusLinkEditor) #root [data-node-id]>button,body:has(#nexusLinkEditor) #nexusTopRail{pointer-events:none!important}
