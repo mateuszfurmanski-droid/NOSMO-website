@@ -35,7 +35,7 @@ function AU(){
   const down=e=>{
     if(e.target.closest('[data-control]')||e.button>0)return;
     if(e.pointerType==='touch')touches.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(touches.current.size>1){startPinch();e.currentTarget.setPointerCapture(e.pointerId);return}
+    if(touches.current.size>1){startPinch();try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}return}
     const id=e.target.closest('[data-node-id]')?.dataset.nodeId;
     gesture.current={mode:id&&id!=='proj'?'node':'pan',id,pointer:e.pointerId,x:e.clientX,y:e.clientY,point:positions.get(id),zoom,pan,before:current.current,moved:false,target:null};
   };
@@ -70,7 +70,7 @@ function AU(){
     if(g.mode==='pinch'){if(touches.current.size===0)gesture.current=null;suppress.current=Date.now()+350;return}
     if(g.moved){suppress.current=Date.now()+350;if(g.mode==='node'){
       if(cancel){current.current=g.before;setState(g.before);setNotice('Move cancelled')}
-      else if(g.target){const point=positions.get(g.target)||g.point;const next=nxGroupDrop(g.before,g.id,g.target,'nx-group-'+crypto.randomUUID(),point,ids);
+      else if(g.target){const point=positions.get(g.target)||g.point;const stable={...g.before,pinned:{...g.before.pinned,...Object.fromEntries(positions)}};const next=nxGroupDrop(stable,g.id,g.target,'nx-group-'+crypto.randomUUID(),point,ids);
         if(next!==g.before&&persist(next,g.before,'Node created · tap it to open')){setOpen(null);setSelected(next.groups[next.groups.length-1].id)}else{current.current=g.before;setState(g.before)}}
       else if(!persist(current.current,g.before,'Position saved on this device')){current.current=g.before;setState(g.before)}
     }}
@@ -79,7 +79,7 @@ function AU(){
   const ungroup=()=>{if(!opened)return;const points=Object.fromEntries(opened.members.map(id=>[id,positions.get(id)]));if(persist(nxUngroup(state,opened.id,points,ids),state,'Node separated · tiles remain in project'))setOpen(null)};
   const reset=()=>{if(persist(nxCleanWorkspace(null,ids),state,'Demo reset · each tile connected only to project')){setOpen(null);setSelected('proj');setPan({x:0,y:0})}};
   if(mode==='workflow')return s.jsxs('div',{className:'relative h-[100dvh] overflow-hidden',children:[s.jsx('button',{'data-control':true,className:'nx-back-map',onClick:()=>setMode('map'),children:'Back to map'}),s.jsx(CU,{})]});
-  return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,style:{'--nx-zoom':zoom},className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
+  return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,style:{'--nx-zoom':zoom},onDragStart:e=>e.preventDefault(),className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
     s.jsxs('div',{'data-control':true,className:'nx-map-toolbar',children:[s.jsx('button',{onClick:fit,children:'Fit map'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z*1.15)),children:'+'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z/1.15)),children:'−'}),s.jsx('button',{onClick:reset,children:'Reset demo'}),s.jsx('button',{onClick:()=>setMode('workflow'),children:'Workflow'}),s.jsx('span',{children:objects.length+' objects · '+edges.length+' links'})]}),
     s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:hover?'Release to create a shared node':notice}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),undo&&s.jsx('button',{onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{onClick:ungroup,children:'Ungroup'})]}),
     s.jsxs('div',{className:'absolute left-0 top-0 h-0 w-0 origin-top-left',style:{transform:`translate(${size.w/2+pan.x}px,${size.h/2+pan.y}px) scale(${zoom})`},children:[

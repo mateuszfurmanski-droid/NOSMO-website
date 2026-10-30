@@ -31,8 +31,8 @@ test('actual React map: drag hover, drop, add, undo, expand, reload, cancel, sav
  global.window=w;global.document=w.document;global.navigator=w.navigator;global.IS_REACT_ACT_ENVIRONMENT=true;
  const objects=ids.map((id,i)=>({id,label:id,type:id==='proj'?'project':'task',Icon:()=>null}));
  const geometry={proj:{x:0,y:0},a:{x:100,y:0},b:{x:220,y:0},c:{x:340,y:0},d:{x:460,y:0}};
- const ctx={window:w,document:w.document,localStorage:w.localStorage,b:React,s:jsx,ns:objects,Dt:()=>null,CU:()=>null,gc:{project:{},task:{}},crypto:require('node:crypto').webcrypto,
- CustomEvent:w.CustomEvent,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame:()=>1,cancelAnimationFrame(){},getComputedStyle:w.getComputedStyle,
+ let raf=null;const ctx={window:w,document:w.document,localStorage:w.localStorage,b:React,s:jsx,ns:objects,Dt:()=>null,CU:()=>null,gc:{project:{},task:{}},crypto:require('node:crypto').webcrypto,
+ CustomEvent:w.CustomEvent,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame:fn=>(raf=fn,1),cancelAnimationFrame(){raf=null},getComputedStyle:w.getComputedStyle,
  _w:z=>Math.max(.3,Math.min(1.3,z)),EU:(items,root,edges,pinned)=>new Map(items.map((o,i)=>[o.id,pinned[o.id]||geometry[o.id]||{x:220,y:0}]))};
  vm.createContext(ctx);vm.runInContext(model+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/relationship-map.js','utf8'),ctx);
  let root=createRoot(w.document.getElementById('mount'));const act=React.act;
@@ -45,14 +45,14 @@ test('actual React map: drag hover, drop, add, undo, expand, reload, cancel, sav
  const send=async(el,type,x,y)=>act(()=>{const e=new w.MouseEvent(type,{bubbles:true,clientX:x,clientY:y,button:0});Object.defineProperties(e,{pointerId:{value:1},pointerType:{value:'touch'}});el.dispatchEvent(e)});
  const boxes=()=>{w.document.querySelectorAll('[data-node-id]').forEach(el=>{const id=el.dataset.nodeId,p=geometry[id]||{x:220,y:0};el.querySelector('[data-tile-face]').getBoundingClientRect=()=>({left:p.x-40,top:p.y-40,width:80,height:80})})};
  await render();assert.equal(w.document.querySelectorAll('line').length,4);assert.equal(w.document.querySelector('input,select'),null);
- boxes();await send(node('a'),'pointerdown',100,0);await send(graph(),'pointerup',220,0);
+ boxes();await send(node('a'),'pointerdown',100,0);await send(graph(),'pointermove',220,0);await act(()=>raf?.());assert.equal(w.document.querySelector('[data-drop-target=true]').dataset.nodeId,'b');await send(graph(),'pointerup',220,0);
  assert.equal(state().groups.length,1);assert.equal(w.document.querySelectorAll('[data-group-members]').length,1);assert.equal(node('a'),null);
  let group=w.document.querySelector('[data-group-members]').dataset.nodeId;
  await click(node(group));assert.ok(node('a'));assert.ok(node('b'));assert.equal(node(group).getAttribute('aria-expanded'),'true');
  await click(node(group));boxes();await send(node('c'),'pointerdown',340,0);await send(graph(),'pointerup',220,0);assert.equal(state().groups[0].members.length,3);
  await click(button('Undo'));assert.equal(state().groups[0].members.length,2);
  await act(()=>root.unmount());root=createRoot(w.document.getElementById('mount'));await render();assert.equal(w.document.querySelectorAll('[data-group-members]').length,1);
- const before=w.localStorage.getItem('nosmo-tile-groups:v2:dev');boxes();await send(node('c'),'pointerdown',340,0);await send(graph(),'pointercancel',220,0);assert.equal(w.localStorage.getItem('nosmo-tile-groups:v2:dev'),before);
+ const before=w.localStorage.getItem('nosmo-tile-groups:v2:dev');boxes();await send(node('c'),'pointerdown',340,0);await send(graph(),'pointermove',220,0);await act(()=>raf?.());await send(graph(),'pointercancel',220,0);assert.equal(w.localStorage.getItem('nosmo-tile-groups:v2:dev'),before);
  const original=w.Storage.prototype.setItem;w.Storage.prototype.setItem=()=>{throw Error('Quota exceeded')};boxes();await send(node('c'),'pointerdown',340,0);await send(graph(),'pointerup',220,0);assert.equal(w.localStorage.getItem('nosmo-tile-groups:v2:dev'),before);assert.match(w.document.querySelector('[role=status]').textContent,/Could not save/);w.Storage.prototype.setItem=original;
  await click(node(group));await click(button('Ungroup'));assert.equal(state().groups.length,0);assert.ok(node('a'));
  await click(button('Reset demo'));assert.equal(w.document.querySelectorAll('line').length,4);assert.equal(w.localStorage.getItem('nosmo-persistent-workspace:dev'),null);
