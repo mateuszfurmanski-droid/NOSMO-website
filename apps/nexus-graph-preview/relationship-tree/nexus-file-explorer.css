@@ -54,8 +54,8 @@ body:has(#nexusFileExplorer) #nexusTimeSpaceDock{visibility:hidden!important;poi
 .nx-explorer-group-label{color:#28728a;font-size:12px;font-weight:650;margin:16px 0 9px;padding:8px 2px;border-bottom:1px solid #bad9e4}.nx-explorer-table .nx-explorer-group-label th{position:static;background:#eaf5fa;font-size:11px;padding:9px 6px;text-transform:none;letter-spacing:0}
 .nx-explorer-item-name{min-width:0;overflow-wrap:anywhere}.nx-explorer-item-name strong{display:block;font-weight:550;line-height:1.45}.nx-explorer-item-name small{display:block;font-size:11px;color:#6a8794;margin-top:3px}
 .nx-explorer-file-items,.nx-explorer-folder-items{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));margin-bottom:14px}
-#nexusFileExplorer .nx-explorer-file-items>button,#nexusFileExplorer .nx-explorer-folder-items>div>button{display:flex;align-items:center;gap:12px;width:100%;min-width:0;min-height:72px;padding:10px;text-align:left;background:transparent;border:1px solid transparent;border-radius:6px}
-#nexusFileExplorer .nx-explorer-file-items>button:hover,#nexusFileExplorer .nx-explorer-folder-items>div>button:hover{background:#e3f3fa;border-color:#aed2e0}
+#nexusFileExplorer .nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,#nexusFileExplorer .nx-explorer-folder-items>div>button{display:flex;align-items:center;gap:12px;width:100%;min-width:0;min-height:72px;padding:10px;text-align:left;background:transparent;border:1px solid transparent;border-radius:6px}
+#nexusFileExplorer .nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child:hover,#nexusFileExplorer .nx-explorer-folder-items>div>button:hover{background:#e3f3fa;border-color:#aed2e0}
 #nexusFileExplorer :is([data-explorer-file],[data-explorer-folder])[data-selected=true]{background:#d5ecf6;border-radius:6px}
 #nexusFileExplorer .nx-explorer-folder-items .nx-explorer-item-name{flex:1}.nx-explorer-folder-items svg{flex:none;width:42px;height:42px;color:#1686a0;padding:4px;background:transparent}
 .nx-explorer-file-items .nx-explorer-content-meta{display:none}
@@ -63,20 +63,20 @@ body:has(#nexusFileExplorer) #nexusTimeSpaceDock{visibility:hidden!important;poi
 #nexusFileExplorer[data-explorer-layout=extra-large]{--nx-item-width:170px;--nx-item-icon:112px}
 #nexusFileExplorer[data-explorer-layout=large]{--nx-item-width:135px;--nx-item-icon:80px}
 #nexusFileExplorer[data-explorer-layout=medium]{--nx-item-width:108px;--nx-item-icon:48px}
-#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) :is(.nx-explorer-file-items>button,.nx-explorer-folder-items>div>button){flex-direction:column;justify-content:start;text-align:center;gap:8px;padding:12px 8px;min-height:0}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) :is(.nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,.nx-explorer-folder-items>div>button){flex-direction:column;justify-content:start;text-align:center;gap:8px;padding:12px 8px;min-height:0}
 #nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) :is(.nx-explorer-file-icon,.nx-explorer-folder-items svg){width:var(--nx-item-icon);height:calc(var(--nx-item-icon)*1.15);max-width:100%;padding:0}
 #nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large]) .nx-explorer-file-icon b{font-size:16px}
 #nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) .nx-explorer-item-name{width:100%;font-size:12px}
 #nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium],[data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-file-items .nx-explorer-item-name small{display:none}
 #nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:3px}
-#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-items>button,.nx-explorer-folder-items>div>button){min-height:36px;padding:5px;gap:7px}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,.nx-explorer-folder-items>div>button){min-height:36px;padding:5px;gap:7px}
 #nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-icon,.nx-explorer-folder-items svg){width:22px;height:27px;padding:0}
 #nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-file-icon b{font-size:6px}
 #nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-item-name strong{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-folder-items .nx-explorer-item-name small{display:none}
 #nexusFileExplorer[data-explorer-layout=list] :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:1fr}
 #nexusFileExplorer[data-explorer-layout=content] :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:1fr;gap:0}
-#nexusFileExplorer[data-explorer-layout=content] :is(.nx-explorer-file-items>button,.nx-explorer-folder-items>div>button){border-bottom:1px solid #cfE3eb;border-radius:0;min-height:86px}
+#nexusFileExplorer[data-explorer-layout=content] :is(.nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,.nx-explorer-folder-items>div>button){border-bottom:1px solid #cfE3eb;border-radius:0;min-height:86px}
 #nexusFileExplorer[data-explorer-layout=content] .nx-explorer-file-items .nx-explorer-content-meta{display:block}
 #nexusFileExplorer[data-explorer-layout=content] .nx-explorer-file-icon{width:51px;height:62px}
 .nx-explorer-selection-actions{position:sticky;bottom:-15px;background:#e0f0f7;border:1px solid #9ec6d7;padding:9px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;box-shadow:0 -3px 14px #1a527519}.nx-explorer-selection-actions strong{flex:1;min-width:120px;font-size:12px;overflow-wrap:anywhere}
@@ -85,3 +85,19 @@ body:has(#nexusFileExplorer) #nexusTimeSpaceDock{visibility:hidden!important;poi
 .nx-explorer-options header{display:flex;align-items:center;justify-content:space-between;gap:10px}.nx-explorer-options h3{margin:0;font-size:18px}.nx-explorer-options p{color:#5d7c8a;font-size:12px;margin:12px 0 16px}.nx-explorer-options>label{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:12px}.nx-explorer-options select{min-height:38px;padding:5px;border:1px solid #b7d3df;border-radius:6px;background:white}.nx-explorer-options input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:#117e9e}.nx-explorer-options-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;border-top:1px solid #cadfe8;padding-top:12px}
 @media(max-width:650px){.nx-explorer-view-controls{padding:6px 10px;gap:6px}.nx-explorer-view-controls label>span{display:none}.nx-explorer-view-controls>small{display:none}.nx-explorer-view-controls select{max-width:95px}.nx-explorer-table th:nth-child(5),.nx-explorer-table td:nth-child(5){display:none}.nx-explorer-table th:first-child{width:66%}.nx-explorer-table th:nth-child(3){width:34%}.nx-explorer-folder-table th:first-child{width:75%}.nx-explorer-folder-table th:nth-child(3){width:25%}#nexusFileExplorer[data-explorer-layout=extra-large]{--nx-item-width:140px;--nx-item-icon:90px}#nexusFileExplorer[data-explorer-layout=large]{--nx-item-width:125px;--nx-item-icon:68px}}
 @media(max-height:500px){.nx-explorer-view-controls{padding-top:3px;padding-bottom:3px}.nx-explorer-view-controls>small{display:none}.nx-explorer-view-menu [role=menu]{max-height:22dvh}.nx-explorer-options{padding:12px}}
+/* Context actions remain explicit on touch and keyboard, without nested buttons. */
+.nx-explorer-item-with-menu,.nx-explorer-folder-items>[data-explorer-folder]{position:relative;min-width:0}
+.nx-explorer-name-cell{position:relative;padding-right:33px!important}
+#nexusFileExplorer button.nx-explorer-more{position:absolute;right:2px;top:5px;width:28px;min-width:28px;min-height:32px;height:32px;padding:0;border:1px solid transparent;background:transparent;display:grid;place-items:center;font-size:21px;font-weight:600;line-height:1;text-align:center;color:#538194;z-index:2}
+#nexusFileExplorer button.nx-explorer-more:hover,#nexusFileExplorer button.nx-explorer-more:focus-visible{background:#d5edf7;border-color:#a1c8d8}
+#nexusFileExplorer .nx-explorer-table td button.nx-explorer-more{width:28px;min-height:32px;top:calc(50% - 16px);right:1px;padding:0;text-align:center;display:grid;font-size:21px}
+#nexusFileExplorer:is([data-explorer-layout=list],[data-explorer-layout=small],[data-explorer-layout=tiles],[data-explorer-layout=content]) .nx-explorer-item-with-menu>button:first-child,
+#nexusFileExplorer:is([data-explorer-layout=list],[data-explorer-layout=small],[data-explorer-layout=tiles],[data-explorer-layout=content]) .nx-explorer-folder-items>[data-explorer-folder]>button:first-child{padding-right:32px}
+#nexusFileExplorer .nx-explorer-context-menu{position:absolute;z-index:15;width:min(232px,calc(100% - 16px));max-height:calc(100% - 16px);overflow:auto;padding:6px;border:1px solid #82b3c5;border-radius:10px;background:#f5fcff;box-shadow:0 8px 35px #082c4b44}
+.nx-explorer-context-menu>strong{display:block;padding:8px 9px 10px;color:#4c7587;font-size:11px;overflow-wrap:anywhere;border-bottom:1px solid #cbE1e9;margin-bottom:4px}
+#nexusFileExplorer .nx-explorer-context-menu>button{display:block;width:100%;min-height:38px;padding:8px 10px;border:0;border-radius:6px;background:transparent;font-size:12px}
+#nexusFileExplorer .nx-explorer-context-menu>button:hover,#nexusFileExplorer .nx-explorer-context-menu>button:focus-visible{background:#d9eef7;color:#085d7a}
+@media(max-width:650px){.nx-explorer-toolbar nav{flex-basis:calc(100% - 142px)}}
+/* Override every layout's main-action dimensions for the separate More action. */
+#nexusFileExplorer[data-explorer-layout] :is(.nx-explorer-folder-items,.nx-explorer-file-items) button.nx-explorer-more[data-explorer-more][aria-haspopup=menu]{width:28px;min-width:28px;min-height:32px;height:32px;padding:0;position:absolute;right:2px;top:5px;display:grid;place-items:center;flex:none;gap:0;border-radius:6px}
+@media(max-width:650px){#nexusFileExplorer .nx-explorer-toolbar>button{flex:0 0 36px;width:36px;min-width:36px;padding:5px}.nx-explorer-toolbar nav{flex-basis:calc(100% - 129px)}}

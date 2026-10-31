@@ -127,3 +127,47 @@ test('corrupt preferences fall back safely and failed writes do not change the a
   assert.equal(h.w.document.querySelector('#nexusFileExplorer').dataset.explorerLayout,'details');assert.match(h.w.document.querySelector('[role="alert"]').textContent,/Previous settings kept/);
  }finally{await h.dispose()}
 });
+
+test('Back/Forward restores folder route, query, page and selection; a new folder branch clears Forward',async()=>{
+ const files=Array.from({length:31},(_,i)=>file('f'+i,`Electrical plan ${i}.pdf`)),h=await harness({files});try{
+  assert.equal(h.w.document.querySelector('[aria-label="Forward to next folder"]').disabled,true);
+  await h.change('[aria-label="Search files in all folders"]','electrical');await h.click('[aria-label="Next page of files"]');await h.click('[data-explorer-file="f25"] button');
+  await h.click('[aria-label="Folder path"] button');assert.equal(h.w.document.querySelector('[aria-label="Search files in all folders"]').value,'');await h.click('[data-explorer-folder="electrical"]');await h.click('[aria-label="Back to previous folder"]');await h.click('[aria-label="Back to previous folder"]');
+  assert.equal(h.w.document.querySelector('[aria-label="Search files in all folders"]').value,'electrical');assert.match(h.w.document.querySelector('.nx-explorer-pagination').textContent,/Page 2 of 2/);assert.equal(h.w.document.querySelector('[data-explorer-file="f25"]').dataset.selected,'true');
+  await h.click('[aria-label="Forward to next folder"]');assert.equal(h.w.document.querySelector('[aria-label="Search files in all folders"]').value,'');await h.click('[aria-label="Forward to next folder"]');assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/Electrical/);
+  await h.click('[aria-label="Back to previous folder"]');await h.click('[data-explorer-folder="electrical"]');assert.equal(h.w.document.querySelector('[aria-label="Forward to next folder"]').disabled,true);
+ }finally{await h.dispose()}
+});
+
+test('file context actions work in every layout, locate the containing folder, and preserve readonly snapshot restrictions',async()=>{
+ const h=await harness();try{
+  await h.change('[aria-label="Search files in all folders"]','electrical');
+  for(const [layout,label] of vm.runInContext('nxExplorerLayouts',h.ctx)){
+   await h.act(()=>[...h.w.document.querySelectorAll('[role="menuitemradio"]')].find(n=>n.textContent.includes(label)).click());await h.click('[aria-label="More actions for file: Electrical wiring plan.pdf"]');
+   assert.equal(h.w.document.querySelector('[role="menu"][aria-label="File actions"]').querySelectorAll('[role="menuitem"]').length,4);
+   await h.act(()=>h.w.document.querySelector('#nexusFileExplorer').dispatchEvent(new h.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true})));assert.equal(h.w.document.querySelector('[aria-label="File actions"]'),null);assert.equal(h.w.document.activeElement.getAttribute('aria-label'),'More actions for file: Electrical wiring plan.pdf');
+  }
+  await h.click('[aria-label="More actions for file: Electrical wiring plan.pdf"]');await h.act(()=>[...h.w.document.querySelectorAll('[aria-label="File actions"] button')].find(n=>n.textContent==='Open containing folder').click());assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/Electrical.*Design/);assert.equal(h.w.document.querySelector('[aria-label="Search files in all folders"]').value,'');
+  await h.click('[aria-label="More actions for file: Electrical wiring plan.pdf"]');await h.act(()=>[...h.w.document.querySelectorAll('[aria-label="File actions"] button')].find(n=>n.textContent==='Preview file').click());assert.equal(h.w.document.querySelector('#nexusFilePreview').dataset.previewId,'a');
+ }finally{await h.dispose()}
+ const snapshot=await harness({initialFile:'a',asOf:Date.now()});try{await snapshot.click('[aria-label="More actions for file: Electrical wiring plan.pdf"]');assert.equal([...snapshot.w.document.querySelectorAll('[aria-label="File actions"] button')].some(n=>n.textContent==='Show in tree'),false)}finally{await snapshot.dispose()}
+});
+
+test('right-click folder menus open as List and retain explicit touch actions without triggering folder navigation',async()=>{
+ const h=await harness();try{
+  const item=h.w.document.querySelector('[data-explorer-folder="electrical"]');await h.act(()=>item.dispatchEvent(new h.w.MouseEvent('contextmenu',{bubbles:true,clientX:50,clientY:50,cancelable:true})));assert.equal(h.w.document.querySelector('[aria-label="Folder path"]').textContent,'Trades');assert.ok(h.w.document.querySelector('[aria-label="Folder actions"]'));
+  await h.act(()=>[...h.w.document.querySelectorAll('[aria-label="Folder actions"] button')].find(n=>n.textContent==='Open as list').click());assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/Electrical/);assert.equal(h.w.document.querySelector('#nexusFileExplorer').dataset.explorerLayout,'list');
+  await h.click('[aria-label="More actions for folder: Design"]');await h.act(()=>[...h.w.document.querySelectorAll('[aria-label="Folder actions"] button')].find(n=>n.textContent==='Folder options').click());assert.ok(h.w.document.querySelector('[role="dialog"][aria-label="Folder options"]'));
+ }finally{await h.dispose()}
+});
+
+test('keyboard navigation selects files, opens previews, focuses search and navigates history; context menu supports arrows and Escape',async()=>{
+ const h=await harness({files:[file('a','Electrical plan A.pdf'),file('b','Electrical plan B.pdf')]});try{
+  const key=(target,key,extra={})=>h.act(()=>target.dispatchEvent(new h.w.KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,...extra})));
+  await key(h.w.document.querySelector('#nexusFileExplorer'),'f',{ctrlKey:true});assert.equal(h.w.document.activeElement.getAttribute('aria-label'),'Search files in all folders');
+  await h.click('[data-explorer-folder="electrical"]');await h.click('[data-explorer-folder="Design"]');assert.equal(h.w.document.querySelectorAll('table').length,1);
+  const first=h.w.document.querySelector('[aria-label="Select file: Electrical plan A.pdf"]');await h.act(()=>first.focus());await key(first,'ArrowDown');assert.equal(h.w.document.activeElement.getAttribute('aria-label'),'Select file: Electrical plan B.pdf');await key(h.w.document.activeElement,'Enter');assert.equal(h.w.document.querySelector('#nexusFilePreview').dataset.previewId,'b');
+  await key(h.w.document.activeElement,'F10',{shiftKey:true});assert.ok(h.w.document.querySelector('[aria-label="File actions"]'));await key(h.w.document.activeElement,'ArrowDown');assert.equal(h.w.document.activeElement.textContent,'File details / lifetime');await key(h.w.document.activeElement,'Escape');assert.equal(h.w.document.querySelector('[aria-label="File actions"]'),null);assert.ok(h.w.document.querySelector('#nexusFilePreview'));
+  await key(h.w.document.querySelector('#nexusFileExplorer'),'ArrowLeft',{altKey:true});assert.equal(h.w.document.querySelectorAll('[data-explorer-file]').length,0);await key(h.w.document.querySelector('#nexusFileExplorer'),'ArrowRight',{altKey:true});assert.equal(h.w.document.querySelectorAll('[data-explorer-file]').length,2);await key(h.w.document.querySelector('#nexusFileExplorer'),'ArrowUp',{altKey:true});assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/Electrical/);
+ }finally{await h.dispose()}
+});

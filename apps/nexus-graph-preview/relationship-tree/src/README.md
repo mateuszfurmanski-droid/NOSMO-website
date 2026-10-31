@@ -108,3 +108,11 @@ Validation: 162tests pass, including eleven Explorer/map regressions; ES-module 
 Folder options persist single/double folder activation, extension visibility, details-pane visibility and per-folder view memory, with apply-all/default restoration. Keyboard Enter activation remains available in double-click mode; Escape closes the options/menu before closing the Explorer, and focus returns to the opening button. Read corruption and failed writes preserve safe prior settings. These settings are device-local, not shared-account synchronization.
 
 Validation: 168 tests pass, including six new React presentation/option regressions. ES-module syntax and reproducible-build checks plus desktop/mobile browser QA accompany the existing private Site update.
+
+## Forward history, item menus and keyboard navigation — 2026-10-31
+
+Explorer history snapshots now retain route, search, status, current page and selection for Back/Forward. Explicit navigation clears Forward. Shared renderers expose separate More buttons and native contextmenu handlers for folders and files across all eight layouts. No nested item buttons or destructive actions are added. The menu reuses preview/details/map reveal and virtual directory navigation; snapshot restrictions remain enforced.
+
+Keyboard handling preserves input controls and adds Alt+Left/Right/Up, Ctrl/Cmd+F, Enter, visible-page arrow/Home/End selection and Shift+F10/menu-key actions. Context menus are bounded, focus their actions, dismiss on outside pointer/Escape, and return focus on Escape. More hit regions are kept at 28×32 regardless of icon/content view style. Empty folder tables are omitted when only files are present.
+
+Validation: 172 tests pass; four new history/context/keyboard integration regressions plus desktop/mobile browser hit-region/navigation checks. File bytes, IDs, source dates, lifecycle and observed connection history are preserved.
