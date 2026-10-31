@@ -5,17 +5,24 @@ const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
 const sourceRoot='apps/nexus-graph-preview/relationship-tree/src/';
 
-async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,contextSaved=null}={}){
+async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,contextSaved=null,fetchImpl=null,localBlob=null}={}){
  const dom=new JSDOM('<button id="origin">Origin</button><div id="mount"></div>',{url:'https://example.test/?world=esafe-demo'}),w=dom.window;
  global.window=w;global.document=w.document;global.navigator=w.navigator;global.IS_REACT_ACT_ENVIRONMENT=true;
  const React=require('react'),ReactDOM=require('react-dom'),{createRoot}=require('react-dom/client'),jsx=require('react/jsx-runtime');
  const timers=new Map();let timerId=0;
- const ctx={window:w,document:w.document,localStorage:w.localStorage,URL,CustomEvent:w.CustomEvent,b:React,s:jsx,ko:ReactDOM,
+ const fetchCalls=[],createdUrls=[],revokedUrls=[];
+ class PreviewURL extends URL {
+  static createObjectURL(blob){const url='blob:https://example.test/preview-'+(createdUrls.length+1);createdUrls.push({url,blob});return url}
+  static revokeObjectURL(url){revokedUrls.push(url)}
+ }
+ const fetchFile=async(url,options)=>{fetchCalls.push({url,options});return fetchImpl?fetchImpl(url,options):{ok:true,status:200,blob:async()=>new Blob(['%PDF-1.7\npreview fixture'],{type:'application/octet-stream'})}};
+ const ctx={window:w,document:w.document,localStorage:w.localStorage,URL:PreviewURL,Blob,AbortController,fetch:fetchFile,CustomEvent:w.CustomEvent,b:React,s:jsx,ko:ReactDOM,
   setInterval:fn=>{const id=++timerId;timers.set(id,fn);return id},clearInterval:id=>timers.delete(id)};
  vm.createContext(ctx);
  vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/data.js','utf8'),ctx);
  vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/files.js','utf8'),ctx);
  for(const name of ['local-files.js','project-files.js','file-playback.js','timespace-model.js','timespace-view.js','timespace-player.js'])vm.runInContext(fs.readFileSync(sourceRoot+name,'utf8'),ctx);
+ if(localBlob)ctx.nxLocalFileBlob=async()=>localBlob;
  const initialFiles=files||Array.from(ctx.nxEsafeCatalog(ctx.window.ESAFE_RECORDS));
  const key='nosmo.timespace.player:v1:esafe-demo';
  if(saved)w.localStorage.setItem(key,JSON.stringify(saved));
@@ -34,7 +41,7 @@ async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,c
  const stored=()=>JSON.parse(w.localStorage.getItem(key));
  const dispose=async()=>{await React.act(()=>root.unmount());w.close()};
  w.document.getElementById('origin').focus();await render();
- return {w,ctx,React,files:initialFiles,render,click,range,update,remount,tick,add,currentName,stored,dispose,timers,events,results:()=>({closed,openedFiles,revealed})};
+ return {w,ctx,React,files:initialFiles,render,click,range,update,remount,tick,add,currentName,stored,dispose,timers,events,fetchCalls,createdUrls,revokedUrls,results:()=>({closed,openedFiles,revealed})};
 }
 
 test('player retains the original console, right-hand file knob and transport structure without VOL, recording or screen buttons',async()=>{
@@ -178,5 +185,65 @@ test('a pending incoming local file stays selected when device files arrive afte
 test('an already-visible initialFile is persisted and dispatched on mount without requiring an interaction',async()=>{
  const h=await harness({initialFile:'d-firecerts',saved:{currentId:'d-snaglist',stream:'all'}});try{
   assert.equal(h.stored().currentId,'d-firecerts');assert.ok(h.events.length>0);assert.ok(h.events.every(id=>id==='d-firecerts'));
+ }finally{await h.dispose()}
+});
+
+test('manual Next or slider selection cancels a stale missing local initialFile without a later focus jump',async()=>{
+ for(const action of ['next','slider']){
+  const missing='local-unavailable',h=await harness({initialFile:missing});try{
+   assert.deepEqual(h.events,[]);
+   const sequence=Array.from(h.ctx.nxTimeSpaceSequence(h.files)),index=action==='next'?1:7;
+   if(action==='next')await h.click('[aria-label="Next file"]');else await h.range(index);
+   const selected=sequence[index];assert.equal(h.currentName(),selected.name);assert.equal(h.stored().currentId,selected.id);
+   assert.ok(h.events.length>0);assert.ok(h.events.every(id=>id===selected.id));
+   const delayed={id:missing,recordId:missing,name:'Previously unavailable.pdf',kind:'PDF',category:'Design',date:'2026-10-31',dateRaw:'2026-10-31',datePrecision:'day',addedAt:'2026-10-31T16:17:18Z',local:true};
+   await h.update({files:[...h.files,delayed]});
+   assert.equal(h.currentName(),selected.name);assert.equal(h.stored().currentId,selected.id);assert.ok(h.events.every(id=>id===selected.id));
+  }finally{await h.dispose()}
+ }
+});
+
+test('source fallback fetches a PDF without credentials, uses a typed Blob URL, keeps source mode across Next and releases URLs',async()=>{
+ const h=await harness();try{
+  const sequence=Array.from(h.ctx.nxTimeSpaceSequence(h.files));
+  await h.click('[aria-label="Show file preview"]');
+  const google=h.w.document.querySelector('#nexusFilePreview iframe');assert.equal(google.src,h.ctx.nxGooglePreviewUrl(sequence[0]));assert.equal(h.fetchCalls.length,0);
+  const sourceButton=[...h.w.document.querySelectorAll('#nexusFilePreview button')].find(button=>button.textContent==='Source preview');assert.ok(sourceButton);await h.click(sourceButton);
+  let frame=h.w.document.querySelector('#nexusFilePreview iframe');assert.ok(frame);assert.equal(frame.title,'PDF preview: '+sequence[0].name);assert.equal(frame.src,h.createdUrls[0].url);
+  assert.equal(h.fetchCalls.length,1);assert.equal(h.fetchCalls[0].url,sequence[0].fileUrl);assert.equal(h.fetchCalls[0].options.credentials,'omit');assert.ok(h.fetchCalls[0].options.signal instanceof AbortSignal);assert.equal(h.createdUrls[0].blob.type,'application/pdf');assert.match(await h.createdUrls[0].blob.text(),/^%PDF/);
+  assert.ok([...h.w.document.querySelectorAll('#nexusFilePreview button')].some(button=>button.textContent==='Try Google preview'));
+  const firstBlob=frame.src;await h.click('[aria-label="Next file"]');frame=h.w.document.querySelector('#nexusFilePreview iframe');
+  assert.equal(frame.title,'PDF preview: '+sequence[1].name);assert.equal(frame.src,h.createdUrls[1].url);assert.notEqual(frame.src,firstBlob);assert.equal(h.fetchCalls[1].url,sequence[1].fileUrl);assert.equal(h.fetchCalls[0].options.signal.aborted,true);assert.ok(h.revokedUrls.includes(firstBlob));
+  const secondBlob=frame.src;await h.click('[aria-label="Close file preview"]');assert.equal(h.w.document.getElementById('nexusFilePreview'),null);assert.equal(h.fetchCalls[1].options.signal.aborted,true);assert.ok(h.revokedUrls.includes(secondBlob));
+ }finally{await h.dispose()}
+});
+
+test('failed source fetch shows a useful error and allows the explicit Google fallback',async()=>{
+ const h=await harness({fetchImpl:async()=>({ok:false,status:503,blob:async()=>{throw Error('Not reached')}})});try{
+  await h.click('[aria-label="Show file preview"]');await h.click([...h.w.document.querySelectorAll('#nexusFilePreview button')].find(button=>button.textContent==='Source preview'));
+  assert.equal(h.w.document.querySelector('#nexusFilePreview iframe'),null);assert.match(h.w.document.querySelector('#nexusFilePreview [role="alert"]').textContent,/HTTP 503/);assert.equal(h.createdUrls.length,0);
+  await h.click([...h.w.document.querySelectorAll('#nexusFilePreview button')].find(button=>button.textContent==='Try Google preview'));
+  assert.ok(h.w.document.querySelector('#nexusFilePreview iframe[title^="Google preview:"]'));assert.equal(h.w.document.querySelector('#nexusFilePreview [role="alert"]'),null);assert.equal(h.fetchCalls.length,1);
+ }finally{await h.dispose()}
+});
+
+test('late source fetches cannot replace the next file preview after cancellation',async()=>{
+ let resolveFirst,calls=0;
+ const h=await harness({fetchImpl:()=>{if(calls++===0)return new Promise(resolve=>resolveFirst=resolve);return Promise.resolve({ok:true,status:200,blob:async()=>new Blob(['%PDF second'],{type:'application/octet-stream'})})}});try{
+  await h.click('[aria-label="Show file preview"]');await h.click([...h.w.document.querySelectorAll('#nexusFilePreview button')].find(button=>button.textContent==='Source preview'));
+  assert.match(h.w.document.querySelector('#nexusFilePreview [role="status"]').textContent,/Loading file/);
+  await h.click('[aria-label="Next file"]');const frame=h.w.document.querySelector('#nexusFilePreview iframe'),currentSource=frame.src;
+  assert.equal(h.fetchCalls[0].options.signal.aborted,true);assert.equal(h.createdUrls.length,1);
+  await h.React.act(async()=>{resolveFirst({ok:true,status:200,blob:async()=>new Blob(['%PDF stale'])});await Promise.resolve();await Promise.resolve()});
+  assert.equal(h.w.document.querySelector('#nexusFilePreview iframe').src,currentSource);assert.equal(h.createdUrls.length,1);
+ }finally{await h.dispose()}
+});
+
+test('device files use their local Blob and never request a source fetch or offer a Google preview',async()=>{
+ const local={id:'local-preview',recordId:'local-preview',name:'Device plan.pdf',kind:'PDF',category:'Design',local:true,addedAt:'2026-10-31T16:17:18Z',date:'2026-10-31',dateRaw:'2026-10-31',datePrecision:'day',fileUrl:null,sourceUrl:null};
+ const h=await harness({files:[local],localBlob:new Blob(['%PDF private device'],{type:'application/pdf'})});try{
+  await h.click('[aria-label="Show file preview"]');const frame=h.w.document.querySelector('#nexusFilePreview iframe');assert.equal(frame.src,h.createdUrls[0].url);assert.equal(frame.title,'PDF preview: '+local.name);assert.equal(h.fetchCalls.length,0);
+  assert.equal(h.w.document.querySelector('#nexusFilePreview iframe[title^="Google preview:"]'),null);assert.ok(![...h.w.document.querySelectorAll('#nexusFilePreview button')].some(button=>/Google/.test(button.textContent)));
+  const source=frame.src;await h.click('[aria-label="Close file preview"]');assert.ok(h.revokedUrls.includes(source));
  }finally{await h.dispose()}
 });

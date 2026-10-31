@@ -18,7 +18,7 @@
   if(world==='esafe-demo'){
     // e-SAFE is its own Project World. Do not let the dev/file-sorting runtime mutate the bundle first.
     window.__NEXUS_TRADE_GRAPH_RUNTIME_INSTALLED__=true;
-    load('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=media-files-20261031');
+    load('__NEXUS_ESAFE_GRAPH_RUNTIME_INSTALLED__','./nexus-esafe-graph-runtime.js?v=media-files-r2-20261031');
     return;
   }
 

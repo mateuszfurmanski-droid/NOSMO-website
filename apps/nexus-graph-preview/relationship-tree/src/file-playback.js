@@ -56,6 +56,6 @@ function nxGooglePreviewUrl(file) {
     // Public Zenodo links may use ?download=1; credentials or signed/private URLs are not forwarded.
     if([...url.searchParams.keys()].some(key=>key!=='download'))return null;
     url.hash='';
-    return 'https://docs.google.com/gview?embedded=1&url='+encodeURIComponent(url.href);
+    return 'https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(url.href);
   }catch{return null}
 }

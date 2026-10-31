@@ -58,7 +58,7 @@ test('malformed dates do not become real import times; equal dates remain stable
 
 test('public Zenodo documents use an encoded Google iframe URL; explicit real Drive IDs use Drive preview',()=>{
  const file={name:'Plan A & B.pdf',kind:'PDF',fileUrl:'https://zenodo.org/records/6497142/files/Plan%20A%20%26%20B.pdf?download=1'};
- const preview=new URL(context.nxGooglePreviewUrl(file));assert.equal(preview.origin,'https://docs.google.com');assert.equal(preview.pathname,'/gview');assert.equal(preview.searchParams.get('embedded'),'1');assert.equal(preview.searchParams.get('url'),file.fileUrl);
+ const preview=new URL(context.nxGooglePreviewUrl(file));assert.equal(preview.origin,'https://docs.google.com');assert.equal(preview.pathname,'/gview');assert.equal(preview.searchParams.get('embedded'),'true');assert.equal(preview.searchParams.get('url'),file.fileUrl);
  for(const name of ['Register.xlsx','Schedule.xls','Notes.docx','Notes.doc','Data.csv','Data.ods'])assert.ok(context.nxGooglePreviewUrl({...file,name}));
  const driveId='1AbCdEfGhIjKlMnOpQrStUvWxYz_234567';
  assert.equal(context.nxGooglePreviewUrl({name:'Plan.pdf',driveFileId:driveId}),'https://drive.google.com/file/d/'+driveId+'/preview');
