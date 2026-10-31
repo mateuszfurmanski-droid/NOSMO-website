@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
 const {IDBFactory}=require('fake-indexeddb');
 const sourceRoot='apps/nexus-graph-preview/relationship-tree/src/';
-const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','file-explorer.js','timespace-model.js','timespace-view.js','timespace-player.js','graph-history.js','file-lifecycle.js','graph-motion.js','relationship-map.js'];
+const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','explorer-views.js','file-explorer.js','timespace-model.js','timespace-view.js','timespace-player.js','graph-history.js','file-lifecycle.js','graph-motion.js','relationship-map.js'];
 const appSource=sourceNames.map(name=>fs.readFileSync(sourceRoot+name,'utf8')).join('\n');
 const makeFile=(name,content='saved bytes',type='application/pdf')=>new File([content],name,{type,lastModified:Date.UTC(2020,4,20)});
 async function mapHarness({beforeMount=null,uuid=null,thematic=false,explorer=false}={}) {
