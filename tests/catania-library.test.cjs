@@ -7,7 +7,7 @@ const sourceRoot='apps/nexus-graph-preview/relationship-tree/';
 const catalogSource=fs.readFileSync(sourceRoot+'src/project-files.js','utf8');
 const dataSource=fs.readFileSync('apps/nexus-esafe-demo/data.js','utf8');
 const fileSource=fs.readFileSync('apps/nexus-esafe-demo/files.js','utf8');
-function dataset(){const ctx={window:{},URL};vm.createContext(ctx);vm.runInContext(dataSource,ctx);vm.runInContext(fileSource,ctx);vm.runInContext(catalogSource,ctx);return ctx}
+function dataset(){const ctx={window:{},URL};vm.createContext(ctx);vm.runInContext(fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/local-files.js','utf8')+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/file-playback.js','utf8')+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/timespace-player.js','utf8'),ctx);vm.runInContext(dataSource,ctx);vm.runInContext(fileSource,ctx);vm.runInContext(catalogSource,ctx);return ctx}
 
 test('existing Catania manifest exposes all 95 source records and 106 named remote files, retaining five graph aliases',()=>{
  const ctx=dataset(),files=ctx.nxEsafeCatalog(ctx.window.ESAFE_RECORDS);
@@ -32,7 +32,7 @@ test('e-SAFE bootstrap loads data and filename manifest together, enriching actu
  const requested=[];
  class XHR{open(method,path,async){assert.equal(method,'GET');assert.equal(async,false);this.path=path;requested.push(path)}send(){this.status=200;this.responseText=this.path.includes('/data.js?')?dataSource:this.path.includes('/files.js?')?fileSource:''}}
  const ctx={document:{addEventListener(){},querySelector(){return null},getElementById(){return null}},window:{__NEXUS_PROJECT_WORLD__:'esafe-demo',fetch:async()=>({}),addEventListener(){}},XMLHttpRequest:XHR,setTimeout(){},console,URL};
- vm.createContext(ctx);vm.runInContext(fs.readFileSync(sourceRoot+'nexus-esafe-graph-runtime.js','utf8'),ctx);vm.runInContext(catalogSource,ctx);
+ vm.createContext(ctx);vm.runInContext(fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/local-files.js','utf8')+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/file-playback.js','utf8')+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/timespace-player.js','utf8'),ctx);vm.runInContext(fs.readFileSync(sourceRoot+'nexus-esafe-graph-runtime.js','utf8'),ctx);vm.runInContext(catalogSource,ctx);
  assert.equal(requested.length,2);assert.match(requested[0],/\/data\.js\?/);assert.match(requested[1],/\/files\.js\?/);
  assert.equal(ctx.nxEsafeCatalog(ctx.window.ESAFE_RECORDS).length,106);assert.equal(typeof ctx.window.ESAFE_RECORDS[0].files[0],'object');
 });
@@ -50,7 +50,7 @@ test('actual catalog UI lists, searches, filters, reveals graph files and descri
  const click=el=>React.act(()=>el.click());
  w.document.getElementById('origin').focus();await render();
  assert.equal(rows().length,106);assert.equal(w.document.querySelector('h2').textContent,'Project files · 106');
- const note=w.document.querySelector('.nx-source-note').textContent;assert.match(note,/95 source records · 104 PDF · 2 videos/);assert.match(note,/Files open from Zenodo/);assert.match(note,/source publication/);assert.doesNotMatch(note,/imported|uploaded|confirmed/i);
+ const note=w.document.querySelector('.nx-source-note').textContent;assert.match(note,/95 source records · 104 PDF · 2 videos/);assert.match(note,/Source links open from Zenodo/);assert.match(note,/source publication/);assert.doesNotMatch(note,/imported|uploaded|confirmed/i);
  assert.equal(w.document.activeElement.getAttribute('aria-label'),'Close project files');
  await click(getButton('Video 2'));assert.equal(rows().length,2);assert.ok(rows().every(r=>r.querySelector('.nx-file-kind').textContent==='Video'));
  await click(getButton('Core pilot 5'));assert.equal(rows().length,5);assert.ok(rows().every(r=>r.textContent.includes('CORE PILOT')));
@@ -79,7 +79,7 @@ async function mountCataniaMap({query='?world=esafe-demo',workspace=null}={}){
  const ctx={window:w,document:w.document,URL,URLSearchParams,localStorage:w.localStorage,b:React,s:jsx,ko:ReactDOM,ns:objects,Dt:()=>null,CU:()=>null,gc:{project:{},person:{},task:{},document:{}},crypto:require('node:crypto').webcrypto,
   CustomEvent:w.CustomEvent,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame:()=>1,cancelAnimationFrame(){},getComputedStyle:w.getComputedStyle,
   _w:z=>Math.max(.3,Math.min(1.3,z)),EU:(items,root,edges,pinned)=>new Map(items.map((o,index)=>[o.id,pinned[o.id]||{x:index*150,y:index%2*200}]))};
- vm.createContext(ctx);vm.runInContext(fs.readFileSync(sourceRoot+'src/tile-groups.js','utf8')+'\n'+catalogSource+'\n'+fs.readFileSync(sourceRoot+'src/timespace-model.js','utf8')+'\n'+fs.readFileSync(sourceRoot+'src/timespace-view.js','utf8')+'\n'+fs.readFileSync(sourceRoot+'src/relationship-map.js','utf8'),ctx);
+ vm.createContext(ctx);vm.runInContext(fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/local-files.js','utf8')+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/file-playback.js','utf8')+'\n'+fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/timespace-player.js','utf8'),ctx);vm.runInContext(fs.readFileSync(sourceRoot+'src/tile-groups.js','utf8')+'\n'+catalogSource+'\n'+fs.readFileSync(sourceRoot+'src/timespace-model.js','utf8')+'\n'+fs.readFileSync(sourceRoot+'src/timespace-view.js','utf8')+'\n'+fs.readFileSync(sourceRoot+'src/relationship-map.js','utf8'),ctx);
  let root=createRoot(w.document.getElementById('mount'));
  const render=()=>React.act(()=>root.render(jsx.jsx(ctx.AU,{})));
  const click=el=>React.act(()=>el.click());
@@ -95,16 +95,16 @@ test('full Catania map opens all files from DOCS and project, reveals a noncore 
  try{
   const files=map.ctx.nxEsafeCatalog(w.ESAFE_RECORDS),other=files.find(f=>!f.core);
   assert.equal(w.document.querySelector('[data-catania-file-count]').textContent,'106 project files');
-  assert.equal(w.document.querySelectorAll('[data-node-id] button[aria-label^="document:"]').length,5);
+  assert.equal(w.document.querySelectorAll('[data-node-id] button[aria-label^="document:"]').length,106);
   assert.ok([...w.document.querySelectorAll('line[data-connection-id]')].every(n=>n.dataset.connectionId.startsWith('proj|')));
-  assert.equal(node(other.id),null);
+  assert.ok(node(other.id));
   await React.act(()=>w.dispatchEvent(new w.CustomEvent('nexus:open-project-files')));assert.equal(fileRows().length,106);
   await click(w.document.querySelector(`[data-file-id="${other.id}"] button`));
   assert.equal(fileRows().length,0);assert.ok(node(other.id));assert.equal(new URL(w.location.href).searchParams.get('file'),other.id);assert.equal(new URL(w.location.href).searchParams.has('files'),false);
   assert.ok([...w.document.querySelectorAll('line[data-connection-id]')].every(n=>n.dataset.connectionId.startsWith('proj|')));
   await click(node(other.id));assert.equal(fileRows().length,1);assert.equal(fileRows()[0].dataset.fileId,other.id);
   await close();await click(node('proj'));assert.equal(fileRows().length,106);
-  await close();await map.remount();assert.ok(node(other.id));assert.equal(fileRows().length,0);assert.equal(w.document.querySelectorAll('[data-node-id] button[aria-label^="document:"]').length,6);
+  await close();await map.remount();assert.ok(node(other.id));assert.equal(fileRows().length,0);assert.equal(w.document.querySelectorAll('[data-node-id] button[aria-label^="document:"]').length,106);
  }finally{await map.cleanup()}
 });
 

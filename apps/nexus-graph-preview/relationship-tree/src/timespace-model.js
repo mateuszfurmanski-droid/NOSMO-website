@@ -16,6 +16,7 @@ const nxTimeSpaceBuildingRecords = new Set(['6260847','6497142','19126519','1912
 function nxTimeSpaceLocation(file,bindings) {
   const id=file?.id;
   if(bindings&&Object.prototype.hasOwnProperty.call(bindings,id)&&nxTimeSpaceLocationIds.has(bindings[id]))return bindings[id];
+  if(file?.local&&nxTimeSpaceLocationIds.has(file.suggestedLocation))return file.suggestedLocation;
   return nxTimeSpaceBuildingRecords.has(String(file?.recordId))?'building':'unassigned';
 }
 function nxTimeSpaceDateLabel(file) {
@@ -43,6 +44,7 @@ function nxTimeSpaceNormalize(raw,files) {
   const knownFiles=new Set(all.map(file=>file.id));
   const years=new Set(nxTimeSpaceYearStats(all).map(stats=>stats.year));
   const topics=new Set(all.map(file=>file.category).filter(category=>typeof category==='string'&&category));
+  if(topics.has('Design')||topics.has('BIM'))topics.add('design-bim');
   const bindings={};
   const entries=raw?.bindings&&typeof raw.bindings==='object'&&!Array.isArray(raw.bindings)?Object.entries(raw.bindings):[];
   for(const [id,location] of entries)if(knownFiles.has(id)&&nxTimeSpaceLocationIds.has(location)) {
@@ -52,7 +54,7 @@ function nxTimeSpaceNormalize(raw,files) {
 }
 function nxTimeSpaceMatch(files,state) {
   const all=Array.isArray(files)?files:[],safe=nxTimeSpaceNormalize(state,all);
-  return all.filter(file=>(safe.year==='all'||nxTimeSpaceYear(file)===safe.year)&&(safe.location==='all'||nxTimeSpaceLocation(file,safe.bindings)===safe.location)&&(safe.topic==='all'||file.category===safe.topic));
+  return all.filter(file=>(safe.year==='all'||nxTimeSpaceYear(file)===safe.year)&&(safe.location==='all'||nxTimeSpaceLocation(file,safe.bindings)===safe.location)&&(safe.topic==='all'||(safe.topic==='design-bim'?['Design','BIM'].includes(file.category):file.category===safe.topic)));
 }
 function nxTimeSpaceGroups(files) {
   const records=new Map();

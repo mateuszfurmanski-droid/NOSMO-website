@@ -141,6 +141,183 @@ function nxPlaceMembers(center, members, occupied) {
   return placed;
 }
 
+// Local project files remain on this device. Metadata and bytes commit together.
+const nxLocalFilesDatabaseName='nosmo-local-project-files-v1';
+let nxLocalFilesDatabasePromise=null;
+function nxLocalFilesWorld(world) {
+  if(typeof world!=='string'||!world.trim()||world.length>200)throw new Error('Choose a valid project before adding files.');
+  return world.trim();
+}
+function nxLocalFilesOpen() {
+  if(nxLocalFilesDatabasePromise)return nxLocalFilesDatabasePromise;
+  if(typeof indexedDB==='undefined')return Promise.reject(new Error('Device file storage is unavailable in this browser.'));
+  const promise=new Promise((resolve,reject)=>{
+    let request,settled=false;
+    try{request=indexedDB.open(nxLocalFilesDatabaseName,1)}catch(error){reject(error);return}
+    request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains('files')){const store=db.createObjectStore('files',{keyPath:['world','id']});store.createIndex('world','world',{unique:false})}};
+    request.onerror=()=>{settled=true;reject(request.error||new Error('Could not open device file storage.'))};
+    request.onblocked=()=>{settled=true;reject(new Error('Device file storage is blocked by another open Nexus tab.'))};
+    request.onsuccess=()=>{const db=request.result;if(settled){db.close();return}settled=true;db.onversionchange=()=>{db.close();nxLocalFilesDatabasePromise=null};resolve(db)};
+  });
+  nxLocalFilesDatabasePromise=promise;
+  promise.catch(()=>{if(nxLocalFilesDatabasePromise===promise)nxLocalFilesDatabasePromise=null});
+  return promise;
+}
+function nxLocalFilesMetadata(record) {const {blob,...metadata}=record;return metadata}
+function nxLocalFilesNotify(world,addedIds=[],extra={}) {
+  try{if(typeof window==='undefined'||typeof window.dispatchEvent!=='function')return;const EventClass=window.CustomEvent||(typeof CustomEvent!=='undefined'?CustomEvent:null);if(EventClass)window.dispatchEvent(new EventClass('nexus:local-files-updated',{detail:{world,addedIds,...extra}}))}catch{}
+}
+function nxLocalFileKind(file) {
+  const mime=String(file.type||'').toLowerCase(),ext=String(file.name||'').split('.').pop().toLowerCase();
+  if(mime==='application/pdf')return'PDF';
+  if(mime.startsWith('video/'))return'Video';
+  if(mime.startsWith('image/'))return'Image';
+  if(/spreadsheet|excel|csv/.test(mime))return'Spreadsheet';
+  if(/msword|wordprocessingml|opendocument.text|presentation|powerpoint/.test(mime)||mime==='application/rtf')return'Document';
+  if(['ifc','ifczip','ifcxml'].includes(ext)||/ifc|x-step/.test(mime))return'IFC';
+  if(ext==='pdf')return'PDF';
+  if(['mp4','webm','mov','m4v','avi','mkv','mpeg','mpg'].includes(ext))return'Video';
+  if(['jpg','jpeg','png','gif','webp','heic','heif','tif','tiff','bmp','svg','avif'].includes(ext))return'Image';
+  if(['xlsx','xls','xlsm','ods','csv'].includes(ext))return'Spreadsheet';
+  if(['doc','docx','odt','rtf','txt','md','ppt','pptx','odp'].includes(ext))return'Document';
+  if(mime==='text/plain'||mime==='text/markdown')return'Document';
+  return'Other';
+}
+function nxLocalFileTopic(name,kind) {
+  const text=String(name).toLowerCase().replace(/[_-]+/g,' ');
+  if(/\b(survey|site measure|measured survey|pomiar|inwentaryzacja)\b/.test(text))return'Survey';
+  if(kind==='IFC'||/\b(bim|ifc|revit|3d model|digital model)\b/.test(text))return'BIM';
+  if(/\b(production|delivery|procurement|pre assembly|purchase order)\b/.test(text))return'Production';
+  if(/\b(inspection|test|testing|certificate|monitoring|commissioning|odbior)\b/.test(text))return'Testing';
+  if(/\b(design|drawing|plan|layout|specification|abacus|projekt|rysunek)\b/.test(text))return'Design';
+  if(/\b(newsletter|poster|dissemination|training|outreach|minutes|meeting)\b/.test(text))return'Communication';
+  if(/\b(construction|installation|renovation|retrofit|site|door|ventilation|duct|electrical|plumbing)\b/.test(text))return'Construction';
+  return'Unclassified';
+}
+function nxLocalFileLocation(name) {
+  const text=String(name).toLowerCase().replace(/_/g,' ');
+  // A named negative level or a range is not a single configured building level.
+  if(/\b(?:level|floor|lvl)\s+-\s*\d/.test(text)||/\b(?:level|floor|lvl|l)[ -]*\d+[ -]*(?:to|through|[–—-])[ -]*\d+/.test(text))return'unassigned';
+  const locations=new Set();
+  for(const match of text.matchAll(/(?:^|[^a-z0-9])(?:level|floor|lvl)[ -]*0?([0-4])(?=$|[^a-z0-9])/g))locations.add('level-'+match[1]);
+  for(const match of text.matchAll(/(?:^|[^a-z0-9])l0?([0-4])(?=$|[^a-z0-9])/g))locations.add('level-'+match[1]);
+  return locations.size===1?[...locations][0]:'unassigned';
+}
+function nxLocalFilesSort(files) {return files.sort((a,b)=>String(a.addedAt).localeCompare(String(b.addedAt))||(a.additionOrder-b.additionOrder)||a.id.localeCompare(b.id))}
+async function nxLocalFilesList(world) {
+  world=nxLocalFilesWorld(world);const db=await nxLocalFilesOpen();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('files','readonly'),request=tx.objectStore('files').index('world').getAll(world);let records=[];
+    request.onsuccess=()=>{records=request.result};
+    tx.oncomplete=()=>resolve(nxLocalFilesSort(records.filter(record=>!record.trashedAt).map(nxLocalFilesMetadata)));
+    tx.onabort=()=>reject(tx.error||new Error('Could not read device files.'));
+  });
+}
+async function nxLocalFilesAdd(world,files) {
+  world=nxLocalFilesWorld(world);files=Array.from(files||[]);
+  if(!files.length)return[];
+  for(const file of files)if(!file||typeof file.name!=='string'||!file.name||!Number.isFinite(file.size)||file.size<0||typeof file.slice!=='function'||typeof file.arrayBuffer!=='function')throw new Error('Choose valid files to add to the project.');
+  const db=await nxLocalFilesOpen();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('files','readwrite'),store=tx.objectStore('files'),existing=store.index('world').getAll(world);let output=[],failure=null;
+    existing.onsuccess=()=>{
+      try{
+        let order=existing.result.reduce((max,record)=>Number.isFinite(record.additionOrder)?Math.max(max,record.additionOrder):max,-1)+1;
+        const addedAt=new Date().toISOString(),day=addedAt.slice(0,10);
+        for(const file of files){
+          const id='local-'+crypto.randomUUID(),kind=nxLocalFileKind(file),mime=file.type||'application/octet-stream';
+          const modifiedAt=Number.isFinite(file.lastModified)&&file.lastModified>=0?new Date(file.lastModified).toISOString():null;
+          const record={world,id,recordId:id,name:file.name,title:file.name,size:file.size,mime,kind,date:day,dateRaw:day,datePrecision:'day',dateBasis:'added',addedAt,additionOrder:order++,modifiedAt,category:nxLocalFileTopic(file.name,kind),categoryBasis:'filename',suggestedLocation:nxLocalFileLocation(file.name),locationBasis:'filename',local:true,sourceUrl:null,fileUrl:null,blob:file.slice(0,file.size,mime)};
+          store.add(record);output.push(nxLocalFilesMetadata(record));
+        }
+      }catch(error){failure=error;tx.abort()}
+    };
+    tx.oncomplete=()=>{nxLocalFilesNotify(world,output.map(record=>record.id),{operation:'add'});resolve(output)};
+    tx.onabort=()=>reject(failure||tx.error||new Error('Could not save files on this device.'));
+  });
+}
+async function nxLocalFileBlob(world,id) {
+  world=nxLocalFilesWorld(world);const db=await nxLocalFilesOpen();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('files','readonly'),request=tx.objectStore('files').get([world,String(id)]);let record=null;
+    request.onsuccess=()=>{record=request.result};tx.oncomplete=()=>resolve(record&&!record.trashedAt?record.blob:null);tx.onabort=()=>reject(tx.error||new Error('Could not open the device file.'));
+  });
+}
+async function nxLocalFilesSetTrash(world,ids,trash) {
+  world=nxLocalFilesWorld(world);ids=[...new Set(Array.from(ids||[]).filter(id=>typeof id==='string'&&id))];if(!ids.length)return[];
+  const db=await nxLocalFilesOpen();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('files','readwrite'),store=tx.objectStore('files');let changed=[],failure=null;
+    for(const id of ids){const request=store.get([world,id]);request.onsuccess=()=>{try{const record=request.result;if(!record||!!record.trashedAt===trash)return;const next={...record};if(trash)next.trashedAt=new Date().toISOString();else delete next.trashedAt;store.put(next);changed.push(nxLocalFilesMetadata(next))}catch(error){failure=error;tx.abort()}}};
+    tx.oncomplete=()=>{if(changed.length)nxLocalFilesNotify(world,[],{operation:trash?'trash':'restore',[trash?'trashedIds':'restoredIds']:changed.map(record=>record.id)});resolve(changed)};
+    tx.onabort=()=>reject(failure||tx.error||new Error('Could not update device files.'));
+  });
+}
+function nxLocalFilesTrash(world,ids) {return nxLocalFilesSetTrash(world,ids,true)}
+function nxLocalFilesRestore(world,ids) {return nxLocalFilesSetTrash(world,ids,false)}
+
+// Individual-file playback. Source publication dates never become invented Nexus import times.
+function nxFilePlaybackDay(raw) {
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return null;
+  const timestamp=Date.parse(raw+'T00:00:00Z');
+  return Number.isFinite(timestamp)&&new Date(timestamp).toISOString().slice(0,10)===raw?timestamp:null;
+}
+function nxFilePlaybackAddedAt(value) {
+  if(typeof value!=='string')return null;
+  const match=value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-]\d{2}:\d{2})$/i);
+  if(!match||nxFilePlaybackDay(match[1])===null||Number(match[2])>23||Number(match[3])>59||Number(match[4]||0)>59)return null;
+  const timestamp=Date.parse(value);
+  return Number.isFinite(timestamp)?timestamp:null;
+}
+function nxFileMoment(file) {
+  const addedAt=nxFilePlaybackAddedAt(file?.addedAt);
+  if(addedAt!==null){
+    const iso=new Date(addedAt).toISOString();
+    return {dateLabel:iso.slice(0,10),timeLabel:iso.slice(11,19)+' UTC',basis:'Added to Nexus',precision:'second',timestamp:addedAt};
+  }
+  const raw=String(file?.dateRaw||file?.date||'').trim();
+  const precision=file?.datePrecision||(raw.length===4?'year':raw.length===7?'month':'day');
+  const basis='Source publication · addition time unknown';
+  if(precision==='year'&&/^\d{4}(?:$|-)/.test(raw)){
+    const year=raw.slice(0,4),timestamp=nxFilePlaybackDay(year+'-01-01');
+    if(timestamp!==null)return {dateLabel:year+' (year only)',timeLabel:'--:--',basis,precision:'year',timestamp};
+  }
+  if(precision==='month'&&/^\d{4}-\d{2}(?:$|-)/.test(raw)){
+    const month=raw.slice(0,7),timestamp=nxFilePlaybackDay(month+'-01');
+    if(timestamp!==null)return {dateLabel:month+' (month only)',timeLabel:'--:--',basis,precision:'month',timestamp};
+  }
+  const timestamp=nxFilePlaybackDay(raw);
+  if(timestamp!==null)return {dateLabel:raw,timeLabel:'--:--',basis,precision:'day',timestamp};
+  return {dateLabel:'Date not available',timeLabel:'--:--',basis,precision:'unknown',timestamp:null};
+}
+function nxTimeSpaceSequence(files) {
+  return (Array.isArray(files)?files:[]).filter(file=>file&&typeof file==='object').map((file,index)=>({file,index,moment:nxFileMoment(file)}))
+    .sort((a,b)=>{
+      const aTime=a.moment.timestamp,bTime=b.moment.timestamp;
+      if(aTime===null&&bTime!==null)return 1;
+      if(bTime===null&&aTime!==null)return -1;
+      return (aTime===null?0:aTime-bTime)||(a.file.addedAt&&b.file.addedAt?(Number(a.file.additionOrder)||0)-(Number(b.file.additionOrder)||0):0)||String(a.file.recordId??'').localeCompare(String(b.file.recordId??''),'en',{numeric:true})||a.index-b.index;
+    }).map(entry=>entry.file);
+}
+function nxGooglePreviewUrl(file) {
+  if(!file||typeof file!=='object'||file.local||file.private===true||file.isPublic===false||file.public===false||file.visibility==='private'||file.access==='private')return null;
+  const name=String(file.name||file.originalName||''),kind=String(file.kind||'').toLowerCase(),mime=String(file.mimeType||file.type||'').toLowerCase();
+  if(/^(video|image)/.test(mime)||/^(video|image|photo)$/.test(kind)||/\.(?:mp4|webm|mov|m4v|avi|mkv|png|jpe?g|gif|webp|svg|avif|bmp|tiff?)$/i.test(name))return null;
+  const supported=/\.(?:pdf|docx?|odt|rtf|xlsx?|xlsm|ods|csv)$/i.test(name)||/^(pdf|document|spreadsheet)$/.test(kind)||/^(?:application\/(?:pdf|msword|vnd\.(?:ms-excel|openxmlformats-officedocument\.(?:wordprocessingml\.document|spreadsheetml\.sheet)|oasis\.opendocument\.(?:text|spreadsheet)))|text\/csv)$/.test(mime);
+  if(!supported)return null;
+  // This explicit field is supplied by a Drive connector; Zenodo record IDs are never Drive IDs.
+  const driveId=typeof file.driveFileId==='string'?file.driveFileId:'';
+  if(/^(?=.*[A-Za-z_-])[A-Za-z0-9_-]{20,200}$/.test(driveId))return 'https://drive.google.com/file/d/'+encodeURIComponent(driveId)+'/preview';
+  try{
+    const url=new URL(file.fileUrl||file.url||'');
+    if(url.protocol!=='https:'||url.hostname!=='zenodo.org'||url.port||url.username||url.password)return null;
+    // Public Zenodo links may use ?download=1; credentials or signed/private URLs are not forwarded.
+    if([...url.searchParams.keys()].some(key=>key!=='download'))return null;
+    url.hash='';
+    return 'https://docs.google.com/gview?embedded=1&url='+encodeURIComponent(url.href);
+  }catch{return null}
+}
+
 // Existing e-SAFE source manifest, shared by the catalog and graph cards.
 function nxEsafeCatalog(records) {
   const aliases={'6260847':'d-snaglist','6497142':'d-firecerts','19114712':'t-install','19126519':'t-snag','19126674':'t-fire'};
@@ -152,18 +329,22 @@ function nxEsafeCatalog(records) {
   }));
 }
 function nxFileSize(bytes){return bytes>=1048576?(bytes/1048576).toFixed(1)+' MB':Math.ceil(bytes/1024)+' KB'}
-function NexusProjectFiles({files,onClose,onReveal,initialFile=null}) {
+function NexusProjectFiles({files,onClose,onReveal,initialFile=null,onAddFiles,onRemoveFile,onRestoreFile}) {
   const [filter,setFilter]=b.useState(initialFile?'selected':'all'),[query,setQuery]=b.useState('');
+  const [lastRemoved,setLastRemoved]=b.useState(null),[error,setError]=b.useState(''),picker=b.useRef(null);
+  const add=async e=>{const list=Array.from(e.target.files||[]);e.target.value='';if(!list.length)return;try{await onAddFiles(list);setError('');setFilter('all')}catch(e){setError(e.message)}};
   const closeButton=b.useRef(null),previousFocus=b.useRef(null);
   b.useEffect(()=>{previousFocus.current=document.activeElement;closeButton.current?.focus();return()=>previousFocus.current?.isConnected&&previousFocus.current.focus()},[]);
   const shown=files.filter(file=>(filter==='all'||filter==='selected'&&file.id===initialFile||filter==='core'&&file.core||filter==='video'&&file.kind==='Video'||filter==='pdf'&&file.kind==='PDF')&&(!query||[file.name,file.title,file.category].join(' ').toLowerCase().includes(query.toLowerCase())));
   const keydown=e=>{if(e.key==='Escape'){e.preventDefault();onClose()}if(e.key==='Tab'){const controls=[...e.currentTarget.querySelectorAll('button,a,input')].filter(n=>!n.disabled&&n.getClientRects().length);if(!controls.length)return;const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
   return ko.createPortal(s.jsxs('section',{id:'nexusProjectFiles','data-control':true,role:'dialog','aria-modal':'true','aria-labelledby':'nx-project-files-title',onKeyDown:keydown,children:[
     s.jsxs('header',{children:[s.jsxs('div',{children:[s.jsx('small',{children:'e-SAFE · CATANIA'}),s.jsx('h2',{id:'nx-project-files-title',children:'Project files · '+files.length})]}),s.jsx('button',{ref:closeButton,onClick:onClose,'aria-label':'Close project files',children:'×'})]}),
-    s.jsx('p',{className:'nx-source-note',children:new Set(files.map(f=>f.recordId)).size+' source records · '+files.filter(f=>f.kind==='PDF').length+' PDF · '+files.filter(f=>f.kind==='Video').length+' videos. Files open from Zenodo; this catalog stores their names and links. Dates refer to source publication.'}),
+    s.jsx('p',{className:'nx-source-note',children:new Set(files.filter(f=>!f.local).map(f=>f.recordId)).size+' source records · '+files.filter(f=>f.kind==='PDF').length+' PDF · '+files.filter(f=>f.kind==='Video').length+' videos. '+files.filter(f=>f.local).length+' device files. Source links open from Zenodo; device files stay here. Dates refer to source publication or actual device addition.'}),
     s.jsxs('div',{className:'nx-file-filters','aria-label':'Filter project files',children:[...['all','core','pdf','video'].map(value=>s.jsx('button',{'aria-pressed':filter===value,onClick:()=>setFilter(value),children:({all:'All '+files.length,core:'Core pilot '+files.filter(f=>f.core).length,pdf:'PDF '+files.filter(f=>f.kind==='PDF').length,video:'Video '+files.filter(f=>f.kind==='Video').length})[value]},value)),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Search project files'}),s.jsx('input',{'aria-label':'Search project files',type:'search',value:query,onChange:e=>setQuery(e.target.value),placeholder:'Find a file…'})]},'search')]}),
+    onAddFiles&&s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>picker.current?.click(),children:'+ Add files'}),s.jsx('input',{ref:picker,type:'file',multiple:true,hidden:true,'aria-label':'Add files to project',onChange:add}),lastRemoved&&s.jsx('button',{onClick:async()=>{try{await onRestoreFile(lastRemoved);setLastRemoved(null)}catch(e){setError(e.message)}},children:'Undo removal'})]}),
+    error&&s.jsx('p',{role:'alert',children:error}),
     s.jsx('p',{className:'nx-file-result-count',role:'status',children:shown.length+' of '+files.length+' files'}),
-    s.jsx('div',{className:'nx-project-file-list',children:shown.length?shown.map(file=>s.jsxs('article',{'data-file-id':file.id,children:[s.jsxs('div',{className:'nx-file-name',children:[s.jsx('span',{className:'nx-file-kind',children:file.kind}),s.jsx('strong',{children:file.name})]}),s.jsx('p',{children:file.title}),s.jsx('small',{children:[file.category,' · ',file.dateRaw||file.date,file.datePrecision==='year'?' (year only)':file.datePrecision==='month'?' (month only)':'',' · ',nxFileSize(file.size),file.core?' · CORE PILOT':'']}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id)):s.jsx('p',{children:'No matching files. Choose All to see the full catalog.'})})]}),document.body);
+    s.jsx('div',{className:'nx-project-file-list',children:shown.length?shown.map(file=>s.jsxs('article',{'data-file-id':file.id,children:[s.jsxs('div',{className:'nx-file-name',children:[s.jsx('span',{className:'nx-file-kind',children:file.kind}),s.jsx('strong',{children:file.name})]}),s.jsx('p',{children:file.title}),s.jsx('small',{children:[file.category,' · ',file.dateRaw||file.date,file.datePrecision==='year'?' (year only)':file.datePrecision==='month'?' (month only)':'',' · ',nxFileSize(file.size),file.core?' · CORE PILOT':'']}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),file.local?s.jsx('button',{onClick:async()=>{try{await onRemoveFile(file.id);setLastRemoved(file.id);setFilter('all')}catch(e){setError(e.message)}},children:'Remove device file'}):s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),!file.local&&s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id)):s.jsx('p',{children:'No matching files. Choose All to see the full catalog.'})})]}),document.body);
 }
 
 // TimeSpace is a read-only view of source chronology plus explicit file locations.
@@ -184,6 +365,7 @@ const nxTimeSpaceBuildingRecords = new Set(['6260847','6497142','19126519','1912
 function nxTimeSpaceLocation(file,bindings) {
   const id=file?.id;
   if(bindings&&Object.prototype.hasOwnProperty.call(bindings,id)&&nxTimeSpaceLocationIds.has(bindings[id]))return bindings[id];
+  if(file?.local&&nxTimeSpaceLocationIds.has(file.suggestedLocation))return file.suggestedLocation;
   return nxTimeSpaceBuildingRecords.has(String(file?.recordId))?'building':'unassigned';
 }
 function nxTimeSpaceDateLabel(file) {
@@ -211,6 +393,7 @@ function nxTimeSpaceNormalize(raw,files) {
   const knownFiles=new Set(all.map(file=>file.id));
   const years=new Set(nxTimeSpaceYearStats(all).map(stats=>stats.year));
   const topics=new Set(all.map(file=>file.category).filter(category=>typeof category==='string'&&category));
+  if(topics.has('Design')||topics.has('BIM'))topics.add('design-bim');
   const bindings={};
   const entries=raw?.bindings&&typeof raw.bindings==='object'&&!Array.isArray(raw.bindings)?Object.entries(raw.bindings):[];
   for(const [id,location] of entries)if(knownFiles.has(id)&&nxTimeSpaceLocationIds.has(location)) {
@@ -220,7 +403,7 @@ function nxTimeSpaceNormalize(raw,files) {
 }
 function nxTimeSpaceMatch(files,state) {
   const all=Array.isArray(files)?files:[],safe=nxTimeSpaceNormalize(state,all);
-  return all.filter(file=>(safe.year==='all'||nxTimeSpaceYear(file)===safe.year)&&(safe.location==='all'||nxTimeSpaceLocation(file,safe.bindings)===safe.location)&&(safe.topic==='all'||file.category===safe.topic));
+  return all.filter(file=>(safe.year==='all'||nxTimeSpaceYear(file)===safe.year)&&(safe.location==='all'||nxTimeSpaceLocation(file,safe.bindings)===safe.location)&&(safe.topic==='all'||(safe.topic==='design-bim'?['Design','BIM'].includes(file.category):file.category===safe.topic)));
 }
 function nxTimeSpaceGroups(files) {
   const records=new Map();
@@ -236,7 +419,7 @@ function nxTimeSpaceGroups(files) {
 }
 
 // TimeSpace in the existing Nexus map. Dates are source publication dates.
-function NexusTimeSpace({files,onClose,onReveal,onOpenFiles}) {
+function NexusTimeSpaceCatalog({files,onClose,onReveal,onOpenFiles}) {
   const storageKey='nosmo.timespace:v1:esafe-demo';
   const [state,setState]=b.useState(()=>{try{return nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(storageKey)),files)}catch{return nxTimeSpaceNormalize(null,files)}});
   const [error,setError]=b.useState(''),[undo,setUndo]=b.useState(null);
@@ -245,23 +428,81 @@ function NexusTimeSpace({files,onClose,onReveal,onOpenFiles}) {
   const topics=[...new Set(files.map(f=>f.category))].sort();
   const commit=(next,remember=false)=>{const clean=nxTimeSpaceNormalize(next,files);try{localStorage.setItem(storageKey,JSON.stringify(clean))}catch{setError('Could not save. Change cancelled — device storage unavailable.');return false}if(remember)setUndo(state);setState(clean);setError('');return true};
   b.useEffect(()=>{origin.current=document.activeElement;closeButton.current?.focus();return()=>origin.current?.isConnected&&origin.current.focus()},[]);
-  b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:timespace-filter',{detail:{fileIds:shown.map(f=>f.id),active:state.year!=='all'||state.location!=='all'||state.topic!=='all',year:state.year,location:state.location,topic:state.topic}}))},[state]);
+  b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:timespace-filter',{detail:{source:'timespace-catalog',fileIds:shown.map(f=>f.id),active:state.year!=='all'||state.location!=='all'||state.topic!=='all',year:state.year,location:state.location,topic:state.topic}}))},[state]);
   const assign=(record,value)=>{const bindings={...state.bindings};for(const file of record.files){if(value==='auto')delete bindings[file.id];else bindings[file.id]=value}commit({...state,bindings},true)};
   const keydown=e=>{if(e.key==='Escape'){e.preventDefault();onClose()}if(e.key==='Tab'){const items=[...e.currentTarget.querySelectorAll('button,a,select,input,summary')].filter(n=>!n.disabled&&n.getClientRects().length);const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
   const locationLabel=id=>nxTimeSpaceLocations.find(l=>l.id===id)?.label||'All locations';
   const placeButton=place=>{const count=files.filter(f=>nxTimeSpaceLocation(f,state.bindings)===place.id).length;return s.jsxs('button',{'data-location':place.id,'aria-pressed':state.location===place.id,onClick:()=>commit({...state,location:place.id}),children:[s.jsx('span',{children:place.label}),s.jsx('strong',{children:count})]},place.id)};
-  return ko.createPortal(s.jsxs('section',{id:'nexusTimeSpace','data-control':true,role:'dialog','aria-modal':'true','aria-labelledby':'nx-timespace-title',onKeyDown:keydown,children:[
-    s.jsxs('header',{children:[s.jsxs('div',{children:[s.jsx('small',{children:'e-SAFE · CATANIA'}),s.jsx('h2',{id:'nx-timespace-title',children:'TimeSpace'})]}),s.jsx('button',{ref:closeButton,onClick:onClose,'aria-label':'Close TimeSpace',children:'×'})]}),
+  return ko.createPortal(s.jsxs('section',{id:'nexusTimeSpaceCatalog','data-control':true,role:'dialog','aria-modal':'true','aria-labelledby':'nx-timespace-catalog-title',onKeyDown:keydown,children:[
+    s.jsxs('header',{children:[s.jsxs('div',{children:[s.jsx('small',{children:'e-SAFE · CATANIA'}),s.jsx('h2',{id:'nx-timespace-catalog-title',children:'TimeSpace'})]}),s.jsx('button',{ref:closeButton,onClick:onClose,'aria-label':'Close catalog',children:'×'})]}),
     s.jsx('p',{className:'nx-ts-explanation',children:'Publication timeline · 2021–2026. Choose a year and place to find project documents. Work event dates and floor assignments are available only when recorded.'}),
     s.jsxs('nav',{className:'nx-ts-years','aria-label':'Publication year',children:[s.jsxs('button',{'data-year':'all','aria-pressed':state.year==='all',onClick:()=>commit({...state,year:'all'}),children:[s.jsx('strong',{children:'All years'}),s.jsx('small',{children:files.length+' files'})]},'all'),...years.map(y=>s.jsxs('button',{'data-year':y.year,'aria-pressed':state.year===String(y.year),onClick:()=>commit({...state,year:String(y.year)}),children:[s.jsx('strong',{children:y.year}),s.jsx('small',{children:y.files+' files'})]},y.year))]}),
     s.jsxs('div',{className:'nx-ts-layout',children:[
       s.jsxs('aside',{className:'nx-ts-spaces','aria-label':'Project location',children:[s.jsx('h3',{children:'Project → place'}),s.jsxs('button',{'data-location':'all','aria-pressed':state.location==='all',onClick:()=>commit({...state,location:'all'}),children:[s.jsx('span',{children:'All project sources'}),s.jsx('strong',{children:files.length})]}),placeButton(nxTimeSpaceLocations.find(l=>l.id==='building')),s.jsx('p',{className:'nx-ts-address',children:'Via Acquicella Porto 27/H, Catania'}),s.jsxs('details',{children:[s.jsx('summary',{children:'Building levels'}),...nxTimeSpaceLocations.filter(l=>l.id.startsWith('level-')).map(placeButton),s.jsx('p',{children:'Levels 0–4 use the existing project structure. Document-to-floor links require an assignment.'})]}),placeButton(nxTimeSpaceLocations.find(l=>l.id==='unassigned')),s.jsx('p',{children:'Research and virtual-pilot sources stay unassigned unless a location is recorded.'})]}),
       s.jsxs('div',{className:'nx-ts-content',children:[
-        s.jsxs('div',{className:'nx-ts-controls',children:[s.jsxs('label',{children:[s.jsx('span',{children:'Topic'}),s.jsx('select',{'aria-label':'TimeSpace topic',value:state.topic,onChange:e=>commit({...state,topic:e.target.value}),children:[s.jsx('option',{value:'all',children:'All topics'},'all'),...topics.map(topic=>s.jsx('option',{value:topic,children:topic},topic))]})]}),s.jsx('button',{onClick:()=>commit({...state,year:'all',location:'all',topic:'all'}),children:'Clear filters'}),s.jsx('button',{onClick:onOpenFiles,children:'Files · '+files.length}),undo&&s.jsx('button',{onClick:()=>{if(commit(undo))setUndo(null)},children:'Undo location'})]}),
+        s.jsxs('div',{className:'nx-ts-controls',children:[s.jsxs('label',{children:[s.jsx('span',{children:'Topic'}),s.jsx('select',{'aria-label':'TimeSpace topic',value:state.topic,onChange:e=>commit({...state,topic:e.target.value}),children:[s.jsx('option',{value:'all',children:'All topics'},'all'),topics.some(t=>t==='Design'||t==='BIM')&&s.jsx('option',{value:'design-bim',children:'Design + BIM'},'design-bim'),...topics.map(topic=>s.jsx('option',{value:topic,children:topic},topic))]})]}),s.jsx('button',{onClick:()=>commit({...state,year:'all',location:'all',topic:'all'}),children:'Clear filters'}),s.jsx('button',{onClick:onOpenFiles,children:'Files · '+files.length}),undo&&s.jsx('button',{onClick:()=>{if(commit(undo))setUndo(null)},children:'Undo location'})]}),
         error&&s.jsx('p',{role:'alert',className:'nx-ts-error',children:error}),
         s.jsxs('p',{className:'nx-ts-summary',role:'status',children:[groups.length,' records · ',shown.length,' files · ',state.year==='all'?'all years':state.year,' · ',locationLabel(state.location)]}),
         s.jsx('p',{className:'nx-ts-note',children:'Dates follow the source catalog; year/month-only dates keep their precision. Topics come from source titles. Location changes are saved on this device.'}),
-        s.jsx('div',{className:'nx-ts-events',children:groups.length?groups.map(record=>{const first=record.files[0],manual=record.files.some(file=>Object.prototype.hasOwnProperty.call(state.bindings,file.id)),places=new Set(record.files.map(file=>nxTimeSpaceLocation(file,state.bindings))),place=places.size===1?[...places][0]:'mixed';return s.jsxs('article',{'data-record-id':record.recordId,children:[s.jsxs('div',{className:'nx-ts-event-head',children:[s.jsx('time',{children:record.dateLabel}),s.jsx('small',{children:first.category+(first.core?' · CORE PILOT':'')})]}),s.jsx('h3',{children:record.title}),s.jsxs('div',{className:'nx-ts-location-row',children:[s.jsx('span',{children:(manual?'Manual location · ':'Source location · ')+(place==='mixed'?'Multiple locations':locationLabel(place))}),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Assign location'}),s.jsx('select',{'aria-label':'Location for source '+record.recordId,value:manual&&place!=='mixed'?place:'auto',onChange:e=>assign(record,e.target.value),children:[s.jsx('option',{value:'auto',children:'Use source location'},'auto'),...nxTimeSpaceLocations.map(p=>s.jsx('option',{value:p.id,children:p.label},p.id))]})]})]}),s.jsx('div',{className:'nx-ts-event-files',children:record.files.map(file=>s.jsxs('div',{'data-timespace-file':file.id,children:[s.jsx('strong',{children:file.name}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id))})]},record.recordId)}):s.jsx('p',{className:'nx-ts-empty',children:'No files in this year and place. Clear filters to see all project sources.'})})]})]})]}),document.body);
+        s.jsx('div',{className:'nx-ts-events',children:groups.length?groups.map(record=>{const first=record.files[0],manual=record.files.some(file=>Object.prototype.hasOwnProperty.call(state.bindings,file.id)),places=new Set(record.files.map(file=>nxTimeSpaceLocation(file,state.bindings))),place=places.size===1?[...places][0]:'mixed';return s.jsxs('article',{'data-record-id':record.recordId,children:[s.jsxs('div',{className:'nx-ts-event-head',children:[s.jsx('time',{children:record.dateLabel}),s.jsx('small',{children:first.category+(first.core?' · CORE PILOT':'')})]}),s.jsx('h3',{children:record.title}),s.jsxs('div',{className:'nx-ts-location-row',children:[s.jsx('span',{children:(manual?'Manual location · ':first.local?'Filename hint · ':'Source location · ')+(place==='mixed'?'Multiple locations':locationLabel(place))}),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Assign location'}),s.jsx('select',{'aria-label':'Location for source '+record.recordId,value:manual&&place!=='mixed'?place:'auto',onChange:e=>assign(record,e.target.value),children:[s.jsx('option',{value:'auto',children:'Use source location'},'auto'),...nxTimeSpaceLocations.map(p=>s.jsx('option',{value:p.id,children:p.label},p.id))]})]})]}),s.jsx('div',{className:'nx-ts-event-files',children:record.files.map(file=>s.jsxs('div',{'data-timespace-file':file.id,children:[s.jsx('strong',{children:file.name}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),file.fileUrl&&s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),file.sourceUrl&&s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id))})]},record.recordId)}):s.jsx('p',{className:'nx-ts-empty',children:'No files in this year and place. Clear filters to see all project sources.'})})]})]})]}),document.body);
+}
+
+// Reuses the existing nx-pti multimedia-console structure and original CSS.
+function NexusFilePreview({file,world,onClose}) {
+  const google=nxGooglePreviewUrl(file);
+  const [direct,setDirect]=b.useState(false),[url,setUrl]=b.useState(null),[error,setError]=b.useState('');
+  b.useEffect(()=>{let live=true,objectUrl=null;setError('');setUrl(null);setDirect(false);if(file.local){nxLocalFileBlob(world,file.id).then(blob=>{if(!blob)throw Error('Device copy is unavailable');if(live){objectUrl=URL.createObjectURL(blob);setUrl(objectUrl)}}).catch(e=>live&&setError(e.message))}else setUrl(file.fileUrl);return()=>{live=false;if(objectUrl)URL.revokeObjectURL(objectUrl)}},[file.id]);
+  const video=file.kind==='Video',image=file.kind==='Image',pdf=file.kind==='PDF',source=direct||!google?url:google;
+  return s.jsxs('section',{id:'nexusFilePreview','data-control':true,role:'region','aria-label':'Nexus file preview',children:[s.jsxs('header',{children:[s.jsxs('div',{children:[s.jsx('small',{children:'NOSMO NEXUS · '+(google&&!direct?'GOOGLE PREVIEW':'DEVICE / SOURCE PREVIEW')}),s.jsx('strong',{children:file.name})]}),s.jsx('button',{onClick:onClose,'aria-label':'Close file preview',children:'×'})]}),
+    s.jsxs('div',{className:'nx-preview-body',children:[error?s.jsx('p',{role:'alert',children:error}):source?(video?s.jsx('video',{src:url,controls:true,preload:'metadata','aria-label':file.name}):image?s.jsx('img',{src:url,alt:file.name}):google&&!direct?s.jsx('iframe',{title:'Google preview: '+file.name,src:google,referrerPolicy:'no-referrer',sandbox:'allow-scripts allow-same-origin allow-forms allow-downloads'}):pdf?s.jsx('iframe',{title:'PDF preview: '+file.name,src:url}):s.jsx('p',{children:'This device file is stored in Nexus. An embedded renderer is not available for this format.'})):s.jsx('p',{role:'status',children:'Loading file…'})]}),
+    s.jsxs('footer',{children:[google&&s.jsx('button',{onClick:()=>setDirect(v=>!v),children:direct?'Google preview':'Source preview'}),file.local&&s.jsx('small',{children:'Device file stays on this device. Google needs a remotely accessible file.'}),url&&s.jsx('a',{href:url,target:file.local?undefined:'_blank',rel:file.local?undefined:'noopener noreferrer',download:file.local?file.name:undefined,children:'Download file'})]})]});
+}
+function NexusTimeSpace({files,onClose,onReveal,onOpenFiles,onAddFiles,initialFile=null,world='esafe-demo'}) {
+  const key='nosmo.timespace.player:v1:'+world,filterKey='nosmo.timespace:v1:'+world;
+  const [context,setContext]=b.useState(()=>{try{return nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(filterKey)),files)}catch{return nxTimeSpaceNormalize(null,files)}});
+  const [saved]=b.useState(()=>{try{return JSON.parse(localStorage.getItem(key))||{}}catch{return{}}});
+  const [stream,setStream]=b.useState(['all','added','source'].includes(saved.stream)?saved.stream:'all'),[currentId,setCurrentId]=b.useState(initialFile||saved.currentId||null),[playing,setPlaying]=b.useState(false),[preview,setPreview]=b.useState(false),[catalog,setCatalog]=b.useState(false),[error,setError]=b.useState('');
+  const picker=b.useRef(null),origin=b.useRef(null),root=b.useRef(null);
+  const [initialRequest,setInitialRequest]=b.useState(null);
+  const filtered=nxTimeSpaceMatch(files,context).filter(f=>stream==='all'||(stream==='added'?!!f.addedAt:!f.addedAt)),sequence=nxTimeSpaceSequence(filtered);
+  let index=sequence.findIndex(f=>f.id===currentId);if(index<0)index=0;
+  const current=sequence[index]||null,moment=current?nxFileMoment(current):{dateLabel:'NO FILE',timeLabel:'--:--',basis:'Add a file to begin'};
+  const pendingInitial=!!initialFile&&initialRequest!==initialFile&&(files.some(file=>file.id===initialFile)||initialFile.startsWith('local-'));
+  const select=i=>{if(!sequence.length)return;setCurrentId(sequence[Math.max(0,Math.min(sequence.length-1,i))].id)};
+  b.useEffect(()=>{
+    if(!initialFile||initialRequest===initialFile)return;
+    if(!files.some(file=>file.id===initialFile))return;
+    setInitialRequest(initialFile);
+    if(!sequence.some(file=>file.id===initialFile)){
+      const clean=nxTimeSpaceNormalize({...context,year:'all',location:'all',topic:'all'},files);
+      setContext(clean);setStream('all');
+      try{localStorage.setItem(filterKey,JSON.stringify(clean))}catch{setError('File opened for this session. Could not save cleared filters.')}
+    }
+    setCurrentId(initialFile);
+  },[initialFile,files]);
+  b.useEffect(()=>{origin.current=document.activeElement;return()=>origin.current?.isConnected&&origin.current.focus()},[]);
+  b.useEffect(()=>{if(!current||pendingInitial)return;try{localStorage.setItem(key,JSON.stringify({currentId:current.id,stream}))}catch{}window.dispatchEvent(new CustomEvent('nexus:timespace-current-file',{detail:{world,fileId:current.id}}))},[current?.id,stream,pendingInitial]);
+  b.useEffect(()=>{const updated=e=>{if(e.detail?.source==='timespace-catalog'){try{setContext(nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(filterKey)),files))}catch{}}};window.addEventListener('nexus:timespace-filter',updated);return()=>window.removeEventListener('nexus:timespace-filter',updated)},[files]);
+  b.useEffect(()=>{if(!playing||!sequence.length)return;const timer=setInterval(()=>{if(index>=sequence.length-1)setPlaying(false);else{select(index+1);if(index+1>=sequence.length-1)setPlaying(false)}},1800);return()=>clearInterval(timer)},[playing,index,sequence.length]);
+  b.useEffect(()=>{const hidden=()=>{if(document.hidden)setPlaying(false)};document.addEventListener('visibilitychange',hidden);return()=>document.removeEventListener('visibilitychange',hidden)},[]);
+  const changeContext=next=>{const clean=nxTimeSpaceNormalize(next,files);try{localStorage.setItem(filterKey,JSON.stringify(clean));setContext(clean);setError('')}catch{setError('Could not save filter. Change cancelled.')}};
+  const add=async list=>{if(!list?.length)return;setPlaying(false);try{const added=await onAddFiles(list);setStream('all');changeContext({...context,year:'all',location:'all',topic:'all'});if(added?.length)setCurrentId(added[added.length-1].id);setError('')}catch(e){setError('Could not add files: '+e.message)}};
+  const command=(cmd)=>{if(cmd==='play')setPlaying(p=>!p);else{setPlaying(false);select(cmd==='first'?0:cmd==='previous'?index-1:cmd==='next'?index+1:sequence.length-1)}};
+  const topics=[['All','all'],['Survey','Survey'],['Design + BIM','design-bim'],['Procurement','Production'],['Construction','Construction'],['Testing + handover','Testing']];
+  // Keep the same console, transport bank, status lights, file-knob position and event card.
+  return ko.createPortal(s.jsxs('div',{id:'nexusTimeSpaceDock','data-control':true,children:[
+    preview&&current&&s.jsx(NexusFilePreview,{file:current,world,onClose:()=>setPreview(false)},current.id),
+    s.jsxs('section',{id:'nexusTimeSpace',ref:root,className:'nx-pti-open nx-timespace-player',role:'region','aria-label':'TimeSpace media player',onKeyDown:e=>{if(e.key==='Escape'){if(preview)setPreview(false);else onClose()}},children:[
+      s.jsxs('div',{className:'nx-pti-player-heading',children:[s.jsx('strong',{children:'NEXUS · TIMESPACE'}),s.jsx('span',{children:'CATANIA'}),s.jsx('button',{onClick:()=>{setPlaying(false);onClose()},'aria-label':'Close TimeSpace',children:'×'})]}),
+      s.jsxs('div',{className:'nx-pti-console',children:[s.jsxs('div',{className:'nx-pti-left',children:[s.jsxs('div',{className:'nx-pti-ticker','aria-live':'polite',children:[s.jsx('strong',{className:'nx-pti-date',children:moment.dateLabel}),s.jsx('strong',{className:'nx-pti-clock',children:moment.timeLabel}),s.jsx('small',{className:'nx-pti-time-basis',children:moment.basis})]}),s.jsx('div',{className:'nx-pti-transport',children:[['play',playing?'Ⅱ':'▶',playing?'Pause files':'Play files'],['first','|◀','First file'],['previous','◀','Previous file'],['next','▶','Next file'],['last','▶|','Last file'],['catalog','▤','Catalog and locations']].map(([cmd,icon,label])=>s.jsx('button',{className:'nx-pti-btn nx-led-'+(cmd==='play'?'green':'blue')+(cmd==='play'&&playing?' nx-active':''),'data-cmd':cmd,'data-icon':icon,'aria-label':label,disabled:!sequence.length||(cmd==='previous'||cmd==='first')&&index===0||(cmd==='next'||cmd==='last')&&index===sequence.length-1,onClick:()=>cmd==='catalog'?(setPlaying(false),setCatalog(true)):command(cmd)},cmd))}),s.jsx('div',{className:'nx-pti-mode',children:[['all','ALL FILES'],['added','ADDED TO NEXUS'],['source','SOURCE ARCHIVE']].map(([value,label])=>s.jsx('button',{'data-mode':value,'aria-pressed':stream===value,className:stream===value?'nx-active':'',onClick:()=>{setPlaying(false);setStream(value)},children:label},value))})]}),s.jsxs('div',{className:'nx-pti-knob-zone',children:[s.jsx('button',{className:'nx-pti-knob nx-pti-file-knob','aria-label':preview?'Hide file preview':'Show file preview','aria-pressed':preview,disabled:!current,onClick:()=>setPreview(v=>!v),children:current?.kind==='PDF'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/pdf.webp',alt:'PDF'}):current?.kind==='Spreadsheet'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/xlsx.webp',alt:'Spreadsheet'}):s.jsx('span',{children:current?.kind==='Video'?'▶':'▤'})}),s.jsx('div',{className:'nx-pti-knob-label',children:'FILE · '+(index+1)+'/'+sequence.length})]})]}),
+      s.jsx('div',{className:'nx-pti-phase','aria-label':'Document topic filter',children:topics.map(([label,value])=>s.jsx('button',{'data-topic':value,'aria-pressed':context.topic===value,className:context.topic===value?'nx-active':'',onClick:()=>{setPlaying(false);changeContext({...context,year:'all',location:'all',topic:value})},children:label},value))}),
+      s.jsxs('div',{className:'nx-pti-meta',children:[s.jsx('span',{children:sequence[0]?nxFileMoment(sequence[0]).dateLabel:'—'}),s.jsx('span',{children:'FILE '+(current?index+1:0)+' OF '+sequence.length}),s.jsx('span',{children:sequence.length?nxFileMoment(sequence[sequence.length-1]).dateLabel:'—'})]}),
+      s.jsx('div',{className:'nx-pti-rail',children:s.jsx('input',{type:'range',min:0,max:Math.max(0,sequence.length-1),step:1,value:index,disabled:!sequence.length,'aria-label':'Chronological file position','aria-valuetext':current?(index+1)+' of '+sequence.length+': '+current.name:'No files',onChange:e=>{setPlaying(false);select(Number(e.target.value))}})}),
+      s.jsxs('div',{className:'nx-pti-status',children:[s.jsxs('div',{className:'nx-pti-stat',children:[s.jsx('b',{children:sequence.length}),' FILES']}),s.jsx('div',{className:'nx-pti-stat',children:current?.category||'NO TOPIC'}),s.jsx('button',{className:'nx-pti-stat',onClick:()=>picker.current?.click(),children:'+ ADD FILES'})]}),
+      s.jsx('input',{ref:picker,type:'file',multiple:true,hidden:true,'aria-label':'Add files to Nexus',onChange:e=>{const list=Array.from(e.target.files||[]);e.target.value='';add(list)}}),
+      s.jsxs('button',{className:'nx-pti-event',onClick:()=>setPreview(v=>!v),disabled:!current,children:[s.jsx('small',{children:preview?'CURRENT FILE · PREVIEW ON':'CURRENT FILE · PREVIEW OFF'}),s.jsx('strong',{children:current?.name||'No files in this selection'}),s.jsx('span',{children:current?.local?'Saved on this device · ordered automatically':current?'Source file · original addition time is unknown':'Choose All files or add a file'})]}),
+      error&&s.jsx('p',{role:'alert',className:'nx-pti-error',children:error})]}),
+    catalog&&s.jsx(NexusTimeSpaceCatalog,{files,onClose:()=>setCatalog(false),onReveal:id=>{setCatalog(false);setCurrentId(id)},onOpenFiles})]}),document.body);
 }
 
 // Maintained source for the existing AU graph component in the deployed legacy bundle.
@@ -270,12 +511,14 @@ function AU(){
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
   const key='nosmo-tile-groups:v2:'+world;
   const esafe={proj:['e-SAFE Catania Real Pilot','project'],'p-mateusz':['Structural / Seismic','task'],'p-sitemgr':['MEP / Energy','task'],'p-architect':['Electrical / Controls','task'],'p-client':['BIM / Digital','task'],'p-team':['Fabrication / Installation','task'],'d-groundfloor':['Survey / QA','task'],'d-doorschedule':['Project / General','task'],'d-snaglist':['D5.1 Detailed survey','document'],'d-firecerts':['D2.2 3D models','document'],'t-install':['D5.5 Monitoring','document'],'t-snag':['D5.4 Production delivery','document'],'t-fire':['D5.3 Detailed design','document'],'t-walkthrough':['Pilot Actions','task']};
-  const catalog=b.useMemo(()=>world==='esafe-demo'?nxEsafeCatalog(window.ESAFE_RECORDS||[]):[],[world]);
+  const sourceCatalog=b.useMemo(()=>world==='esafe-demo'?nxEsafeCatalog(window.ESAFE_RECORDS||[]):[],[world]);
+  const [deviceFiles,setDeviceFiles]=b.useState([]),[fileError,setFileError]=b.useState('');
+  const catalog=b.useMemo(()=>[...sourceCatalog,...deviceFiles],[sourceCatalog,deviceFiles]);
   const objects=b.useMemo(()=>world==='esafe-demo'?[...ns.filter(o=>esafe[o.id]&&esafe[o.id][1]!=='document').map(o=>({...o,label:esafe[o.id][0],type:esafe[o.id][1]})),...catalog.map(file=>({...file,label:file.name,type:'document',Icon:ns.find(o=>o.type==='document')?.Icon||Dt}))]:ns,[world,catalog]);
   const [library,setLibrary]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('files')==='all'),[libraryFile,setLibraryFile]=b.useState(null),[fileFocus,setFileFocus]=b.useState(()=>new URLSearchParams(window.location.search).get('file'));
   const [timeSpace,setTimeSpace]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('view')==='timespace'),[timeFilter,setTimeFilter]=b.useState(null);
   const ids=b.useMemo(()=>objects.map(o=>o.id),[objects]);
-  const [state,setState]=b.useState(()=>{try{return nxCleanWorkspace(JSON.parse(localStorage.getItem(key)),ids)}catch{return nxCleanWorkspace(null,ids)}});
+  const [state,setState]=b.useState(()=>{try{const raw=JSON.parse(localStorage.getItem(key));const pendingLocal=(raw?.groups||[]).flatMap(g=>Array.isArray(g.members)?g.members.filter(id=>typeof id==='string'&&id.startsWith('local-')):[]);return nxCleanWorkspace(raw,[...ids,...pendingLocal])}catch{return nxCleanWorkspace(null,ids)}});
   const [open,setOpen]=b.useState(()=>state.groups.find(group=>group.members.includes(fileFocus))?.id||null),[selected,setSelected]=b.useState(fileFocus||'proj');
   const [zoom,setZoom]=b.useState(window.innerWidth<720?.52:.72),[pan,setPan]=b.useState({x:0,y:0});
   const [size,setSize]=b.useState({w:0,h:0}),[drag,setDrag]=b.useState(null),[hover,setHover]=b.useState(null);
@@ -286,13 +529,26 @@ function AU(){
   const all=[...objects,...groupNodes],byId=new Map(all.map(o=>[o.id,o]));
   const members=new Set(state.groups.flatMap(g=>g.members));
   const opened=state.groups.find(g=>g.id===open);
-  const graphObjects=objects.filter(o=>!o.fileUrl||o.core||o.id===fileFocus||members.has(o.id));
-  const visible=all.filter(o=>(!o.fileUrl||o.core||o.id===fileFocus||members.has(o.id))&&(!members.has(o.id)||opened?.members.includes(o.id)));
+  const graphObjects=objects;
+  const visible=all.filter(o=>!members.has(o.id)||opened?.members.includes(o.id));
   const edges=nxGroupEdges(graphObjects,state.groups,open);
-  const positions=EU([...graphObjects,...groupNodes].filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
+  const positions=EU([...graphObjects.filter(o=>o.type!=='document'),...groupNodes].filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
+  const chronologicalFiles=nxTimeSpaceSequence(catalog).filter(o=>!members.has(o.id));
+  chronologicalFiles.forEach((file,index)=>positions.set(file.id,{x:400,y:-240+index*165}));
   if(opened){const center=positions.get(opened.id)||{x:0,y:0};nxPlaceMembers(center,opened.members,positions).forEach((point,id)=>positions.set(id,point))}
   if(drag&&state.pinned[drag])positions.set(drag,state.pinned[drag]);
   b.useLayoutEffect(()=>{const el=root.current;if(!el)return;const resize=()=>setSize({w:el.clientWidth,h:el.clientHeight});resize();const obs=new ResizeObserver(resize);obs.observe(el);return()=>obs.disconnect()},[mode]);
+  b.useEffect(()=>{if(world!=='esafe-demo')return;let live=true;const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('nosmo-project-files'):null;
+    const refresh=()=>{if(!window.indexedDB)return;nxLocalFilesList(world).then(list=>{if(live){setDeviceFiles(list);setFileError('')}}).catch(e=>live&&setFileError(e.message))};
+    const updated=e=>{if(e.detail?.world!==world)return;refresh();channel?.postMessage({world})};if(channel)channel.onmessage=e=>{if(e.data?.world===world)refresh()};
+    const legacyChange=e=>{if(e.target.id!=='nexusFileInput')return;e.stopImmediatePropagation();const list=Array.from(e.target.files||[]);e.target.value='';if(list.length)addFiles(list).then(()=>openTimeSpace()).catch(e=>setFileError(e.message))};
+    const pickerClick=e=>{if(!e.target.closest('[data-nexus-action="file-loader"],[data-nexus-file-action="upload"]'))return;e.preventDefault();e.stopImmediatePropagation();document.querySelectorAll('.nexus-shell-panel.open').forEach(n=>n.classList.remove('open'));document.getElementById('nexusShellScrim')?.classList.remove('open');document.getElementById('nexusFileInput')?.click()};
+    const drop=e=>{if(!e.dataTransfer?.files?.length)return;e.preventDefault();e.stopImmediatePropagation();addFiles(Array.from(e.dataTransfer.files)).then(()=>openTimeSpace()).catch(e=>setFileError(e.message))};
+    const over=e=>{if(Array.from(e.dataTransfer?.types||[]).includes('Files'))e.preventDefault()};
+    const currentFile=e=>{if(e.detail?.world!==world)return;setFileFocus(e.detail.fileId);setSelected(e.detail.fileId);const url=new URL(window.location.href);url.searchParams.set('file',e.detail.fileId);window.history.replaceState(null,'',url);setOpen(current.current.groups.find(g=>g.members.includes(e.detail.fileId))?.id||null)};
+    window.addEventListener('nexus:local-files-updated',updated);window.addEventListener('focus',refresh);window.addEventListener('nexus:timespace-current-file',currentFile);document.addEventListener('change',legacyChange,true);document.addEventListener('click',pickerClick,true);document.addEventListener('drop',drop,true);document.addEventListener('dragover',over,true);refresh();
+    return()=>{live=false;channel?.close();window.removeEventListener('nexus:local-files-updated',updated);window.removeEventListener('focus',refresh);window.removeEventListener('nexus:timespace-current-file',currentFile);document.removeEventListener('change',legacyChange,true);document.removeEventListener('click',pickerClick,true);document.removeEventListener('drop',drop,true);document.removeEventListener('dragover',over,true)}
+  },[world]);
   b.useEffect(()=>{if(world!=='esafe-demo')return;window.__NEXUS_NATIVE_ESAFE__=true;document.title='NOSMO Nexus — e-SAFE Catania';const openFiles=()=>openLibrary(),openTime=()=>{window.__NEXUS_TIMESPACE_PENDING__=false;openTimeSpace()},filterTime=event=>setTimeFilter(event.detail);window.addEventListener('nexus:open-project-files',openFiles);window.addEventListener('nexus:open-timespace',openTime);window.addEventListener('nexus:timespace-filter',filterTime);if(window.__NEXUS_TIMESPACE_PENDING__)openTime();return()=>{window.removeEventListener('nexus:open-project-files',openFiles);window.removeEventListener('nexus:open-timespace',openTime);window.removeEventListener('nexus:timespace-filter',filterTime)}},[world]);
   b.useEffect(()=>{if(world!=='esafe-demo')return;const sub=document.getElementById('nexusTopTimeSub');if(sub)sub.textContent=timeSpace?'ON':'OFF';window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:{worldId:world,open:timeSpace,mode:'source',source:'publication-timespace'}}))},[timeSpace,world]);
   b.useEffect(()=>{if(!fileFocus)return;const point=positions.get(fileFocus);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom})},[fileFocus,open]);
@@ -303,12 +559,15 @@ function AU(){
     if(previous)setUndo(previous);current.current=next;setState(next);setNotice(message);return true;
   };
   const fit=()=>{const pts=[...positions.values()];if(!pts.length)return;const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);const left=Math.min(...xs)-100,right=Math.max(...xs)+100,top=Math.min(...ys)-130,bottom=Math.max(...ys)+130;const z=Math.min(.95,Math.max(.3,Math.min(size.w/(right-left),(size.h-100)/(bottom-top))));setZoom(z);setPan({x:-(left+right)/2*z,y:-(top+bottom)/2*z})};
+  const addFiles=async list=>{const added=await nxLocalFilesAdd(world,list);setDeviceFiles(await nxLocalFilesList(world));if(added.length){setFileFocus(added[added.length-1].id);setNotice(added.length+' file(s) added and ordered automatically')}return added};
+  const removeFile=async id=>{await nxLocalFilesTrash(world,[id]);setDeviceFiles(await nxLocalFilesList(world))};
+  const restoreFile=async id=>{await nxLocalFilesRestore(world,[id]);setDeviceFiles(await nxLocalFilesList(world))};
   const openLibrary=(id=null)=>{setTimeSpace(false);setLibraryFile(id);setLibrary(true);const url=new URL(window.location.href);url.searchParams.delete('view');url.searchParams.set('files','all');window.history.replaceState(null,'',url)};
   const closeLibrary=()=>{setLibrary(false);const url=new URL(window.location.href);url.searchParams.delete('files');window.history.replaceState(null,'',url)};
   const openTimeSpace=()=>{setLibrary(false);setTimeSpace(true);const url=new URL(window.location.href);url.searchParams.delete('files');url.searchParams.set('view','timespace');window.history.replaceState(null,'',url)};
   const closeTimeSpace=()=>{setTimeSpace(false);const url=new URL(window.location.href);url.searchParams.delete('view');window.history.replaceState(null,'',url)};
   const revealFile=id=>{setFileFocus(id);setSelected(id);setOpen(state.groups.find(g=>g.members.includes(id))?.id||null);setTimeSpace(false);closeLibrary();const point=positions.get(id);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom});const url=new URL(window.location.href);url.searchParams.set('file',id);url.searchParams.delete('view');window.history.replaceState(null,'',url);setNotice('File shown in tree · drag it onto another tile to connect')};
-  const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj'){setOpen(null);if(world==='esafe-demo')openLibrary()}else if(o.fileUrl)openLibrary(o.id)};
+  const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj'){setOpen(null);if(world==='esafe-demo')openLibrary()}else if(o.fileUrl||o.local)openLibrary(o.id)};
   const startPinch=()=>{const [a,c]=[...touches.current.values()];if(!a||!c)return;const r=root.current.getBoundingClientRect(),mid={x:(a.x+c.x)/2-r.left,y:(a.y+c.y)/2-r.top};const previous=gesture.current?.before;if(previous){current.current=previous;setState(previous)}gesture.current={mode:'pinch',distance:Math.max(1,Math.hypot(a.x-c.x,a.y-c.y)),zoom,world:{x:(mid.x-size.w/2-pan.x)/zoom,y:(mid.y-size.h/2-pan.y)/zoom}};setDrag(null);setHover(null)};
   const down=e=>{
     if(e.target.closest('[data-control]')||e.button>0)return;
@@ -351,7 +610,7 @@ function AU(){
       if(cancel){current.current=g.before;setState(g.before);setNotice('Move cancelled')}
       else if(g.target){const point=positions.get(g.target)||g.point;const stable={...g.before,pinned:{...g.before.pinned,...Object.fromEntries(positions)}};const next=nxGroupDrop(stable,g.id,g.target,'nx-group-'+crypto.randomUUID(),point,ids);
         if(next!==g.before&&persist(next,g.before,'Node created · tap it to open')){setOpen(null);setSelected(next.groups[next.groups.length-1].id)}else{current.current=g.before;setState(g.before)}}
-      else {const member=g.before.groups.some(group=>group.members.includes(g.id));const next=member?nxDetachMember(g.before,g.id,current.current.pinned[g.id],Object.fromEntries(positions),ids):current.current;if(persist(next,g.before,member?'Tile moved out of node':'Position saved on this device')){if(open&&!next.groups.some(group=>group.id===open))setOpen(null)}else{current.current=g.before;setState(g.before)}}
+      else {const member=g.before.groups.some(group=>group.members.includes(g.id));let next=member?nxDetachMember(g.before,g.id,current.current.pinned[g.id],Object.fromEntries(positions),ids):current.current;if(byId.get(g.id)?.type==='document'){const pins={...next.pinned};delete pins[g.id];next={...next,pinned:pins}}if(persist(next,g.before,member?'Tile moved out of node':byId.get(g.id)?.type==='document'?'File kept in chronological order':'Position saved on this device')){if(open&&!next.groups.some(group=>group.id===open))setOpen(null)}else{current.current=g.before;setState(g.before)}}
     }}
     gesture.current=null;setDrag(null);setHover(null);try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{}
   };
@@ -359,14 +618,14 @@ function AU(){
   const reset=()=>{if(persist(nxCleanWorkspace(null,ids),state,'Demo reset · each tile connected only to project')){setOpen(null);setSelected('proj');setPan({x:0,y:0})}};
   if(mode==='workflow')return s.jsxs('div',{className:'relative h-[100dvh] overflow-hidden',children:[s.jsx('button',{'data-control':true,className:'nx-back-map',onClick:()=>setMode('map'),children:'Back to map'}),s.jsx(CU,{})]});
   return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,style:{'--nx-zoom':zoom},onDragStart:e=>e.preventDefault(),className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
-    timeSpace&&world==='esafe-demo'&&s.jsx(NexusTimeSpace,{files:catalog,onClose:closeTimeSpace,onReveal:revealFile,onOpenFiles:()=>openLibrary()}),
-    library&&world==='esafe-demo'&&s.jsx(NexusProjectFiles,{files:catalog,initialFile:libraryFile,onClose:closeLibrary,onReveal:revealFile},libraryFile||'all'),
+    timeSpace&&world==='esafe-demo'&&s.jsx(NexusTimeSpace,{files:catalog,onClose:closeTimeSpace,onReveal:revealFile,onOpenFiles:()=>openLibrary(),onAddFiles:addFiles,initialFile:fileFocus,world}),
+    library&&world==='esafe-demo'&&s.jsx(NexusProjectFiles,{files:catalog,initialFile:libraryFile,onClose:closeLibrary,onReveal:revealFile,onAddFiles:addFiles,onRemoveFile:removeFile,onRestoreFile:restoreFile},libraryFile||'all'),
     s.jsxs('div',{'data-control':true,className:'nx-project-access',children:[s.jsx('button',{'aria-label':'Switch project',onClick:()=>document.getElementById('nexusTopProject')?.click(),children:world==='esafe-demo'?'e-SAFE Catania ▾':'Riverside ▾'}),world==='esafe-demo'&&s.jsx('button',{'data-catania-file-count':catalog.length,onClick:()=>openLibrary(),children:catalog.length+' project files'}),world==='esafe-demo'&&s.jsx('button',{onClick:openTimeSpace,children:'TimeSpace'})]}),
     s.jsxs('div',{'data-control':true,className:'nx-map-toolbar',children:[s.jsx('button',{onClick:fit,children:'Fit map'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z*1.15)),children:'+'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z/1.15)),children:'−'}),s.jsx('button',{onClick:reset,children:'Reset demo'}),s.jsx('button',{onClick:()=>setMode('workflow'),children:'Workflow'}),s.jsx('span',{children:objects.length+' objects · '+edges.length+' links'})]}),
-    s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:hover?'Release to create a shared node':notice}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),s.jsx('button',{onClick:reset,'aria-label':'Reset demo',title:'Reset demo (undoable)',children:'↺'}),undo&&s.jsx('button',{onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{onClick:ungroup,children:'Ungroup'})]}),
+    s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:fileError|| (hover?'Release to create a shared node':notice)}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),s.jsx('button',{onClick:reset,'aria-label':'Reset demo',title:'Reset demo (undoable)',children:'↺'}),undo&&s.jsx('button',{onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{onClick:ungroup,children:'Ungroup'})]}),
     s.jsxs('div',{className:'absolute left-0 top-0 h-0 w-0 origin-top-left',style:{transform:`translate(${size.w/2+pan.x}px,${size.h/2+pan.y}px) scale(${zoom})`},children:[
       s.jsx('svg',{className:'pointer-events-none absolute left-0 top-0 overflow-visible',children:edges.map(edge=>{const a=positions.get(edge.source),c=positions.get(edge.target);return a&&c?s.jsx('line',{'data-connection-id':edge.source+'|'+edge.target,x1:a.x,y1:a.y,x2:c.x,y2:c.y,stroke:'currentColor',className:'text-primary',strokeWidth:edge.source==='proj'?1:2,opacity:edge.source==='proj'?.22:.65},edge.source+'|'+edge.target):null})}),
-      ...visible.map(o=>{const point=positions.get(o.id)||{x:0,y:0},target=hover===o.id,active=selected===o.id,theme=gc[o.type]||gc.task;return s.jsx('div',{'data-node':true,'data-node-id':o.id,'data-group-members':o.members?.join(','),'data-timespace-match':timeFilter?.active?String(!o.fileUrl&&!o.members||timeFilter.fileIds.includes(o.id)||o.members?.some(id=>timeFilter.fileIds.includes(id))):undefined,'data-drop-target':target?'true':undefined,className:'absolute left-0 top-0 nx-map-node',style:{transform:`translate(${point.x}px,${point.y}px)`,zIndex:drag===o.id?40:target?30:20},children:s.jsxs('button',{type:'button',onClick:()=>click(o),'aria-label':o.members?o.label+', '+o.members.length+' items. '+(open===o.id?'Collapse':'Expand'):o.type+': '+o.label,'aria-expanded':o.members?open===o.id:undefined,className:'group flex w-[138px] -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center gap-2 rounded-2xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-primary',children:[
+      ...visible.map(o=>{const point=positions.get(o.id)||{x:0,y:0},target=hover===o.id,active=selected===o.id,theme=gc[o.type]||gc.task;return s.jsx('div',{'data-node':true,'data-node-id':o.id,'data-group-members':o.members?.join(','),'data-timespace-match':timeFilter?.active?String(o.type!=='document'&&!o.members||timeFilter.fileIds.includes(o.id)||o.members?.some(id=>timeFilter.fileIds.includes(id))):undefined,'data-drop-target':target?'true':undefined,className:'absolute left-0 top-0 nx-map-node',style:{transform:`translate(${point.x}px,${point.y}px)`,zIndex:drag===o.id?40:target?30:20},children:s.jsxs('button',{type:'button',onClick:()=>click(o),'aria-label':o.members?o.label+', '+o.members.length+' items. '+(open===o.id?'Collapse':'Expand'):o.type+': '+o.label,'aria-expanded':o.members?open===o.id:undefined,className:'group flex w-[138px] -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center gap-2 rounded-2xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-primary',children:[
         s.jsxs('span',{'data-tile-face':true,className:`nx-tile-face relative flex items-center justify-center rounded-2xl border-2 bg-card ${theme.centerBorder} ${o.members?'nx-group-face':''} ${active?'nx-tile-selected':''}`,children:[o.members?s.jsx('span',{className:'nx-group-mosaic',children:o.members.slice(0,4).map(id=>{const member=byId.get(id);return s.jsx('span',{className:(gc[member?.type]||gc.task).chip,children:s.jsx(member?.Icon||Dt,{className:'h-5 w-5'})},id)})}):s.jsx('span',{className:`flex h-10 w-10 items-center justify-center rounded-xl ${theme.chip}`,children:s.jsx(o.Icon,{className:'h-5 w-5'})}),o.members&&s.jsx('span',{className:'nx-group-count',children:o.members.length})]}),
         s.jsx('span',{className:'line-clamp-2 max-w-[138px] text-center text-[11px] font-semibold leading-tight',children:o.label}),s.jsx('span',{className:'rounded-full border border-border bg-background/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] text-muted-foreground',children:o.members?'NODE · '+(open===o.id?'CLOSE':'OPEN'):o.type})]})},o.id)})]})]});
 }

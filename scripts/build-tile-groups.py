@@ -9,5 +9,5 @@ if '/* NEXUS TILE GROUPS END */' in text:
     end=text.index('/* NEXUS TILE GROUPS END */')+len('/* NEXUS TILE GROUPS END */')
 else:
     end=text.index('function ',text.index('function AU(){')+15)
-replacement='/* NEXUS TILE GROUPS START */\n'+(src/'tile-groups.js').read_text()+'\n'+(src/'project-files.js').read_text()+'\n'+(src/'timespace-model.js').read_text()+'\n'+(src/'timespace-view.js').read_text()+'\n'+(src/'relationship-map.js').read_text()+'\n/* NEXUS TILE GROUPS END */'
+replacement='/* NEXUS TILE GROUPS START */\n'+(src/'tile-groups.js').read_text()+'\n'+(src/'local-files.js').read_text()+'\n'+(src/'file-playback.js').read_text()+'\n'+(src/'project-files.js').read_text()+'\n'+(src/'timespace-model.js').read_text()+'\n'+(src/'timespace-view.js').read_text()+'\n'+(src/'timespace-player.js').read_text()+'\n'+(src/'relationship-map.js').read_text()+'\n/* NEXUS TILE GROUPS END */'
 bundle.write_text(text[:start]+replacement+text[end:])

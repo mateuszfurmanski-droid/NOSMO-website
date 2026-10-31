@@ -80,3 +80,12 @@ test('chronological source groups contain all files once and retain multi-file r
  const first=files[0],duplicated=ctx.nxTimeSpaceGroups([first,first]);assert.equal(duplicated.length,1);assert.equal(duplicated[0].files.length,1);
  const filtered=ctx.nxTimeSpaceGroups(ctx.nxTimeSpaceMatch(files,{year:'2022'}));assert.equal(filtered.length,22);assert.equal(filtered.reduce((n,group)=>n+group.files.length,0),33);
 });
+
+
+test('combined Design + BIM is a valid union filter and composes with source year and place',()=>{
+ const expected=files.filter(file=>file.category==='Design'||file.category==='BIM');
+ assert.ok(expected.some(file=>file.category==='Design'));assert.ok(expected.some(file=>file.category==='BIM'));
+ assert.equal(ctx.nxTimeSpaceNormalize({topic:'design-bim'},files).topic,'design-bim');
+ assert.deepEqual(Array.from(ctx.nxTimeSpaceMatch(files,{topic:'design-bim'}),file=>file.id),expected.map(file=>file.id));
+ assert.deepEqual(Array.from(ctx.nxTimeSpaceMatch(files,{topic:'design-bim',year:'2022',location:'building'}),file=>file.id),expected.filter(file=>file.dateRaw.startsWith('2022')&&ctx.nxTimeSpaceLocation(file,{})==='building').map(file=>file.id));
+});
