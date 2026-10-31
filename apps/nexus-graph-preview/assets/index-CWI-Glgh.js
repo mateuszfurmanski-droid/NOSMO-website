@@ -334,7 +334,17 @@ function nxTimeSpaceCheckpoints(files,history) {
     }
   }
   const changes=[...(history?.baseline?.groups?.length?[{...history.baseline,baseline:true}]:[]),...(history?.events||[])];
-  for(const [index,event] of changes.entries()){const at=nxFilePlaybackAddedAt(event.at);if(at!==null)points.push({key:'connections:'+index+':'+event.at,kind:'connections',at,baseline:!!event.baseline,order:points.length})}
+  const fileIds=new Set(files.map(file=>file.id)),groupMap=groups=>new Map((Array.isArray(groups)?groups:[]).filter(group=>typeof group?.id==='string').map(group=>[group.id,[...new Set(Array.isArray(group.members)?group.members:[])].filter(id=>typeof id==='string')]));
+  let previousGroups=new Map();
+  for(const [index,event] of changes.entries()){
+    const at=nxFilePlaybackAddedAt(event.at);if(at===null)continue;
+    const groups=groupMap(event.groups),membership=members=>members?JSON.stringify([...members].sort()):null;
+    const changed=[...new Set([...groups.keys(),...previousGroups.keys()])].filter(id=>membership(groups.get(id))!==membership(previousGroups.get(id)));
+    const affected=[...new Set(changed.flatMap(id=>[...(groups.get(id)||[]),...(previousGroups.get(id)||[])]))];
+    const fileId=affected.find(id=>fileIds.has(id)),focusId=fileId||changed.find(id=>groups.has(id))||affected[0];
+    points.push({key:'connections:'+index+':'+event.at,kind:'connections',fileId,focusId,at,baseline:!!event.baseline,order:points.length});
+    previousGroups=groups;
+  }
   return points.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity)||a.order-b.order);
 }
 
@@ -566,7 +576,7 @@ function NexusTimeSpace({files,onClose,onReveal,onOpenFiles,onAddFiles,initialFi
     setCurrentId(initialFile);
   },[initialFile,files]);
   b.useEffect(()=>{origin.current=document.activeElement;return()=>origin.current?.isConnected&&origin.current.focus()},[]);
-  b.useEffect(()=>{if(!current||pendingInitial)return;try{localStorage.setItem(key,JSON.stringify({currentId:current.id,stream}))}catch{}window.dispatchEvent(new CustomEvent('nexus:timespace-current-file',{detail:{world,fileId:current.id,at,mode:playhead?.mode==='live'?'live':'replay',kind:playhead?.kind||'file'}}))},[current?.id,stream,pendingInitial,at,playhead?.mode,playhead?.kind]);
+  b.useEffect(()=>{if(!current||pendingInitial)return;try{localStorage.setItem(key,JSON.stringify({currentId:current.id,stream}))}catch{}window.dispatchEvent(new CustomEvent('nexus:timespace-current-file',{detail:{world,fileId:current.id,focusId:playhead?.focusId||current.id,at,mode:playhead?.mode==='live'?'live':'replay',kind:playhead?.kind||'file'}}))},[current?.id,stream,pendingInitial,at,playhead?.mode,playhead?.kind]);
   b.useEffect(()=>{const updated=e=>{if(e.detail?.source==='timespace-catalog'){try{setContext(nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(filterKey)),files))}catch{}}};window.addEventListener('nexus:timespace-filter',updated);return()=>window.removeEventListener('nexus:timespace-filter',updated)},[files]);
   b.useEffect(()=>{if(!playing||!sequence.length)return;const timer=setInterval(()=>{if(index>=sequence.length-1)setPlaying(false);else{select(index+1);if(index+1>=sequence.length-1)setPlaying(false)}},1800);return()=>clearInterval(timer)},[playing,index,sequence.length]);
   b.useEffect(()=>{const hidden=()=>{if(document.hidden)setPlaying(false)};document.addEventListener('visibilitychange',hidden);return()=>document.removeEventListener('visibilitychange',hidden)},[]);
@@ -911,13 +921,13 @@ function AU(){
     const pickerClick=e=>{if(!e.target.closest('[data-nexus-action="file-loader"],[data-nexus-file-action="upload"]'))return;e.preventDefault();e.stopImmediatePropagation();document.querySelectorAll('.nexus-shell-panel.open').forEach(n=>n.classList.remove('open'));document.getElementById('nexusShellScrim')?.classList.remove('open');document.getElementById('nexusFileInput')?.click()};
     const drop=e=>{if(!e.dataTransfer?.files?.length)return;e.preventDefault();e.stopImmediatePropagation();addFiles(Array.from(e.dataTransfer.files)).then(()=>openTimeSpace()).catch(e=>setFileError(e.message))};
     const over=e=>{if(Array.from(e.dataTransfer?.types||[]).includes('Files'))e.preventDefault()};
-    const currentFile=e=>{if(e.detail?.world!==world)return;setGraphClock({mode:e.detail.mode==='replay'?'replay':'live',at:Number.isFinite(e.detail.at)?e.detail.at:null});if(e.detail.mode!=='replay')setLifeNow(Date.now());if(typeof e.detail.fileId!=='string')return;setFileFocus(e.detail.fileId);setSelected(e.detail.fileId);const url=new URL(window.location.href);url.searchParams.set('file',e.detail.fileId);window.history.replaceState(null,'',url);setOpen(current.current.groups.find(g=>g.members.includes(e.detail.fileId))?.id||null)};
+    const currentFile=e=>{if(e.detail?.world!==world)return;setGraphClock({mode:e.detail.mode==='replay'?'replay':'live',at:Number.isFinite(e.detail.at)?e.detail.at:null,focusId:typeof e.detail.focusId==='string'?e.detail.focusId:null,kind:e.detail.kind});if(e.detail.mode!=='replay')setLifeNow(Date.now());if(typeof e.detail.fileId!=='string')return;setFileFocus(e.detail.fileId);setSelected(typeof e.detail.focusId==='string'?e.detail.focusId:e.detail.fileId);const url=new URL(window.location.href);url.searchParams.set('file',e.detail.fileId);window.history.replaceState(null,'',url);setOpen(current.current.groups.find(g=>g.members.includes(e.detail.fileId))?.id||null)};
     window.addEventListener('nexus:local-files-updated',updated);window.addEventListener('focus',refresh);window.addEventListener('nexus:timespace-current-file',currentFile);document.addEventListener('change',legacyChange,true);document.addEventListener('click',pickerClick,true);document.addEventListener('drop',drop,true);document.addEventListener('dragover',over,true);refresh();
     return()=>{live=false;channel?.close();window.removeEventListener('nexus:local-files-updated',updated);window.removeEventListener('focus',refresh);window.removeEventListener('nexus:timespace-current-file',currentFile);document.removeEventListener('change',legacyChange,true);document.removeEventListener('click',pickerClick,true);document.removeEventListener('drop',drop,true);document.removeEventListener('dragover',over,true)}
   },[world]);
   b.useEffect(()=>{if(world!=='esafe-demo')return;window.__NEXUS_NATIVE_ESAFE__=true;document.title='NOSMO Nexus — e-SAFE Catania';const openFiles=()=>openLibrary(),openTime=()=>{window.__NEXUS_TIMESPACE_PENDING__=false;openTimeSpace()},filterTime=event=>setTimeFilter(event.detail);window.addEventListener('nexus:open-project-files',openFiles);window.addEventListener('nexus:open-timespace',openTime);window.addEventListener('nexus:timespace-filter',filterTime);if(window.__NEXUS_TIMESPACE_PENDING__)openTime();return()=>{window.removeEventListener('nexus:open-project-files',openFiles);window.removeEventListener('nexus:open-timespace',openTime);window.removeEventListener('nexus:timespace-filter',filterTime)}},[world]);
   b.useEffect(()=>{if(world!=='esafe-demo')return;const sub=document.getElementById('nexusTopTimeSub');if(sub)sub.textContent=timeSpace?'ON':'OFF';window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:{worldId:world,open:timeSpace,mode:'source',source:'publication-timespace'}}))},[timeSpace,world]);
-  b.useEffect(()=>{if(!fileFocus)return;const point=positions.get(fileFocus);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom})},[fileFocus,open]);
+  b.useEffect(()=>{const focus=replay&&graphClock.focusId?graphClock.focusId:fileFocus;if(!focus)return;const point=positions.get(focus);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom})},[fileFocus,open,replay,graphClock.focusId]);
   b.useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[]);
   b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:groups-change'))},[state.groups,open]);
   const persist=(next,previous=null,message='Saved on this device')=>{

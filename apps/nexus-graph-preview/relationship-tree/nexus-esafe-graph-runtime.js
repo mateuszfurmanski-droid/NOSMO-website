@@ -47,7 +47,7 @@
   function loadData(){
     for(const [ready,path] of [[()=>Array.isArray(window.ESAFE_RECORDS)&&window.ESAFE_RECORDS.length,'data.js'],[()=>window.ESAFE_FILES,'files.js']]){
       if(ready())continue;
-      try{const request=new XMLHttpRequest();request.open('GET','/apps/nexus-esafe-demo/'+path+'?v=lifecycle-motion-r2-20261031',false);request.send(null);if(request.status>=200&&request.status<300)(0,eval)(request.responseText);else console.warn('[NOSMO] e-SAFE catalog unavailable',path,request.status)}catch(error){console.warn('[NOSMO] e-SAFE catalog failed',path,error)}
+      try{const request=new XMLHttpRequest();request.open('GET','/apps/nexus-esafe-demo/'+path+'?v=lifecycle-motion-r3-20261031',false);request.send(null);if(request.status>=200&&request.status<300)(0,eval)(request.responseText);else console.warn('[NOSMO] e-SAFE catalog unavailable',path,request.status)}catch(error){console.warn('[NOSMO] e-SAFE catalog failed',path,error)}
     }
   }
   loadData();

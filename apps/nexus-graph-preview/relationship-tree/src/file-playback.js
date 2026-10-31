@@ -76,6 +76,16 @@ function nxTimeSpaceCheckpoints(files,history) {
     }
   }
   const changes=[...(history?.baseline?.groups?.length?[{...history.baseline,baseline:true}]:[]),...(history?.events||[])];
-  for(const [index,event] of changes.entries()){const at=nxFilePlaybackAddedAt(event.at);if(at!==null)points.push({key:'connections:'+index+':'+event.at,kind:'connections',at,baseline:!!event.baseline,order:points.length})}
+  const fileIds=new Set(files.map(file=>file.id)),groupMap=groups=>new Map((Array.isArray(groups)?groups:[]).filter(group=>typeof group?.id==='string').map(group=>[group.id,[...new Set(Array.isArray(group.members)?group.members:[])].filter(id=>typeof id==='string')]));
+  let previousGroups=new Map();
+  for(const [index,event] of changes.entries()){
+    const at=nxFilePlaybackAddedAt(event.at);if(at===null)continue;
+    const groups=groupMap(event.groups),membership=members=>members?JSON.stringify([...members].sort()):null;
+    const changed=[...new Set([...groups.keys(),...previousGroups.keys()])].filter(id=>membership(groups.get(id))!==membership(previousGroups.get(id)));
+    const affected=[...new Set(changed.flatMap(id=>[...(groups.get(id)||[]),...(previousGroups.get(id)||[])]))];
+    const fileId=affected.find(id=>fileIds.has(id)),focusId=fileId||changed.find(id=>groups.has(id))||affected[0];
+    points.push({key:'connections:'+index+':'+event.at,kind:'connections',fileId,focusId,at,baseline:!!event.baseline,order:points.length});
+    previousGroups=groups;
+  }
   return points.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity)||a.order-b.order);
 }

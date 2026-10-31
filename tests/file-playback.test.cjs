@@ -113,3 +113,40 @@ test('setting a past deadline archives at the actual observed operation time wit
  const again=plain(context.nxTimeSpaceCheckpoints([recovered],null));
  assert.deepEqual(again.map(point=>[point.kind,point.at]),[['file',Date.parse(file.addedAt)],['deactivation',Date.parse(file.lifecycleEvents[0].at)],['reactivation',Date.parse('2026-10-31T11:15:00Z')]]);
 });
+
+test('a new connection focuses its actual affected file rather than an unrelated newer file',()=>{
+ const files=[{id:'early',addedAt:'2026-10-31T10:00:00Z'},{id:'unrelated-newer',addedAt:'2026-10-31T11:00:00Z'}];
+ const existing={id:'nx-group-unchanged',members:['unrelated-newer','person-old']},created={id:'nx-group-created',members:['person-new','early']};
+ const history={baseline:{at:'2026-10-31T11:15:00Z',groups:[existing]},events:[{at:'2026-10-31T11:30:00Z',groups:[existing,created]}]};
+ const before=JSON.stringify(history),points=plain(context.nxTimeSpaceCheckpoints(files,history)),connection=points.find(point=>point.kind==='connections'&&!point.baseline);
+ assert.equal(connection.fileId,'early');assert.equal(connection.focusId,'early');assert.equal(connection.at,Date.parse(history.events[0].at));
+ assert.equal(connection.key,'connections:1:'+history.events[0].at);assert.equal(connection.order,3);assert.equal(JSON.stringify(history),before);
+ const baseline=points.find(point=>point.baseline);assert.equal(baseline.fileId,'unrelated-newer');assert.equal(baseline.focusId,'unrelated-newer');
+});
+
+test('merge, member removal and ungroup checkpoints use affected current and previous members',()=>{
+ const files=[{id:'file-a',addedAt:'2026-10-31T10:00:00Z'},{id:'file-b',addedAt:'2026-10-31T10:01:00Z'},{id:'unrelated',addedAt:'2026-10-31T10:02:00Z'}];
+ const first={id:'nx-group-first',members:['person-a','file-a']},second={id:'nx-group-second',members:['person-b','file-b']},merged={id:first.id,members:['person-b','file-b','person-a','file-a']};
+ const history={baseline:{at:'2026-10-31T10:03:00Z',groups:[first,second]},events:[
+  {at:'2026-10-31T10:04:00Z',groups:[merged]},
+  {at:'2026-10-31T10:05:00Z',groups:[{id:first.id,members:['person-b','person-a']}]},
+  {at:'2026-10-31T10:06:00Z',groups:[]}
+ ]};
+ const points=plain(context.nxTimeSpaceCheckpoints(files,history)).filter(point=>point.kind==='connections'&&!point.baseline);
+ assert.equal(points[0].fileId,'file-b');assert.equal(points[0].focusId,'file-b','the newly merged member is in the changed group');
+ assert.equal(points[1].fileId,'file-b');assert.equal(points[1].focusId,'file-b','a removed file remains an affected previous member');
+ assert.equal(points[2].fileId,undefined);assert.equal(points[2].focusId,'person-b','a removed group cannot be the camera destination');
+ const ungroup={baseline:{at:'2026-10-31T10:03:00Z',groups:[first]},events:[{at:'2026-10-31T10:04:00Z',groups:[]}]};
+ const dissolved=plain(context.nxTimeSpaceCheckpoints(files,ungroup)).find(point=>point.kind==='connections'&&!point.baseline);
+ assert.equal(dissolved.fileId,'file-a');assert.equal(dissolved.focusId,'file-a');
+});
+
+test('task-only connection changes focus the existing changed group or its member after removal',()=>{
+ const files=[{id:'unrelated',addedAt:'2026-10-31T10:00:00Z'}],taskGroup={id:'nx-group-task',members:['task-a','person-b']};
+ const history={baseline:{at:'2026-10-31T10:01:00Z',groups:[]},events:[{at:'2026-10-31T10:02:00Z',groups:[taskGroup]},{at:'2026-10-31T10:03:00Z',groups:[]}]};
+ const points=plain(context.nxTimeSpaceCheckpoints(files,history)).filter(point=>point.kind==='connections');
+ assert.equal(points[0].fileId,undefined);assert.equal(points[0].focusId,taskGroup.id);
+ assert.equal(points[1].fileId,undefined);assert.equal(points[1].focusId,'task-a');
+ const baselineOnly=plain(context.nxTimeSpaceCheckpoints(files,{baseline:{at:history.events[0].at,groups:[taskGroup]},events:[]})).find(point=>point.baseline);
+ assert.equal(baselineOnly.focusId,taskGroup.id);assert.equal(baselineOnly.fileId,undefined);
+});
