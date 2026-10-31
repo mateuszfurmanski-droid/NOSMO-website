@@ -2,9 +2,9 @@
 (()=>{
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
-  const version='lifecycle-motion-r3-20261031';
+  const version='lifecycle-motion-r4-20261031';
   const tuneVersion='project-time-thin-status-knob-20260817a';
-  const dockVersion='lifecycle-motion-r3-20261031';
+  const dockVersion='lifecycle-motion-r4-20261031';
   const timeChipVersion='top-time-chip-20260817a';
   const compactTopVersion='compact-top-shell-20260817a';
   const integrationsVersion='integrations-compact-tile-20260817a';
