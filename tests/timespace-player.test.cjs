@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
 const sourceRoot='apps/nexus-graph-preview/relationship-tree/src/';
 
-async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,contextSaved=null,fetchImpl=null,localBlob=null}={}){
+async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,contextSaved=null,fetchImpl=null,localBlob=null,historySaved=null}={}){
  const dom=new JSDOM('<button id="origin">Origin</button><div id="mount"></div>',{url:'https://example.test/?world=esafe-demo'}),w=dom.window;
  global.window=w;global.document=w.document;global.navigator=w.navigator;global.IS_REACT_ACT_ENVIRONMENT=true;
  const React=require('react'),ReactDOM=require('react-dom'),{createRoot}=require('react-dom/client'),jsx=require('react/jsx-runtime');
@@ -21,18 +21,19 @@ async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,c
  vm.createContext(ctx);
  vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/data.js','utf8'),ctx);
  vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/files.js','utf8'),ctx);
- for(const name of ['local-files.js','project-files.js','file-playback.js','timespace-model.js','timespace-view.js','timespace-player.js'])vm.runInContext(fs.readFileSync(sourceRoot+name,'utf8'),ctx);
+ for(const name of ['local-files.js','project-files.js','file-playback.js','graph-history.js','timespace-model.js','timespace-view.js','timespace-player.js'])vm.runInContext(fs.readFileSync(sourceRoot+name,'utf8'),ctx);
  if(localBlob)ctx.nxLocalFileBlob=async()=>localBlob;
  const initialFiles=files||Array.from(ctx.nxEsafeCatalog(ctx.window.ESAFE_RECORDS));
  const key='nosmo.timespace.player:v1:esafe-demo';
  if(saved)w.localStorage.setItem(key,JSON.stringify(saved));
  if(contextSaved)w.localStorage.setItem('nosmo.timespace:v1:esafe-demo',JSON.stringify(contextSaved));
- const events=[];w.addEventListener('nexus:timespace-current-file',event=>events.push(event.detail.fileId));
+ if(historySaved)w.localStorage.setItem('nosmo.graph-history:v1:esafe-demo',JSON.stringify(historySaved));
+ const events=[],eventDetails=[];w.addEventListener('nexus:timespace-current-file',event=>{events.push(event.detail.fileId);eventDetails.push({...event.detail})});
  let closed=0,openedFiles=0,revealed=null,props={files:initialFiles,onClose:()=>closed++,onReveal:id=>revealed=id,onOpenFiles:()=>openedFiles++,onAddFiles:onAddFiles||(async()=>[]),world:'esafe-demo',initialFile};
  let root=createRoot(w.document.getElementById('mount'));
  const render=()=>React.act(async()=>{root.render(jsx.jsx(ctx.NexusTimeSpace,props));await Promise.resolve()});
  const click=target=>React.act(async()=>{const el=typeof target==='string'?w.document.querySelector(target):target;assert.ok(el,'Missing target '+target);el.click();await Promise.resolve()});
- const range=async index=>React.act(async()=>{const el=w.document.querySelector('[aria-label="Chronological file position"]');Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype,'value').set.call(el,String(index));el.dispatchEvent(new w.Event('input',{bubbles:true}));el.dispatchEvent(new w.Event('change',{bubbles:true}));await Promise.resolve()});
+ const range=async index=>React.act(async()=>{const el=w.document.querySelector('[aria-label="Chronological timeline position"]');Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype,'value').set.call(el,String(index));el.dispatchEvent(new w.Event('input',{bubbles:true}));el.dispatchEvent(new w.Event('change',{bubbles:true}));await Promise.resolve()});
  const update=async next=>{props={...props,...next};await render()};
  const remount=async()=>{await React.act(()=>root.unmount());root=createRoot(w.document.getElementById('mount'));await render()};
  const tick=()=>React.act(async()=>{const callback=[...timers.values()][0];if(callback)callback();await Promise.resolve()});
@@ -41,7 +42,7 @@ async function harness({files=null,saved=null,onAddFiles=null,initialFile=null,c
  const stored=()=>JSON.parse(w.localStorage.getItem(key));
  const dispose=async()=>{await React.act(()=>root.unmount());w.close()};
  w.document.getElementById('origin').focus();await render();
- return {w,ctx,React,files:initialFiles,render,click,range,update,remount,tick,add,currentName,stored,dispose,timers,events,fetchCalls,createdUrls,revokedUrls,results:()=>({closed,openedFiles,revealed})};
+ return {w,ctx,React,files:initialFiles,render,click,range,update,remount,tick,add,currentName,stored,dispose,timers,events,eventDetails,fetchCalls,createdUrls,revokedUrls,results:()=>({closed,openedFiles,revealed})};
 }
 
 test('player retains the original console, right-hand file knob and transport structure without VOL, recording or screen buttons',async()=>{
@@ -59,7 +60,7 @@ test('player retains the original console, right-hand file knob and transport st
 
 test('range and previous/next select all 106 individual files including equal-date multi-file source records',async()=>{
  const h=await harness();try{
-  const sequence=Array.from(h.ctx.nxTimeSpaceSequence(h.files)),slider=h.w.document.querySelector('[aria-label="Chronological file position"]');
+  const sequence=Array.from(h.ctx.nxTimeSpaceSequence(h.files)),slider=h.w.document.querySelector('[aria-label="Chronological timeline position"]');
   assert.equal(slider.min,'0');assert.equal(slider.max,'105');assert.equal(slider.step,'1');
   assert.equal(h.currentName(),sequence[0].name);assert.equal(h.w.document.querySelector('[aria-label="Previous file"]').disabled,true);
   await h.click('[aria-label="Next file"]');assert.equal(h.currentName(),sequence[1].name);assert.equal(slider.value,'1');
@@ -130,7 +131,7 @@ test('adding files calls the host, resets filters and selects the imported file 
   const selected=[new h.w.File(['%PDF-1.7'],'New Level 1 Plan.pdf',{type:'application/pdf'})];
   await h.add(selected);assert.equal(calls,1);assert.equal(received[0],selected[0]);
   await h.update({files:[...h.files,added]});assert.equal(h.currentName(),added.name);assert.equal(h.stored().currentId,added.id);assert.equal(h.stored().stream,'all');
-  assert.equal(h.w.document.querySelector('[aria-label="Chronological file position"]').max,'106');
+  assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').max,'106');
   const context=JSON.parse(h.w.localStorage.getItem('nosmo.timespace:v1:esafe-demo'));assert.equal(context.year,'all');assert.equal(context.location,'all');assert.equal(context.topic,'all');
   assert.equal(h.w.document.getElementById('nexusFilePreview'),null);assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'15:16:17 UTC');
  }finally{await h.dispose()}
@@ -151,10 +152,10 @@ test('Design + BIM combines both real topics and keeps the combined filter after
   const expected=h.files.filter(file=>file.category==='Design'||file.category==='BIM');
   assert.ok(expected.some(file=>file.category==='Design'));assert.ok(expected.some(file=>file.category==='BIM'));
   await h.click('[data-topic="design-bim"]');
-  assert.equal(h.w.document.querySelector('[aria-label="Chronological file position"]').max,String(expected.length-1));
+  assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').max,String(expected.length-1));
   assert.equal(h.w.document.querySelector('[data-topic="design-bim"]').getAttribute('aria-pressed'),'true');
   assert.equal(JSON.parse(h.w.localStorage.getItem('nosmo.timespace:v1:esafe-demo')).topic,'design-bim');
-  await h.remount();assert.equal(h.w.document.querySelector('[aria-label="Chronological file position"]').max,String(expected.length-1));
+  await h.remount();assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').max,String(expected.length-1));
   assert.equal(h.w.document.querySelector('[data-topic="design-bim"]').getAttribute('aria-pressed'),'true');
  }finally{await h.dispose()}
 });
@@ -166,7 +167,7 @@ test('incoming initialFile clears incompatible saved filters without emitting a 
   assert.ok(h.events.length>0);assert.ok(h.events.every(id=>id===target));
   const context=JSON.parse(h.w.localStorage.getItem('nosmo.timespace:v1:esafe-demo'));
   assert.equal(context.year,'all');assert.equal(context.topic,'all');assert.equal(context.location,'all');
-  assert.equal(h.w.document.querySelector('[aria-label="Chronological file position"]').max,'105');
+  assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').max,'105');
   await h.click('[aria-label="Next file"]');assert.notEqual(h.stored().currentId,target);
  }finally{await h.dispose()}
 });
@@ -245,5 +246,110 @@ test('device files use their local Blob and never request a source fetch or offe
   await h.click('[aria-label="Show file preview"]');const frame=h.w.document.querySelector('#nexusFilePreview iframe');assert.equal(frame.src,h.createdUrls[0].url);assert.equal(frame.title,'PDF preview: '+local.name);assert.equal(h.fetchCalls.length,0);
   assert.equal(h.w.document.querySelector('#nexusFilePreview iframe[title^="Google preview:"]'),null);assert.ok(![...h.w.document.querySelectorAll('#nexusFilePreview button')].some(button=>/Google/.test(button.textContent)));
   const source=frame.src;await h.click('[aria-label="Close file preview"]');assert.ok(h.revokedUrls.includes(source));
+ }finally{await h.dispose()}
+});
+
+test('compact layout retains the same preview on collapse, keeps its slider and browsing state, and persists per project',async()=>{
+ const h=await harness();try{
+  const sequence=Array.from(h.ctx.nxTimeSpaceSequence(h.files)),player=h.w.document.getElementById('nexusTimeSpace');
+  await h.range(7);await h.click('[aria-label="Show file preview"]');
+  const firstFrame=h.w.document.querySelector('#nexusFilePreview iframe'),slider=h.w.document.querySelector('[aria-label="Chronological timeline position"]');
+  assert.ok(firstFrame);assert.equal(player.dataset.layout,'full');
+  await h.click('[aria-label="Minimize TimeSpace"]');
+  assert.equal(player.dataset.layout,'compact');assert.ok(player.classList.contains('nx-pti-collapsed'));
+  assert.equal(h.w.document.querySelector('[aria-label="Expand TimeSpace"]').getAttribute('aria-expanded'),'false');
+  assert.equal(h.w.document.querySelector('#nexusFilePreview iframe'),firstFrame);assert.equal(slider.isConnected,true);
+  assert.equal(h.w.localStorage.getItem('nosmo.timespace.layout:v1:esafe-demo'),'compact');
+  assert.equal(h.w.localStorage.getItem('nosmo.timespace.layout:v1:dev'),null);
+  await h.click('[aria-label="Next file"]');assert.equal(h.currentName(),sequence[8].name);assert.ok(h.w.document.getElementById('nexusFilePreview'));assert.equal(slider.value,'8');
+  await h.range(10);assert.equal(h.currentName(),sequence[10].name);assert.ok(h.w.document.querySelector('#nexusFilePreview iframe'));assert.equal(player.dataset.layout,'compact');
+  const laterFrame=h.w.document.querySelector('#nexusFilePreview iframe');
+  await h.click('[aria-label="Expand TimeSpace"]');assert.equal(player.dataset.layout,'full');assert.equal(h.w.document.querySelector('#nexusFilePreview iframe'),laterFrame);
+  assert.equal(h.w.document.querySelector('[aria-label="Minimize TimeSpace"]').getAttribute('aria-expanded'),'true');
+  await h.click('[aria-label="Minimize TimeSpace"]');await h.remount();
+  assert.equal(h.w.document.getElementById('nexusTimeSpace').dataset.layout,'compact');assert.equal(h.currentName(),sequence[10].name);
+  assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').value,'10');
+  assert.equal(h.w.document.getElementById('nexusFilePreview'),null,'preview remains opt-in after a full reopen');
+ }finally{await h.dispose()}
+});
+
+function checkpointFixture(){
+ const file=(id,hour)=>({id,recordId:id,name:id+'.pdf',kind:'PDF',category:'Design',date:'2026-10-31',dateRaw:'2026-10-31',datePrecision:'day',addedAt:'2026-10-31T'+hour+':00:00Z',fileUrl:'https://zenodo.org/records/1/files/'+id+'.pdf'});
+ const files=[{...file('file-a','10'),deactivateAt:'2026-10-31T10:30:00Z'},file('file-b','11'),file('file-c','12')];
+ const historySaved={version:1,baseline:{at:'2026-10-31T10:15:00Z',groups:[]},events:[{at:'2026-10-31T10:45:00Z',groups:[{id:'nx-group-recorded',members:['file-a','person-b']}]}]};
+ return {files,historySaved};
+}
+
+test('timeline slider visits actual expiry and recorded connections while transport steps files only',async()=>{
+ const fixture=checkpointFixture(),h=await harness(fixture);try{
+  const points=Array.from(h.ctx.nxTimeSpaceCheckpoints(fixture.files,fixture.historySaved)),slider=h.w.document.querySelector('[aria-label="Chronological timeline position"]');
+  assert.deepEqual(points.map(point=>point.kind),['file','deactivation','connections','file','file']);assert.equal(slider.max,'4');
+  await h.range(1);assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:30:00 UTC');
+  assert.match(h.w.document.querySelector('.nx-pti-time-basis').textContent,/Deactivation deadline/);assert.match(slider.getAttribute('aria-valuetext'),/Deactivation/);
+  let event=h.eventDetails.at(-1);assert.equal(event.at,Date.parse(fixture.files[0].deactivateAt));assert.equal(event.mode,'replay');assert.equal(event.kind,'deactivation');assert.equal(event.fileId,'file-a');
+  await h.range(2);assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:45:00 UTC');
+  assert.match(h.w.document.querySelector('.nx-pti-time-basis').textContent,/Recorded connection change/);event=h.eventDetails.at(-1);
+  assert.equal(event.kind,'connections');assert.equal(event.mode,'replay');assert.equal(event.at,Date.parse(fixture.historySaved.events[0].at));
+  await h.click('[aria-label="Next file"]');assert.equal(h.currentName(),'file-b.pdf');assert.equal(slider.value,'3');assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'11:00:00 UTC');assert.equal(h.eventDetails.at(-1).kind,'file');
+  await h.click('[aria-label="Previous file"]');assert.equal(h.currentName(),'file-a.pdf');assert.equal(slider.value,'0');assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:00:00 UTC');
+ }finally{await h.dispose()}
+});
+
+test('parent selection acknowledgement and refreshed file metadata do not replace an expiry playhead',async()=>{
+ const fixture=checkpointFixture(),h=await harness(fixture);try{
+  await h.range(1);const expires=Date.parse(fixture.files[0].deactivateAt),eventCount=h.eventDetails.length;
+  await h.update({initialFile:'file-a'});
+  assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:30:00 UTC');
+  assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').value,'1');
+  assert.equal(h.eventDetails.at(-1).at,expires);assert.equal(h.eventDetails.at(-1).kind,'deactivation');
+  assert.ok(h.eventDetails.slice(eventCount).every(event=>event.at===expires&&event.kind==='deactivation'));
+  await h.update({files:fixture.files.map(file=>({...file}))});
+  assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:30:00 UTC');assert.equal(h.eventDetails.at(-1).at,expires);
+ }finally{await h.dispose()}
+});
+
+test('LIVE returns to actual current time, and the next file command leaves live mode',async()=>{
+ const fixture=checkpointFixture(),h=await harness(fixture);try{
+  await h.range(1);const before=Date.now();await h.click('[aria-label="Return to live tree"]');const after=Date.now(),event=h.eventDetails.at(-1);
+  assert.equal(event.mode,'live');assert.equal(event.kind,'live');assert.ok(Number.isFinite(event.at));assert.ok(event.at>=before&&event.at<=after);
+  assert.equal(h.w.document.querySelector('[aria-label="Return to live tree"]').getAttribute('aria-pressed'),'true');
+  assert.match(h.w.document.querySelector('.nx-pti-time-basis').textContent,/LIVE/);assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,new Date(event.at).toISOString().slice(11,19)+' UTC');
+  assert.equal(h.timers.size,1);
+  await h.click('[aria-label="Next file"]');assert.equal(h.currentName(),'file-b.pdf');assert.equal(h.eventDetails.at(-1).mode,'replay');assert.equal(h.eventDetails.at(-1).kind,'file');assert.equal(h.eventDetails.at(-1).at,Date.parse(fixture.files[1].addedAt));assert.equal(h.timers.size,0);
+ }finally{await h.dispose()}
+});
+
+test('newly recorded connection changes extend the timeline without inventing an empty baseline checkpoint',async()=>{
+ const fixture=checkpointFixture(),h=await harness({files:fixture.files});try{
+  const slider=h.w.document.querySelector('[aria-label="Chronological timeline position"]');assert.equal(slider.max,'3');
+  await h.React.act(async()=>{h.ctx.nxGraphHistoryEnsure('esafe-demo',[],'2026-10-31T10:15:00Z');await Promise.resolve()});assert.equal(slider.max,'3');
+  await h.React.act(async()=>{h.ctx.nxGraphHistoryRecord('esafe-demo',[{id:'nx-group-added',members:['file-a','person-b']}],'2026-10-31T10:45:00Z');await Promise.resolve()});
+  assert.equal(slider.max,'4');await h.range(2);assert.equal(h.eventDetails.at(-1).kind,'connections');assert.equal(h.eventDetails.at(-1).at,Date.parse('2026-10-31T10:45:00Z'));
+ }finally{await h.dispose()}
+});
+
+test('LIVE followed by Next leaves live mode even after the parent has acknowledged the current file',async()=>{
+ const fixture=checkpointFixture(),h=await harness({...fixture,initialFile:'file-a'});try{
+  assert.equal(h.stored().currentId,'file-a');
+  await h.click('[aria-label="Return to live tree"]');assert.equal(h.eventDetails.at(-1).mode,'live');assert.equal(h.eventDetails.at(-1).fileId,'file-a');
+  await h.click('[aria-label="Next file"]');
+  assert.equal(h.currentName(),'file-b.pdf');assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'11:00:00 UTC');
+  assert.equal(h.eventDetails.at(-1).mode,'replay');assert.equal(h.eventDetails.at(-1).kind,'file');assert.equal(h.eventDetails.at(-1).at,Date.parse(fixture.files[1].addedAt));
+  assert.equal(h.w.document.querySelector('[aria-label="Return to live tree"]').getAttribute('aria-pressed'),'false');assert.equal(h.timers.size,0);
+  await h.update({initialFile:'file-b'});assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'11:00:00 UTC');assert.equal(h.eventDetails.at(-1).mode,'replay');
+ }finally{await h.dispose()}
+});
+
+test('a reactivated file retains its earlier archive and recovery instants in the player timeline',async()=>{
+ const fixture=checkpointFixture(),observed={...fixture.files[0],deactivateAt:null,lifecycleEvents:[
+  {id:'file-a',at:'2026-10-31T10:15:00Z',deactivateAt:'2026-10-31T10:30:00Z'},
+  {id:'file-a',at:'2026-10-31T10:45:00Z',deactivateAt:null}
+ ]};
+ const h=await harness({files:[observed,...fixture.files.slice(1)],initialFile:'file-a'});try{
+  const slider=h.w.document.querySelector('[aria-label="Chronological timeline position"]');assert.equal(slider.max,'4');
+  await h.range(1);assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:30:00 UTC');assert.equal(h.eventDetails.at(-1).kind,'deactivation');
+  await h.range(2);assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:45:00 UTC');assert.equal(h.eventDetails.at(-1).kind,'reactivation');assert.equal(h.eventDetails.at(-1).mode,'replay');assert.equal(h.eventDetails.at(-1).at,Date.parse(observed.lifecycleEvents[1].at));
+  assert.match(slider.getAttribute('aria-valuetext'),/Reactivation/);assert.match(h.w.document.querySelector('.nx-pti-time-basis').textContent,/File reactivated/);
+  await h.update({initialFile:'file-a',files:[{...observed},...fixture.files.slice(1)]});assert.equal(h.w.document.querySelector('.nx-pti-clock').textContent,'10:45:00 UTC');assert.equal(h.eventDetails.at(-1).kind,'reactivation');
  }finally{await h.dispose()}
 });

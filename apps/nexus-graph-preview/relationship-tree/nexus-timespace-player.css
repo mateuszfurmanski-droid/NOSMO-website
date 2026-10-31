@@ -62,3 +62,25 @@ body:has(#nexusTimeSpaceCatalog) #nexusTimeSpaceDock>*:not(#nexusTimeSpaceCatalo
 @media(prefers-reduced-motion:reduce){#nexusTimeSpaceDock *{animation:none!important;transition:none!important}}
 /* Keep both preview and transport reachable on short / landscape screens. */
 @media(max-height:700px){#nexusTimeSpaceDock{overflow-y:auto;overscroll-behavior:contain;pointer-events:auto;border-radius:15px}#nexusTimeSpace.nx-timespace-player{flex-shrink:1;min-height:160px;overflow-y:auto}#nexusFilePreview{min-height:110px}}
+
+/* Compact is the same player: file selection, slider and preview remain mounted. */
+#nexusTimeSpace.nx-timespace-player .nx-pti-collapse{display:grid;place-items:center;width:36px;min-height:30px;border:1px solid #4b718a;background:#173950;border-radius:7px;padding:0}
+#nexusTimeSpace.nx-timespace-player .nx-pti-collapse svg{transition:transform .15s ease}
+#nexusTimeSpace.nx-timespace-player.nx-pti-collapsed{padding:6px 8px;gap:3px;min-height:0;flex-shrink:0;overflow:visible}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-player-heading{display:contents}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-player-heading>strong,#nexusTimeSpace.nx-pti-collapsed .nx-pti-player-heading>span,#nexusTimeSpace.nx-pti-collapsed .nx-pti-close,#nexusTimeSpace.nx-pti-collapsed .nx-pti-live,#nexusTimeSpace.nx-pti-collapsed .nx-pti-mode,#nexusTimeSpace.nx-pti-collapsed .nx-pti-knob-zone,#nexusTimeSpace.nx-pti-collapsed .nx-pti-phase,#nexusTimeSpace.nx-pti-collapsed .nx-pti-meta,#nexusTimeSpace.nx-pti-collapsed .nx-pti-status,#nexusTimeSpace.nx-pti-collapsed .nx-pti-event,#nexusTimeSpace.nx-pti-collapsed .nx-pti-time-basis{display:none}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-collapse{position:absolute;right:8px;top:6px;width:40px;height:40px}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-collapse svg{transform:rotate(180deg)}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-console{width:calc(100% - 46px);grid-template-columns:minmax(0,1fr) 120px;gap:6px}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-left{display:contents}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-ticker{height:40px;grid-template-columns:minmax(0,1fr);grid-template-rows:20px 14px;padding:2px 8px}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-date{font-size:16px;line-height:20px;overflow:hidden;text-overflow:ellipsis}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-clock{font-size:11px;line-height:14px}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-transport{height:40px;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-btn{height:40px;min-height:40px}
+#nexusTimeSpace.nx-pti-collapsed [data-cmd=first],#nexusTimeSpace.nx-pti-collapsed [data-cmd=last],#nexusTimeSpace.nx-pti-collapsed [data-cmd=catalog]{display:none}
+#nexusTimeSpace.nx-pti-collapsed [data-cmd=previous]{order:0}#nexusTimeSpace.nx-pti-collapsed [data-cmd=play]{order:1}#nexusTimeSpace.nx-pti-collapsed [data-cmd=next]{order:2}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-rail{height:26px;margin:0}
+#nexusTimeSpace.nx-pti-collapsed .nx-pti-rail input{height:26px}
+
+#nexusTimeSpace.nx-timespace-player .nx-pti-player-heading .nx-pti-live{width:46px;font-size:10px;letter-spacing:.06em;color:#83e0c4}#nexusTimeSpace.nx-timespace-player .nx-pti-live[aria-pressed=true]{background:#175148;border-color:#58baa2}

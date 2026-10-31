@@ -317,6 +317,26 @@ function nxGooglePreviewUrl(file) {
     return 'https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(url.href);
   }catch{return null}
 }
+// The slider also exposes actual expiry and recorded connection changes; transport still steps files.
+function nxTimeSpaceCheckpoints(files,history) {
+  const points=nxTimeSpaceSequence(files).map((file,index)=>({key:'file:'+file.id,kind:'file',fileId:file.id,at:nxFileMoment(file).timestamp,order:index}));
+  for(const file of files){
+    const events=Array.isArray(file.lifecycleEvents)?file.lifecycleEvents:[];
+    if(!events.length){const at=nxFilePlaybackAddedAt(file.deactivateAt);if(at!==null)points.push({key:'deactivation:'+file.id,kind:'deactivation',fileId:file.id,at,order:points.length});continue}
+    for(const [index,event] of events.entries()){
+      const recorded=nxFilePlaybackAddedAt(event.at),deadline=nxFilePlaybackAddedAt(event.deactivateAt),previous=events[index-1],priorDeadline=nxFilePlaybackAddedAt(previous?.deactivateAt);
+      if(recorded===null)continue;
+      if(priorDeadline!==null&&priorDeadline<=recorded&&(deadline===null||deadline>recorded))points.push({key:'reactivation:'+file.id+':'+index,kind:'reactivation',fileId:file.id,at:recorded,order:points.length});
+      if(deadline===null)continue;
+      const at=Math.max(recorded,deadline),nextChange=nxFilePlaybackAddedAt(events[index+1]?.at);
+      if(nextChange!==null&&nextChange<=at)continue;
+      points.push({key:'deactivation:'+file.id+':'+index,kind:'deactivation',fileId:file.id,at,order:points.length});
+    }
+  }
+  const changes=[...(history?.baseline?.groups?.length?[{...history.baseline,baseline:true}]:[]),...(history?.events||[])];
+  for(const [index,event] of changes.entries()){const at=nxFilePlaybackAddedAt(event.at);if(at!==null)points.push({key:'connections:'+index+':'+event.at,kind:'connections',at,baseline:!!event.baseline,order:points.length})}
+  return points.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity)||a.order-b.order);
+}
 
 // Existing e-SAFE source manifest, shared by the catalog and graph cards.
 function nxEsafeCatalog(records) {
@@ -329,22 +349,66 @@ function nxEsafeCatalog(records) {
   }));
 }
 function nxFileSize(bytes){return bytes>=1048576?(bytes/1048576).toFixed(1)+' MB':Math.ceil(bytes/1024)+' KB'}
-function NexusProjectFiles({files,onClose,onReveal,initialFile=null,onAddFiles,onRemoveFile,onRestoreFile}) {
+// datetime-local is entered and displayed in the browser's local timezone.
+function nxFileLifetimeInputValue(iso) {
+  if(!iso)return '';
+  const date=new Date(iso);if(!Number.isFinite(date.getTime()))return '';
+  const pad=value=>String(value).padStart(2,'0');
+  return date.getFullYear()+'-'+pad(date.getMonth()+1)+'-'+pad(date.getDate())+'T'+pad(date.getHours())+':'+pad(date.getMinutes())+':'+pad(date.getSeconds());
+}
+function nxFileLifetimeInputIso(value) {
+  const parts=String(value||'').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if(!parts)return null;
+  const date=new Date(value);if(!Number.isFinite(date.getTime()))return null;
+  const components=[date.getFullYear(),date.getMonth()+1,date.getDate(),date.getHours(),date.getMinutes(),date.getSeconds()];
+  if(components.some((part,index)=>part!==Number(parts[index+1]||0)))return null;
+  return date.toISOString();
+}
+function nxFileLifetimeDateLabel(iso) {
+  const date=new Date(iso);if(!Number.isFinite(date.getTime()))return 'Date unavailable';
+  return new Intl.DateTimeFormat(undefined,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(date);
+}
+function NexusFileLifetime({file,onSetDeactivation,busy,onError}) {
+  const [value,setValue]=b.useState(()=>nxFileLifetimeInputValue(file.deactivateAt));
+  b.useEffect(()=>setValue(nxFileLifetimeInputValue(file.deactivateAt)),[file.deactivateAt]);
+  const zone=new Intl.DateTimeFormat().resolvedOptions().timeZone||'local timezone';
+  const save=()=>{const iso=nxFileLifetimeInputIso(value);if(!iso){onError('Choose a valid local date and time for '+file.name+'.');return}onSetDeactivation(file.id,iso)};
+  return s.jsxs('details',{className:'nx-file-lifetime',children:[
+    s.jsx('summary',{children:'File lifetime'}),
+    s.jsx('p',{children:'Deactivation moves this file to Archive. Its original file stays available.'}),
+    s.jsxs('label',{children:[s.jsx('span',{children:'Date and time · '+zone+' (local)'}),s.jsx('input',{type:'datetime-local',step:1,value,disabled:busy,'aria-label':'Deactivation date and time for '+file.name,onChange:event=>setValue(event.target.value)})]}),
+    s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{type:'button',disabled:busy,onClick:save,children:'Set date'}),!file.archived&&s.jsx('button',{type:'button',disabled:busy,onClick:()=>onSetDeactivation(file.id,new Date().toISOString()),children:'Deactivate now'}),(file.deactivateAt||file.archived)&&s.jsx('button',{type:'button',disabled:busy,onClick:()=>onSetDeactivation(file.id,null),children:file.archived?'Reactivate':'Remove deactivation date'})]})]});
+}
+function NexusFileAdditionTime({file}) {
+  const moment=typeof nxFileMoment==='function'?nxFileMoment(file):null;
+  return moment?.basis==='Added to Nexus'?s.jsxs('p',{className:'nx-file-added-time',children:['Added to Nexus · ',s.jsx('time',{dateTime:new Date(moment.timestamp).toISOString(),children:moment.dateLabel+' '+moment.timeLabel})]}):s.jsx('p',{className:'nx-file-added-time',children:'Nexus addition time unavailable'});
+}
+function NexusProjectFiles({files,onClose,onReveal,initialFile=null,initialStatus='active',asOf=null,onSetDeactivation,onAddFiles,onRemoveFile,onRestoreFile}) {
   const [filter,setFilter]=b.useState(initialFile?'selected':'all'),[query,setQuery]=b.useState('');
-  const [lastRemoved,setLastRemoved]=b.useState(null),[error,setError]=b.useState(''),picker=b.useRef(null);
-  const add=async e=>{const list=Array.from(e.target.files||[]);e.target.value='';if(!list.length)return;try{await onAddFiles(list);setError('');setFilter('all')}catch(e){setError(e.message)}};
+  const [status,setStatus]=b.useState(()=>{const selected=files.find(file=>file.id===initialFile);return selected?(selected.archived?'archived':'active'):initialStatus==='archived'?'archived':'active'});
+  const [lastRemoved,setLastRemoved]=b.useState(null),[error,setError]=b.useState(''),[message,setMessage]=b.useState(''),[busyId,setBusyId]=b.useState(null),[previewId,setPreviewId]=b.useState(null),[previewViewer,setPreviewViewer]=b.useState('google'),picker=b.useRef(null);
+  const add=async e=>{const list=Array.from(e.target.files||[]);e.target.value='';if(!list.length)return;try{await onAddFiles(list);setError('');setFilter('all');setStatus('active')}catch(e){setError(e.message)}};
+  const setDeadline=async(id,iso)=>{const file=files.find(file=>file.id===id);setBusyId(id);setError('');setMessage('');try{await onSetDeactivation(id,iso);setMessage(iso===null?'File reactivated. Find it in Active files.':Date.parse(iso)<=Date.now()?'File moved to Archive. The original file is retained.':'Deactivation date saved for '+(file?.name||'file')+'.');if(iso===null&&file?.archived||iso!==null&&Date.parse(iso)<=Date.now())onClose()}catch(e){setError('Could not change file lifetime: '+e.message)}finally{setBusyId(null)}};
   const closeButton=b.useRef(null),previousFocus=b.useRef(null);
   b.useEffect(()=>{previousFocus.current=document.activeElement;closeButton.current?.focus();return()=>previousFocus.current?.isConnected&&previousFocus.current.focus()},[]);
-  const shown=files.filter(file=>(filter==='all'||filter==='selected'&&file.id===initialFile||filter==='core'&&file.core||filter==='video'&&file.kind==='Video'||filter==='pdf'&&file.kind==='PDF')&&(!query||[file.name,file.title,file.category].join(' ').toLowerCase().includes(query.toLowerCase())));
-  const keydown=e=>{if(e.key==='Escape'){e.preventDefault();onClose()}if(e.key==='Tab'){const controls=[...e.currentTarget.querySelectorAll('button,a,input')].filter(n=>!n.disabled&&n.getClientRects().length);if(!controls.length)return;const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
+  const scoped=files.filter(file=>status==='all'||(status==='archived'?file.archived:!file.archived));
+  const shown=scoped.filter(file=>(filter==='all'||filter==='selected'&&file.id===initialFile||filter==='core'&&file.core||filter==='video'&&file.kind==='Video'||filter==='pdf'&&file.kind==='PDF')&&(!query||[file.name,file.title,file.category].join(' ').toLowerCase().includes(query.toLowerCase())));
+  const previewFile=files.find(file=>file.id===previewId);
+  const showPreview=id=>{setPreviewViewer('google');setPreviewId(id)};
+  const keydown=e=>{if(e.key==='Escape'){e.preventDefault();if(previewId)setPreviewId(null);else onClose()}if(e.key==='Tab'){const controls=[...e.currentTarget.querySelectorAll('button,a,input,summary')].filter(n=>!n.disabled&&n.getClientRects().length);if(!controls.length)return;const first=controls[0],last=controls[controls.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
   return ko.createPortal(s.jsxs('section',{id:'nexusProjectFiles','data-control':true,role:'dialog','aria-modal':'true','aria-labelledby':'nx-project-files-title',onKeyDown:keydown,children:[
     s.jsxs('header',{children:[s.jsxs('div',{children:[s.jsx('small',{children:'e-SAFE · CATANIA'}),s.jsx('h2',{id:'nx-project-files-title',children:'Project files · '+files.length})]}),s.jsx('button',{ref:closeButton,onClick:onClose,'aria-label':'Close project files',children:'×'})]}),
-    s.jsx('p',{className:'nx-source-note',children:new Set(files.filter(f=>!f.local).map(f=>f.recordId)).size+' source records · '+files.filter(f=>f.kind==='PDF').length+' PDF · '+files.filter(f=>f.kind==='Video').length+' videos. '+files.filter(f=>f.local).length+' device files. Source links open from Zenodo; device files stay here. Dates refer to source publication or actual device addition.'}),
-    s.jsxs('div',{className:'nx-file-filters','aria-label':'Filter project files',children:[...['all','core','pdf','video'].map(value=>s.jsx('button',{'aria-pressed':filter===value,onClick:()=>setFilter(value),children:({all:'All '+files.length,core:'Core pilot '+files.filter(f=>f.core).length,pdf:'PDF '+files.filter(f=>f.kind==='PDF').length,video:'Video '+files.filter(f=>f.kind==='Video').length})[value]},value)),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Search project files'}),s.jsx('input',{'aria-label':'Search project files',type:'search',value:query,onChange:e=>setQuery(e.target.value),placeholder:'Find a file…'})]},'search')]}),
+    asOf!==null&&s.jsx('p',{className:'nx-source-note',children:'TimeSpace snapshot · '+nxFileLifetimeDateLabel(new Date(asOf).toISOString())+' · read-only. Return to LIVE to change file dates.'}),s.jsx('p',{className:'nx-source-note',children:new Set(files.filter(f=>!f.local).map(f=>f.recordId)).size+' source records · '+files.filter(f=>f.kind==='PDF').length+' PDF · '+files.filter(f=>f.kind==='Video').length+' videos. '+files.filter(f=>f.local).length+' device files. Source links open from Zenodo; device files stay here. Dates refer to source publication or actual device addition.'}),
+    s.jsxs('div',{className:'nx-file-filters','aria-label':'File status',children:[...['active','archived','all'].map(value=>s.jsx('button',{'data-file-status-filter':value,'aria-pressed':status===value,onClick:()=>{setStatus(value);setFilter('all')},children:({active:'Active '+files.filter(file=>!file.archived).length,archived:'Archive '+files.filter(file=>file.archived).length,all:'All statuses '+files.length})[value]},value))]}),
+    s.jsxs('div',{className:'nx-file-filters','aria-label':'Filter project files',children:[...['all','core','pdf','video'].map(value=>s.jsx('button',{'aria-pressed':filter===value,onClick:()=>setFilter(value),children:({all:'All '+scoped.length,core:'Core pilot '+scoped.filter(f=>f.core).length,pdf:'PDF '+scoped.filter(f=>f.kind==='PDF').length,video:'Video '+scoped.filter(f=>f.kind==='Video').length})[value]},value)),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Search project files'}),s.jsx('input',{'aria-label':'Search project files',type:'search',value:query,onChange:e=>setQuery(e.target.value),placeholder:'Find a file…'})]},'search')]}),
     onAddFiles&&s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>picker.current?.click(),children:'+ Add files'}),s.jsx('input',{ref:picker,type:'file',multiple:true,hidden:true,'aria-label':'Add files to project',onChange:add}),lastRemoved&&s.jsx('button',{onClick:async()=>{try{await onRestoreFile(lastRemoved);setLastRemoved(null)}catch(e){setError(e.message)}},children:'Undo removal'})]}),
-    error&&s.jsx('p',{role:'alert',children:error}),
+    error&&s.jsx('p',{role:'alert',children:error}),message&&s.jsx('p',{role:'status',children:message}),
+    previewFile&&typeof NexusFilePreview==='function'&&s.jsx(NexusFilePreview,{file:previewFile,world:window.__NEXUS_PROJECT_WORLD__||'esafe-demo',viewer:previewViewer,onViewerChange:setPreviewViewer,onClose:()=>setPreviewId(null)},previewFile.id),
     s.jsx('p',{className:'nx-file-result-count',role:'status',children:shown.length+' of '+files.length+' files'}),
-    s.jsx('div',{className:'nx-project-file-list',children:shown.length?shown.map(file=>s.jsxs('article',{'data-file-id':file.id,children:[s.jsxs('div',{className:'nx-file-name',children:[s.jsx('span',{className:'nx-file-kind',children:file.kind}),s.jsx('strong',{children:file.name})]}),s.jsx('p',{children:file.title}),s.jsx('small',{children:[file.category,' · ',file.dateRaw||file.date,file.datePrecision==='year'?' (year only)':file.datePrecision==='month'?' (month only)':'',' · ',nxFileSize(file.size),file.core?' · CORE PILOT':'']}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),file.local?s.jsx('button',{onClick:async()=>{try{await onRemoveFile(file.id);setLastRemoved(file.id);setFilter('all')}catch(e){setError(e.message)}},children:'Remove device file'}):s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),!file.local&&s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id)):s.jsx('p',{children:'No matching files. Choose All to see the full catalog.'})})]}),document.body);
+    s.jsx('div',{className:'nx-project-file-list',children:shown.length?shown.map(file=>s.jsxs('article',{'data-file-id':file.id,'data-file-archived':file.archived?'true':'false',children:[s.jsxs('div',{className:'nx-file-name',children:[s.jsx('span',{className:'nx-file-kind',children:file.kind}),s.jsx('strong',{children:file.name})]}),s.jsx('p',{children:file.title}),s.jsx(NexusFileAdditionTime,{file}),s.jsx('small',{className:'nx-file-source-date',children:[file.category,' · ',file.local?'Device date · ':'Source publication · ',file.dateRaw||file.date,file.datePrecision==='year'?' (year only)':file.datePrecision==='month'?' (month only)':'',' · ',nxFileSize(file.size),file.core?' · CORE PILOT':'']}),
+      s.jsxs('p',{className:'nx-file-lifetime-status',children:[file.archived?'Archived · ':file.deactivateAt?'Active until ':'Active · no deactivation date',file.deactivateAt?s.jsx('time',{dateTime:file.deactivateAt,children:nxFileLifetimeDateLabel(file.deactivateAt)}):file.archived?'deactivation time unavailable':'']}),
+      s.jsxs('div',{className:'nx-file-actions',children:[!file.archived&&asOf===null&&s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),typeof NexusFilePreview==='function'&&s.jsx('button',{onClick:()=>showPreview(file.id),children:'Preview file'}),file.local?(!file.archived&&onRemoveFile&&s.jsx('button',{onClick:async()=>{try{await onRemoveFile(file.id);setLastRemoved(file.id);setFilter('all')}catch(e){setError(e.message)}},children:'Remove device file'})):s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),!file.local&&s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]}),
+      onSetDeactivation&&s.jsx(NexusFileLifetime,{file,onSetDeactivation:setDeadline,busy:busyId!==null,onError:setError})]},file.id)):s.jsx('p',{children:'No matching files. Choose another status or All to see more files.'})})]}),document.body);
 }
 
 // TimeSpace is a read-only view of source chronology plus explicit file locations.
@@ -466,21 +530,33 @@ function NexusFilePreview({file,world,onClose,viewer='google',onViewerChange}) {
     s.jsxs('footer',{children:[google&&s.jsx('button',{onClick:()=>onViewerChange?.(direct?'google':'source'),children:direct?'Try Google preview':'Source preview'}),google&&!direct&&s.jsx('small',{children:'If Google cannot display this file, choose Source preview.'}),file.local&&s.jsx('small',{children:'Device file stays on this device. Google needs a remotely accessible file.'}),(url||file.fileUrl)&&s.jsx('a',{href:url||file.fileUrl,target:(url||'').startsWith('blob:')?undefined:'_blank',rel:'noopener noreferrer',download:(url||'').startsWith('blob:')?file.name:undefined,children:'Download file'})]})]});
 }
 function NexusTimeSpace({files,onClose,onReveal,onOpenFiles,onAddFiles,initialFile=null,world='esafe-demo'}) {
-  const key='nosmo.timespace.player:v1:'+world,filterKey='nosmo.timespace:v1:'+world;
+  const key='nosmo.timespace.player:v1:'+world,filterKey='nosmo.timespace:v1:'+world,layoutKey='nosmo.timespace.layout:v1:'+world;
   const [context,setContext]=b.useState(()=>{try{return nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(filterKey)),files)}catch{return nxTimeSpaceNormalize(null,files)}});
   const [saved]=b.useState(()=>{try{return JSON.parse(localStorage.getItem(key))||{}}catch{return{}}});
   const [stream,setStream]=b.useState(['all','added','source'].includes(saved.stream)?saved.stream:'all'),[currentId,setCurrentId]=b.useState(initialFile||saved.currentId||null),[playing,setPlaying]=b.useState(false),[preview,setPreview]=b.useState(false),[viewer,setViewer]=b.useState('google'),[catalog,setCatalog]=b.useState(false),[error,setError]=b.useState('');
+  const [playhead,setPlayhead]=b.useState(null),[liveNow,setLiveNow]=b.useState(Date.now),[historyRevision,setHistoryRevision]=b.useState(0);
+  b.useEffect(()=>{const changed=e=>{if(!e.detail?.world||e.detail.world===world)setHistoryRevision(v=>v+1)};window.addEventListener('nexus:graph-history-updated',changed);window.addEventListener('storage',changed);return()=>{window.removeEventListener('nexus:graph-history-updated',changed);window.removeEventListener('storage',changed)}},[world]);
+  b.useEffect(()=>{if(playhead?.mode!=='live')return;const timer=setInterval(()=>setLiveNow(Date.now()),1000);return()=>clearInterval(timer)},[playhead?.mode]);
+  const [collapsed,setCollapsed]=b.useState(()=>{try{return localStorage.getItem(layoutKey)==='compact'}catch{return false}});
+  b.useEffect(()=>{try{localStorage.setItem(layoutKey,collapsed?'compact':'full')}catch{}},[collapsed,layoutKey]);
   const picker=b.useRef(null),origin=b.useRef(null),root=b.useRef(null);
   const [initialRequest,setInitialRequest]=b.useState(null);
   const filtered=nxTimeSpaceMatch(files,context).filter(f=>stream==='all'||(stream==='added'?!!f.addedAt:!f.addedAt)),sequence=nxTimeSpaceSequence(filtered);
   let index=sequence.findIndex(f=>f.id===currentId);if(index<0)index=0;
-  const current=sequence[index]||null,moment=current?nxFileMoment(current):{dateLabel:'NO FILE',timeLabel:'--:--',basis:'Add a file to begin'};
+  const current=sequence[index]||null,fileMoment=current?nxFileMoment(current):{dateLabel:'NO FILE',timeLabel:'--:--',basis:'Add a file to begin',timestamp:null};
+  const history=typeof nxGraphHistoryRead==='function'?nxGraphHistoryRead(world):null,checkpoints=nxTimeSpaceCheckpoints(filtered,history);
+  const at=playhead?.mode==='live'?liveNow:playhead?.at??fileMoment.timestamp;
+  const pointKey=playhead?.mode==='replay'?playhead.key:'file:'+current?.id;
+  const pointIndex=Math.max(0,checkpoints.findIndex(p=>p.key===pointKey));
+  const selectedPoint=playhead?.mode==='replay'?playhead:null;
+  const eventIso=Number.isFinite(at)?new Date(at).toISOString():null;
+  const moment=playhead&&eventIso?{dateLabel:eventIso.slice(0,10),timeLabel:eventIso.slice(11,19)+' UTC',basis:playhead.mode==='live'?'LIVE · actual device time':playhead.kind==='deactivation'?'Deactivation deadline'+(at>Date.now()?' · scheduled':' · elapsed'):playhead.kind==='reactivation'?'File reactivated':playhead.baseline?'Recorded baseline · earlier changes unknown':'Recorded connection change',timestamp:at}:fileMoment;
   const pendingInitial=!!initialFile&&initialRequest!==initialFile&&(files.some(file=>file.id===initialFile)||initialFile.startsWith('local-'));
-  const select=i=>{if(!sequence.length)return;if(pendingInitial)setInitialRequest(initialFile);setCurrentId(sequence[Math.max(0,Math.min(sequence.length-1,i))].id)};
+  const select=i=>{if(!sequence.length)return;if(pendingInitial)setInitialRequest(initialFile);setPlayhead(null);setCurrentId(sequence[Math.max(0,Math.min(sequence.length-1,i))].id)};
   b.useEffect(()=>{
     if(!initialFile||initialRequest===initialFile)return;
     if(!files.some(file=>file.id===initialFile))return;
-    setInitialRequest(initialFile);
+    setInitialRequest(initialFile);if(initialFile!==currentId)setPlayhead(null);
     if(!sequence.some(file=>file.id===initialFile)){
       const clean=nxTimeSpaceNormalize({...context,year:'all',location:'all',topic:'all'},files);
       setContext(clean);setStream('all');
@@ -489,42 +565,299 @@ function NexusTimeSpace({files,onClose,onReveal,onOpenFiles,onAddFiles,initialFi
     setCurrentId(initialFile);
   },[initialFile,files]);
   b.useEffect(()=>{origin.current=document.activeElement;return()=>origin.current?.isConnected&&origin.current.focus()},[]);
-  b.useEffect(()=>{if(!current||pendingInitial)return;try{localStorage.setItem(key,JSON.stringify({currentId:current.id,stream}))}catch{}window.dispatchEvent(new CustomEvent('nexus:timespace-current-file',{detail:{world,fileId:current.id}}))},[current?.id,stream,pendingInitial]);
+  b.useEffect(()=>{if(!current||pendingInitial)return;try{localStorage.setItem(key,JSON.stringify({currentId:current.id,stream}))}catch{}window.dispatchEvent(new CustomEvent('nexus:timespace-current-file',{detail:{world,fileId:current.id,at,mode:playhead?.mode==='live'?'live':'replay',kind:playhead?.kind||'file'}}))},[current?.id,stream,pendingInitial,at,playhead?.mode,playhead?.kind]);
   b.useEffect(()=>{const updated=e=>{if(e.detail?.source==='timespace-catalog'){try{setContext(nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(filterKey)),files))}catch{}}};window.addEventListener('nexus:timespace-filter',updated);return()=>window.removeEventListener('nexus:timespace-filter',updated)},[files]);
   b.useEffect(()=>{if(!playing||!sequence.length)return;const timer=setInterval(()=>{if(index>=sequence.length-1)setPlaying(false);else{select(index+1);if(index+1>=sequence.length-1)setPlaying(false)}},1800);return()=>clearInterval(timer)},[playing,index,sequence.length]);
   b.useEffect(()=>{const hidden=()=>{if(document.hidden)setPlaying(false)};document.addEventListener('visibilitychange',hidden);return()=>document.removeEventListener('visibilitychange',hidden)},[]);
-  const changeContext=next=>{const clean=nxTimeSpaceNormalize(next,files);try{localStorage.setItem(filterKey,JSON.stringify(clean));setContext(clean);setError('')}catch{setError('Could not save filter. Change cancelled.')}};
+  const changeContext=next=>{setPlayhead(null);const clean=nxTimeSpaceNormalize(next,files);try{localStorage.setItem(filterKey,JSON.stringify(clean));setContext(clean);setError('')}catch{setError('Could not save filter. Change cancelled.')}};
   const add=async list=>{if(!list?.length)return;setPlaying(false);try{const added=await onAddFiles(list);setStream('all');changeContext({...context,year:'all',location:'all',topic:'all'});if(added?.length)setCurrentId(added[added.length-1].id);setError('')}catch(e){setError('Could not add files: '+e.message)}};
   const command=(cmd)=>{if(cmd==='play')setPlaying(p=>!p);else{setPlaying(false);select(cmd==='first'?0:cmd==='previous'?index-1:cmd==='next'?index+1:sequence.length-1)}};
+  const seek=position=>{setPlaying(false);const point=checkpoints[position];if(!point)return;if(pendingInitial)setInitialRequest(initialFile);if(point.kind==='file'){setPlayhead(null);setCurrentId(point.fileId)}else{setPlayhead({...point,mode:'replay'});const nearest=point.fileId||nxTimeSpaceSequence(filtered.filter(f=>(nxFileMoment(f).timestamp??Infinity)<=point.at)).at(-1)?.id;if(nearest)setCurrentId(nearest)}};
+  const goLive=()=>{setPlaying(false);setLiveNow(Date.now());setPlayhead({mode:'live',kind:'live'})};
   const topics=[['All','all'],['Survey','Survey'],['Design + BIM','design-bim'],['Procurement','Production'],['Construction','Construction'],['Testing + handover','Testing']];
   // Keep the same console, transport bank, status lights, file-knob position and event card.
   return ko.createPortal(s.jsxs('div',{id:'nexusTimeSpaceDock','data-control':true,children:[
     preview&&current&&s.jsx(NexusFilePreview,{file:current,world,viewer,onViewerChange:setViewer,onClose:()=>setPreview(false)},current.id),
-    s.jsxs('section',{id:'nexusTimeSpace',ref:root,className:'nx-pti-open nx-timespace-player',role:'region','aria-label':'TimeSpace media player',onKeyDown:e=>{if(e.key==='Escape'){if(preview)setPreview(false);else onClose()}},children:[
-      s.jsxs('div',{className:'nx-pti-player-heading',children:[s.jsx('strong',{children:'NEXUS · TIMESPACE'}),s.jsx('span',{children:'CATANIA'+(context.year!=='all'?' · '+context.year:'')+(context.location!=='all'?' · '+(nxTimeSpaceLocations.find(p=>p.id===context.location)?.label||context.location):'')}),s.jsx('button',{onClick:()=>{setPlaying(false);onClose()},'aria-label':'Close TimeSpace',children:'×'})]}),
-      s.jsxs('div',{className:'nx-pti-console',children:[s.jsxs('div',{className:'nx-pti-left',children:[s.jsxs('div',{className:'nx-pti-ticker','aria-live':'polite',children:[s.jsx('strong',{className:'nx-pti-date',children:moment.dateLabel}),s.jsx('strong',{className:'nx-pti-clock',children:moment.timeLabel}),s.jsx('small',{className:'nx-pti-time-basis',children:moment.basis})]}),s.jsx('div',{className:'nx-pti-transport',children:[['play',playing?'Ⅱ':'▶',playing?'Pause files':'Play files'],['first','|◀','First file'],['previous','◀','Previous file'],['next','▶','Next file'],['last','▶|','Last file'],['catalog','▤','Catalog and locations']].map(([cmd,icon,label])=>s.jsx('button',{className:'nx-pti-btn nx-led-'+(cmd==='play'?'green':'blue')+(cmd==='play'&&playing?' nx-active':''),'data-cmd':cmd,'data-icon':icon,'aria-label':label,disabled:!sequence.length||(cmd==='previous'||cmd==='first')&&index===0||(cmd==='next'||cmd==='last')&&index===sequence.length-1,onClick:()=>cmd==='catalog'?(setPlaying(false),setCatalog(true)):command(cmd)},cmd))}),s.jsx('div',{className:'nx-pti-mode',children:[['all','ALL FILES'],['added','ADDED TO NEXUS'],['source','SOURCE ARCHIVE']].map(([value,label])=>s.jsx('button',{'data-mode':value,'aria-pressed':stream===value,className:stream===value?'nx-active':'',onClick:()=>{setPlaying(false);setStream(value)},children:label},value))})]}),s.jsxs('div',{className:'nx-pti-knob-zone',children:[s.jsx('button',{className:'nx-pti-knob nx-pti-file-knob','aria-label':preview?'Hide file preview':'Show file preview','aria-pressed':preview,disabled:!current,onClick:()=>setPreview(v=>!v),children:current?.kind==='PDF'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/pdf.webp',alt:'PDF'}):current?.kind==='Spreadsheet'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/xlsx.webp',alt:'Spreadsheet'}):s.jsx('span',{children:current?.kind==='Video'?'▶':'▤'})}),s.jsx('div',{className:'nx-pti-knob-label',children:'FILE · '+(index+1)+'/'+sequence.length})]})]}),
+    s.jsxs('section',{id:'nexusTimeSpace',ref:root,className:'nx-pti-open nx-timespace-player'+(collapsed?' nx-pti-collapsed':''),'data-layout':collapsed?'compact':'full',role:'region','aria-label':'TimeSpace media player',onKeyDown:e=>{if(e.key==='Escape'){if(preview)setPreview(false);else onClose()}},children:[
+      s.jsxs('div',{className:'nx-pti-player-heading',children:[s.jsx('strong',{children:'NEXUS · TIMESPACE'}),s.jsx('span',{children:'CATANIA'+(context.year!=='all'?' · '+context.year:'')+(context.location!=='all'?' · '+(nxTimeSpaceLocations.find(p=>p.id===context.location)?.label||context.location):'')}),s.jsx('button',{className:'nx-pti-live',onClick:goLive,'aria-label':'Return to live tree','aria-pressed':playhead?.mode==='live',children:'LIVE'}),s.jsx('button',{className:'nx-pti-collapse',onClick:()=>setCollapsed(v=>!v),'aria-label':collapsed?'Expand TimeSpace':'Minimize TimeSpace','aria-expanded':!collapsed,'aria-controls':'nexusTimeSpace',title:collapsed?'Full controls':'Minimize player',children:s.jsx('svg',{width:20,height:20,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.5,'aria-hidden':true,children:s.jsx('path',{d:'M6 9l6 6 6-6'})})}),s.jsx('button',{className:'nx-pti-close',onClick:()=>{setPlaying(false);onClose()},'aria-label':'Close TimeSpace',children:'×'})]}),
+      s.jsxs('div',{className:'nx-pti-console',children:[s.jsxs('div',{className:'nx-pti-left',children:[s.jsxs('div',{className:'nx-pti-ticker','aria-live':'polite',children:[s.jsx('strong',{className:'nx-pti-date',children:moment.dateLabel}),s.jsx('strong',{className:'nx-pti-clock',children:moment.timeLabel}),s.jsx('small',{className:'nx-pti-time-basis',children:moment.basis})]}),s.jsx('div',{className:'nx-pti-transport',children:[['play',playing?'Ⅱ':'▶',playing?'Pause files':'Play files'],['first','|◀','First file'],['previous','◀','Previous file'],['next','▶','Next file'],['last','▶|','Last file'],['catalog','▤','Catalog and locations']].map(([cmd,icon,label])=>s.jsx('button',{className:'nx-pti-btn nx-led-'+(cmd==='play'?'green':'blue')+(cmd==='play'&&playing?' nx-active':''),'data-cmd':cmd,'data-icon':icon,'aria-label':label,disabled:!sequence.length||(cmd==='previous'||cmd==='first')&&index===0||(cmd==='next'||cmd==='last')&&index===sequence.length-1,onClick:()=>cmd==='catalog'?(setPlaying(false),setCatalog(true)):command(cmd)},cmd))}),s.jsx('div',{className:'nx-pti-mode',children:[['all','ALL FILES'],['added','ADDED TO NEXUS'],['source','SOURCE ARCHIVE']].map(([value,label])=>s.jsx('button',{'data-mode':value,'aria-pressed':stream===value,className:stream===value?'nx-active':'',onClick:()=>{setPlaying(false);setPlayhead(null);setStream(value)},children:label},value))})]}),s.jsxs('div',{className:'nx-pti-knob-zone',children:[s.jsx('button',{className:'nx-pti-knob nx-pti-file-knob','aria-label':preview?'Hide file preview':'Show file preview','aria-pressed':preview,disabled:!current,onClick:()=>setPreview(v=>!v),children:current?.kind==='PDF'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/pdf.webp',alt:'PDF'}):current?.kind==='Spreadsheet'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/xlsx.webp',alt:'Spreadsheet'}):s.jsx('span',{children:current?.kind==='Video'?'▶':'▤'})}),s.jsx('div',{className:'nx-pti-knob-label',children:'FILE · '+(index+1)+'/'+sequence.length})]})]}),
       s.jsx('div',{className:'nx-pti-phase','aria-label':'Document topic filter',children:topics.map(([label,value])=>s.jsx('button',{'data-topic':value,'aria-pressed':context.topic===value,className:context.topic===value?'nx-active':'',onClick:()=>{setPlaying(false);changeContext({...context,year:'all',location:'all',topic:value})},children:label},value))}),
       s.jsxs('div',{className:'nx-pti-meta',children:[s.jsx('span',{children:sequence[0]?nxFileMoment(sequence[0]).dateLabel:'—'}),s.jsx('span',{children:'FILE '+(current?index+1:0)+' OF '+sequence.length}),s.jsx('span',{children:sequence.length?nxFileMoment(sequence[sequence.length-1]).dateLabel:'—'})]}),
-      s.jsx('div',{className:'nx-pti-rail',children:s.jsx('input',{type:'range',min:0,max:Math.max(0,sequence.length-1),step:1,value:index,disabled:!sequence.length,'aria-label':'Chronological file position','aria-valuetext':current?(index+1)+' of '+sequence.length+': '+current.name:'No files',onChange:e=>{setPlaying(false);select(Number(e.target.value))}})}),
+      s.jsx('div',{className:'nx-pti-rail',children:s.jsx('input',{type:'range',min:0,max:Math.max(0,checkpoints.length-1),step:1,value:pointIndex,disabled:!checkpoints.length,'aria-label':'Chronological timeline position','aria-valuetext':current?(pointIndex+1)+' of '+checkpoints.length+': '+(selectedPoint?.kind==='deactivation'?'Deactivation: ':selectedPoint?.kind==='reactivation'?'Reactivation: ':selectedPoint?.kind==='connections'?'Connection change: ':'')+current.name:'No events',onChange:e=>seek(Number(e.target.value))})}),
       s.jsxs('div',{className:'nx-pti-status',children:[s.jsxs('div',{className:'nx-pti-stat',children:[s.jsx('b',{children:sequence.length}),' FILES']}),s.jsx('div',{className:'nx-pti-stat',children:current?.category||'NO TOPIC'}),s.jsx('button',{className:'nx-pti-stat',onClick:()=>picker.current?.click(),children:'+ ADD FILES'})]}),
       s.jsx('input',{ref:picker,type:'file',multiple:true,hidden:true,'aria-label':'Add files to Nexus',onChange:e=>{const list=Array.from(e.target.files||[]);e.target.value='';add(list)}}),
       s.jsxs('button',{className:'nx-pti-event',onClick:()=>setPreview(v=>!v),disabled:!current,children:[s.jsx('small',{children:preview?'CURRENT FILE · PREVIEW ON':'CURRENT FILE · PREVIEW OFF'}),s.jsx('strong',{children:current?.name||'No files in this selection'}),s.jsx('span',{children:current?.local?'Saved on this device · ordered automatically':current?'Source file · original addition time is unknown':'Choose All files or add a file'})]}),
       error&&s.jsx('p',{role:'alert',className:'nx-pti-error',children:error})]}),
-    catalog&&s.jsx(NexusTimeSpaceCatalog,{files,onClose:()=>setCatalog(false),onReveal:id=>{setCatalog(false);setCurrentId(id)},onOpenFiles})]}),document.body);
+    catalog&&s.jsx(NexusTimeSpaceCatalog,{files,onClose:()=>setCatalog(false),onReveal:id=>{setCatalog(false);setPlayhead(null);setCurrentId(id)},onOpenFiles})]}),document.body);
+}
+
+// Observed Nexus connections only. Before the first real snapshot, history is unknown.
+function nxGraphHistoryKey(world) {
+  if(typeof world!=='string'||!world||world.length>200)throw new TypeError('A project world is required');
+  return 'nosmo.graph-history:v1:'+world;
+}
+function nxGraphHistoryStamp(value) {
+  if(typeof value!=='string')return null;
+  const match=value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-]\d{2}:\d{2})$/i);
+  if(!match||Number(match[2])>23||Number(match[3])>59||Number(match[4]||0)>59)return null;
+  const day=Date.parse(match[1]+'T00:00:00Z'),time=Date.parse(value);
+  if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10)!==match[1]||!Number.isFinite(time))return null;
+  return new Date(time).toISOString();
+}
+function nxGraphHistoryGroups(groups) {
+  const result=[],used=new Set(),ids=new Set();
+  for(const group of Array.isArray(groups)?groups:[]) {
+    if(!group||typeof group.id!=='string'||!/^nx-group-[A-Za-z0-9_-]{1,180}$/.test(group.id)||ids.has(group.id))continue;
+    const members=[...new Set(Array.isArray(group.members)?group.members:[])].filter(id=>typeof id==='string'&&id.length>0&&id.length<=250&&id!=='proj'&&!id.startsWith('nx-group-')&&!used.has(id));
+    if(members.length<2)continue;
+    result.push({id:group.id,members});ids.add(group.id);members.forEach(id=>used.add(id));
+  }
+  return result;
+}
+function nxGraphHistorySignature(groups) {
+  return JSON.stringify(nxGraphHistoryGroups(groups).map(group=>({id:group.id,members:[...group.members].sort()})).sort((a,b)=>a.id.localeCompare(b.id)));
+}
+function nxGraphHistoryClean(raw) {
+  if(raw?.version!==1||!raw.baseline||!Array.isArray(raw.baseline.groups))return null;
+  const at=nxGraphHistoryStamp(raw.baseline.at);if(!at)return null;
+  const baseline={at,groups:nxGraphHistoryGroups(raw.baseline.groups)},events=[];
+  const sorted=(Array.isArray(raw.events)?raw.events:[]).map((event,index)=>({event,index,at:nxGraphHistoryStamp(event?.at)})).filter(entry=>entry.at&&entry.at>=at&&Array.isArray(entry.event?.groups)).sort((a,b)=>a.at.localeCompare(b.at)||a.index-b.index);
+  let signature=nxGraphHistorySignature(baseline.groups);
+  for(const entry of sorted) {
+    const groups=nxGraphHistoryGroups(entry.event.groups),next=nxGraphHistorySignature(groups);
+    if(next!==signature){events.push({at:entry.at,groups});signature=next}
+  }
+  return {version:1,baseline,events};
+}
+function nxGraphHistoryRead(world) {
+  const key=nxGraphHistoryKey(world);
+  try{return nxGraphHistoryClean(JSON.parse(localStorage.getItem(key)))}catch{return null}
+}
+function nxGraphHistoryWrite(world,history) {
+  // Commit first. Failed storage must never announce a successful recording.
+  localStorage.setItem(nxGraphHistoryKey(world),JSON.stringify(history));
+  if(typeof window!=='undefined'&&typeof window.dispatchEvent==='function') {
+    try{window.dispatchEvent(new CustomEvent('nexus:graph-history-updated',{detail:{world}}))}catch{}
+  }
+  return history;
+}
+function nxGraphHistoryEnsure(world,groups,nowISO=new Date().toISOString()) {
+  const existing=nxGraphHistoryRead(world);if(existing)return existing;
+  const at=nxGraphHistoryStamp(nowISO);if(!at)throw new TypeError('A real ISO connection timestamp is required');
+  return nxGraphHistoryWrite(world,{version:1,baseline:{at,groups:nxGraphHistoryGroups(groups)},events:[]});
+}
+function nxGraphHistoryRecord(world,groups,nowISO=new Date().toISOString()) {
+  const history=nxGraphHistoryRead(world);if(!history)return nxGraphHistoryEnsure(world,groups,nowISO);
+  const last=history.events[history.events.length-1]||history.baseline;
+  const clean=nxGraphHistoryGroups(groups);
+  if(nxGraphHistorySignature(clean)===nxGraphHistorySignature(last.groups))return history;
+  const at=nxGraphHistoryStamp(nowISO);if(!at)throw new TypeError('A real ISO connection timestamp is required');
+  if(at<last.at)throw new RangeError('Cannot record a connection change before the last observed state');
+  return nxGraphHistoryWrite(world,{version:1,baseline:history.baseline,events:[...history.events,{at,groups:clean}]});
+}
+function nxGraphHistoryAt(history,atMillis) {
+  const clean=nxGraphHistoryClean(history);
+  if(!clean||!Number.isFinite(atMillis)||atMillis<Date.parse(clean.baseline.at))return null;
+  let snapshot=clean.baseline;
+  for(const event of clean.events){if(Date.parse(event.at)>atMillis)break;snapshot=event}
+  return nxGraphHistoryGroups(snapshot.groups);
+}
+function nxGraphHistoryTimes(history) {
+  const clean=nxGraphHistoryClean(history);if(!clean)return [];
+  return [...new Set([clean.baseline.at,...clean.events.map(event=>event.at)])];
+}
+
+// Deactivation is a reversible visibility rule. It never deletes file metadata or bytes.
+function nxFileLifecycleKey(world) {
+  if(typeof world!=='string'||!world.trim())throw new Error('Choose a project before changing file availability.');
+  return 'nosmo.file-lifecycle:v1:'+world.trim();
+}
+function nxFileLifecycleTimestamp(value) {
+  if(typeof value!=='string')return null;
+  const match=value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-]\d{2}:\d{2})$/i);
+  if(!match||Number(match[2])>23||Number(match[3])>59||Number(match[4]||0)>59)return null;
+  const day=Date.parse(match[1]+'T00:00:00Z'),timestamp=Date.parse(value);
+  return Number.isFinite(day)&&new Date(day).toISOString().slice(0,10)===match[1]&&Number.isFinite(timestamp)?timestamp:null;
+}
+function nxFileLifecycleRules(raw) {
+  if(!raw||typeof raw!=='object'||Array.isArray(raw))return{};
+  const valid={};
+  for(const [id,rule] of Object.entries(raw))if(id&&nxFileLifecycleTimestamp(rule?.deactivateAt)!==null)Object.defineProperty(valid,id,{value:{deactivateAt:new Date(nxFileLifecycleTimestamp(rule.deactivateAt)).toISOString()},enumerable:true,writable:true,configurable:true});
+  return valid;
+}
+function nxFileLifecycleEvents(raw) {
+  return (Array.isArray(raw)?raw:[]).flatMap((event,index)=>{
+    const at=nxFileLifecycleTimestamp(event?.at),deadline=event?.deactivateAt===null?null:nxFileLifecycleTimestamp(event?.deactivateAt);
+    if(typeof event?.id!=='string'||!event.id||at===null||event.deactivateAt!==null&&deadline===null)return[];
+    return[{id:event.id,at:new Date(at).toISOString(),deactivateAt:deadline===null?null:new Date(deadline).toISOString(),index}];
+  }).sort((a,b)=>a.at.localeCompare(b.at)||a.index-b.index).map(({index,...event})=>event);
+}
+function nxFileLifecycleStored(world) {
+  const text=localStorage.getItem(nxFileLifecycleKey(world));let raw;
+  try{raw=JSON.parse(text||'{}')}catch{raw={}}
+  if(raw?.version===2)return {version:2,rules:nxFileLifecycleRules(raw.rules),events:nxFileLifecycleEvents(raw.events),legacyRules:nxFileLifecycleRules(raw.legacyRules)};
+  const rules=nxFileLifecycleRules(raw);
+  // Old rules have no observed edit time. Preserve that unknown baseline, never invent one.
+  return {version:2,rules,events:[],legacyRules:nxFileLifecycleRules(rules)};
+}
+function nxFileLifecycleRead(world) {return nxFileLifecycleStored(world).rules}
+function nxFileLifecycleHistory(world) {
+  const stored=nxFileLifecycleStored(world),events=stored.events;
+  // The array remains the documented events API; migration metadata is not a fabricated event.
+  Object.defineProperty(events,'legacyRules',{value:stored.legacyRules,enumerable:false});
+  return events;
+}
+function nxFileLifecycleSet(world,id,deactivateAt) {
+  const key=nxFileLifecycleKey(world);
+  if(typeof id!=='string'||!id||id.length>500)throw new Error('Choose a valid project file.');
+  const timestamp=deactivateAt===null?null:nxFileLifecycleTimestamp(deactivateAt);
+  if(deactivateAt!==null&&timestamp===null)throw new Error('Choose a valid date and time with a time zone.');
+  const stored=nxFileLifecycleStored(world),next=stored.rules,deadline=timestamp===null?null:new Date(timestamp).toISOString();
+  const previous=Object.prototype.hasOwnProperty.call(next,id)?next[id].deactivateAt:null;
+  if(previous===deadline)return next;
+  if(deadline===null)delete next[id];
+  else Object.defineProperty(next,id,{value:{deactivateAt:deadline},enumerable:true,writable:true,configurable:true});
+  const at=new Date().toISOString(),events=[...stored.events,{id,at,deactivateAt:deadline}];
+  localStorage.setItem(key,JSON.stringify({version:2,rules:next,events,...(Object.keys(stored.legacyRules).length?{legacyRules:stored.legacyRules}:{})}));
+  try{window.dispatchEvent(new CustomEvent('nexus:file-lifecycle-updated',{detail:{world,id,at,deactivateAt:deadline}}))}catch{}
+  return next;
+}
+function nxFileLifecycleApply(files,rules,now=Date.now(),history) {
+  const instant=Number(now),events=nxFileLifecycleEvents(Array.isArray(history)?history:history?.events),legacyRules=nxFileLifecycleRules(history?.legacyRules);
+  const byFile=new Map();
+  for(const event of events){if(!byFile.has(event.id))byFile.set(event.id,[]);byFile.get(event.id).push(event)}
+  return (Array.isArray(files)?files:[]).map(file=>{
+    const currentRule=rules&&Object.prototype.hasOwnProperty.call(rules,file.id)?rules[file.id]:null,current=nxFileLifecycleTimestamp(currentRule?.deactivateAt),fileEvents=byFile.get(file.id)||[];
+    let timestamp=current;
+    if(history!==undefined&&fileEvents.length){
+      const previous=fileEvents.filter(event=>nxFileLifecycleTimestamp(event.at)<=instant).at(-1);
+      timestamp=previous?nxFileLifecycleTimestamp(previous.deactivateAt):nxFileLifecycleTimestamp(legacyRules[file.id]?.deactivateAt);
+    }
+    return {...file,deactivateAt:timestamp===null?null:new Date(timestamp).toISOString(),currentDeactivateAt:current===null?null:new Date(current).toISOString(),archived:timestamp!==null&&Number.isFinite(instant)&&timestamp<=instant,lifecycleEvents:fileEvents.map(event=>({...event}))};
+  });
+}
+// Epoch milliseconds of the next future deadline, or null when there is none.
+function nxFileLifecycleNext(files,now=Date.now()) {
+  const instant=Number(now);let next=null;
+  for(const file of Array.isArray(files)?files:[]){const at=nxFileLifecycleTimestamp(file.deactivateAt);if(at!==null&&at>instant&&(next===null||at<next))next=at}
+  return next;
+}
+
+// Visual transitions only. The projection/history layer owns file and group state.
+function nxGraphMotionSnapshot(positions,visibleNodes,edges,byId) {
+  const point=value=>value&&Number.isFinite(value.x)&&Number.isFinite(value.y)?{x:value.x,y:value.y}:null;
+  const points=new Map(),nodes=new Map(),known=new Map(),links=new Map();
+  positions?.forEach?.((value,id)=>{const p=point(value);if(p)points.set(id,p)});
+  byId?.forEach?.((value,id)=>known.set(id,{...value,members:value.members?[...value.members]:undefined}));
+  for(const node of visibleNodes||[]){const p=points.get(node.id);if(p)nodes.set(node.id,{...node,...p,members:node.members?[...node.members]:undefined})}
+  for(const edge of edges||[]){const from=points.get(edge.source),to=points.get(edge.target);if(from&&to)links.set(edge.source+'|'+edge.target,{source:edge.source,target:edge.target,from,to})}
+  return {points,nodes,known,links};
+}
+function nxGraphMotionPlan(previous,next) {
+  if(!previous)return {moves:[],links:[]};
+  const moves=[],links=[];
+  const owner=(snapshot,id)=>[...snapshot.nodes.values()].find(node=>node.members?.includes(id));
+  const anchor=(snapshot,id,fallback)=>snapshot.points.get(id)||fallback||{x:0,y:0};
+  for(const [id,node] of previous.nodes){
+    if(id==='proj'||id==='nexus-archive')continue;
+    const current=next.nodes.get(id),from={x:node.x,y:node.y};
+    if(current){
+      const to={x:current.x,y:current.y};
+      if(Math.hypot(to.x-from.x,to.y-from.y)>.5)moves.push({id,node:current,from,to,kind:'move'});
+    }else{
+      const group=owner(next,id),archived=next.known.get(id)?.archived===true||!!node.members?.length&&node.members.every(member=>next.known.get(member)?.archived===true);
+      const target=archived?'nexus-archive':group?.id||'proj';
+      moves.push({id,node,from,to:anchor(next,target,anchor(previous,target)),toId:target,kind:'depart',reason:archived?'archive':group?'group':'time'});
+    }
+  }
+  for(const [id,node] of next.nodes){
+    if(previous.nodes.has(id)||id==='proj'||id==='nexus-archive')continue;
+    const group=owner(previous,id),archived=previous.known.get(id)?.archived===true;
+    const origin=archived?'nexus-archive':group?.id||'proj';
+    moves.push({id,node,from:anchor(previous,origin,anchor(next,origin)),fromId:origin,to:{x:node.x,y:node.y},kind:'arrive',reason:archived?'archive':group?'group':'time'});
+  }
+  // A closed group still visibly releases/reclaims the individual archived file.
+  for(const [id,node] of next.known){
+    const old=previous.known.get(id);if(!old||old.archived===node.archived)continue;
+    if(node.archived===true&&!previous.nodes.has(id)){
+      const group=owner(previous,id);if(group)moves.push({id,node,from:anchor(previous,group.id),to:anchor(next,'nexus-archive'),toId:'nexus-archive',kind:'depart',reason:'archive'});
+    }else if(old.archived===true&&!next.nodes.has(id)){
+      const group=owner(next,id);if(group)moves.push({id,node,from:anchor(previous,'nexus-archive'),fromId:'nexus-archive',to:anchor(next,group.id),kind:'arrive',reason:'archive'});
+    }
+  }
+  for(const [id,edge] of previous.links)if(!next.links.has(id))links.push({...edge,id,kind:'disconnect'});
+  for(const [id,edge] of next.links)if(!previous.links.has(id))links.push({...edge,id,kind:'connect'});
+  return {moves,links};
+}
+function nxGraphMotionSignature(snapshot) {
+  // Archive compensates for camera movement; it is an anchor, not a migration.
+  return [...snapshot.nodes.values()].map(n=>n.id+(n.id==='nexus-archive'?':anchor':':'+n.x+','+n.y)+':'+(n.members||[]).join(',')).join(';')+'|'+[...snapshot.links.keys()].join(';');
+}
+function nxGraphMotionResolve(batch,snapshot) {
+  const archive=snapshot.points.get('nexus-archive');if(!archive)return batch;
+  const link=edge=>({...edge,from:edge.source==='nexus-archive'?archive:edge.from,to:edge.target==='nexus-archive'?archive:edge.to});
+  return {...batch,moves:batch.moves.map(move=>({...move,from:move.fromId==='nexus-archive'?archive:move.from,to:move.toId==='nexus-archive'?archive:move.to})),links:batch.links.map(link),focus:batch.focus.map(link)};
+}
+function NexusGraphMotion({positions,visibleNodes,edges,byId,replayKey,dragging=false,activeId=null}) {
+  const snapshot=nxGraphMotionSnapshot(positions,visibleNodes,edges,byId);
+  const signature=nxGraphMotionSignature(snapshot);
+  const previous=b.useRef(null),serial=b.useRef(0),currentBatch=b.useRef(null),timer=b.useRef(null),[storedBatch,setBatch]=b.useState(null);
+  const publish=value=>{currentBatch.current=value;setBatch(value)};
+  const stop=()=>{if(timer.current!==null)window.clearTimeout(timer.current);timer.current=null;publish(null)};
+  const finish=()=>{if(timer.current===null)timer.current=window.setTimeout(()=>{timer.current=null;publish(null)},820)};
+  b.useLayoutEffect(()=>{
+    const before=previous.current;
+    const reduced=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(!before)return;
+    if(dragging||reduced){stop();return}
+    const plan=nxGraphMotionPlan(before,snapshot);
+    const focus=[...snapshot.links.values()].filter(edge=>edge.target===activeId||edge.source===activeId).map(edge=>({...edge,id:edge.source+'|'+edge.target,kind:'focus'}));
+    if(plan.moves.length||plan.links.length){
+      if(timer.current!==null)window.clearTimeout(timer.current);timer.current=null;
+      publish({...plan,focus,id:++serial.current});finish();
+    }else if(currentBatch.current){
+      // Selection cleanup and camera focus must not erase an in-flight migration.
+      publish({...currentBatch.current,focus});
+    }else if(focus.length){publish({...plan,focus,id:++serial.current});finish()}
+  },[signature,replayKey,dragging,activeId]);
+  // Refresh anchor positions even when only the camera changed, without a new batch.
+  b.useLayoutEffect(()=>{previous.current=snapshot});
+  b.useEffect(()=>()=>{if(timer.current!==null)window.clearTimeout(timer.current)},[]);
+  const batch=storedBatch?nxGraphMotionResolve(storedBatch,snapshot):null;
+  if(!batch)return null;
+  const route=(from,to)=>'M '+from.x+' '+from.y+' L '+to.x+' '+to.y;
+  const cssId=id=>String(id).replace(/[^a-zA-Z0-9_-]/g,char=>'\\'+char.codePointAt(0).toString(16)+' ');
+  const arriving=batch.moves.filter(move=>move.kind==='arrive').map(move=>'#root .nx-map-node[data-node-id="'+cssId(move.id)+'"]');
+  const routes=[...batch.moves.filter(move=>move.kind!=='move'||Math.hypot(move.to.x-move.from.x,move.to.y-move.from.y)>220).map(move=>({id:'move:'+move.id,from:move.from,to:move.to,kind:move.reason==='archive'?'archive':'migration'})),...batch.links,...batch.focus];
+  return s.jsxs('div',{className:'nx-graph-motion','aria-hidden':true,'data-motion-batch':batch.id,children:[
+    arriving.length?s.jsx('style',{children:arriving.join(',')+'{animation:nx-node-arrival 760ms linear both;pointer-events:none!important}'}):null,
+    s.jsx('svg',{className:'nx-motion-routes',width:1,height:1,children:routes.map((item,index)=>s.jsx('path',{d:route(item.from,item.to),pathLength:1,className:'nx-motion-route nx-motion-'+item.kind,'data-motion-route':item.id},batch.id+':'+item.id+':'+index))}),
+    ...batch.moves.filter(move=>move.kind!=='move').map(move=>s.jsx('div',{className:'nx-motion-ghost nx-motion-'+move.kind,'data-motion-node':move.id,'data-motion-destination':move.reason||'time',style:{'--nx-from-x':move.from.x+'px','--nx-from-y':move.from.y+'px','--nx-to-x':move.to.x+'px','--nx-to-y':move.to.y+'px'},children:s.jsxs('div',{className:'nx-motion-tile',children:[s.jsx('span',{className:'nx-motion-icon',children:move.node.kind==='PDF'||/\.pdf$/i.test(move.node.name||move.node.label||'')?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/pdf.webp',alt:''}):move.node.kind==='Spreadsheet'?s.jsx('img',{src:'/apps/nexus-graph-preview/assets/file-icons/xlsx.webp',alt:''}):move.node.Icon?s.jsx(move.node.Icon,{className:'h-8 w-8'}):s.jsx('span',{children:move.node.kind==='Video'?'▶':'▤'})}),s.jsx('strong',{children:move.node.label||move.node.name||'File'})]})},batch.id+':'+move.id))
+  ]});
 }
 
 // Maintained source for the existing AU graph component in the deployed legacy bundle.
 // Rebuild with scripts/build-tile-groups.py; uses the bundle's React and icon imports.
+function NxArchiveTileIcon({className}={}) {
+  return s.jsxs('svg',{viewBox:'0 0 24 24',width:24,height:24,fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round',className,'aria-hidden':true,children:[s.jsx('rect',{x:2,y:3,width:20,height:5,rx:1.5}),s.jsx('path',{d:'M4 8v12h16V8M12 11v6m-3-3 3 3 3-3'})]});
+}
 function AU(){
   const world=window.__NEXUS_PROJECT_WORLD__||'dev';
   const key='nosmo-tile-groups:v2:'+world;
   const esafe={proj:['e-SAFE Catania Real Pilot','project'],'p-mateusz':['Structural / Seismic','task'],'p-sitemgr':['MEP / Energy','task'],'p-architect':['Electrical / Controls','task'],'p-client':['BIM / Digital','task'],'p-team':['Fabrication / Installation','task'],'d-groundfloor':['Survey / QA','task'],'d-doorschedule':['Project / General','task'],'d-snaglist':['D5.1 Detailed survey','document'],'d-firecerts':['D2.2 3D models','document'],'t-install':['D5.5 Monitoring','document'],'t-snag':['D5.4 Production delivery','document'],'t-fire':['D5.3 Detailed design','document'],'t-walkthrough':['Pilot Actions','task']};
   const sourceCatalog=b.useMemo(()=>world==='esafe-demo'?nxEsafeCatalog(window.ESAFE_RECORDS||[]):[],[world]);
   const [deviceFiles,setDeviceFiles]=b.useState([]),[fileError,setFileError]=b.useState('');
-  const catalog=b.useMemo(()=>[...sourceCatalog,...deviceFiles],[sourceCatalog,deviceFiles]);
-  const objects=b.useMemo(()=>world==='esafe-demo'?[...ns.filter(o=>esafe[o.id]&&esafe[o.id][1]!=='document').map(o=>({...o,label:esafe[o.id][0],type:esafe[o.id][1]})),...catalog.map(file=>({...file,label:file.name,type:'document',Icon:ns.find(o=>o.type==='document')?.Icon||Dt}))]:ns,[world,catalog]);
-  const [library,setLibrary]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('files')==='all'),[libraryFile,setLibraryFile]=b.useState(null),[fileFocus,setFileFocus]=b.useState(()=>new URLSearchParams(window.location.search).get('file'));
+  const [lifeRules,setLifeRules]=b.useState(()=>{try{return nxFileLifecycleRead(world)}catch{return{}}}),[lifeNow,setLifeNow]=b.useState(()=>Date.now());
+  const [graphClock,setGraphClock]=b.useState({mode:'live',at:null}),[graphHistory,setGraphHistory]=b.useState(()=>{try{return typeof nxGraphHistoryRead==='function'?nxGraphHistoryRead(world):null}catch{return null}});
+  const rawCatalog=b.useMemo(()=>[...sourceCatalog,...deviceFiles],[sourceCatalog,deviceFiles]);
+  const [library,setLibrary]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('files')==='all'),[libraryFile,setLibraryFile]=b.useState(null),[libraryScope,setLibraryScope]=b.useState('active'),[libraryAt,setLibraryAt]=b.useState(null),[fileFocus,setFileFocus]=b.useState(()=>new URLSearchParams(window.location.search).get('file'));
   const [timeSpace,setTimeSpace]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('view')==='timespace'),[timeFilter,setTimeFilter]=b.useState(null);
+  const replay=world==='esafe-demo'&&timeSpace&&graphClock.mode==='replay'&&Number.isFinite(graphClock.at);
+  const viewAt=library&&Number.isFinite(libraryAt)?libraryAt:replay?graphClock.at:lifeNow;
+  const catalog=b.useMemo(()=>{let lifecycleHistory;try{if(typeof nxFileLifecycleHistory==='function')lifecycleHistory=nxFileLifecycleHistory(world)}catch{}return nxFileLifecycleApply(rawCatalog,lifeRules,viewAt,lifecycleHistory)},[rawCatalog,lifeRules,viewAt]);
+  const available=file=>{const at=nxFileMoment(file).timestamp;return at===null||at<=viewAt};
+  const activeCatalog=catalog.filter(file=>!file.archived&&available(file)),archivedCatalog=catalog.filter(file=>file.archived&&available(file));
+  const objects=b.useMemo(()=>world==='esafe-demo'?[...ns.filter(o=>esafe[o.id]&&esafe[o.id][1]!=='document').map(o=>({...o,label:esafe[o.id][0],type:esafe[o.id][1]})),...catalog.map(file=>({...file,label:file.name,type:'document',Icon:ns.find(o=>o.type==='document')?.Icon||Dt}))]:ns,[world,catalog]);
   const ids=b.useMemo(()=>objects.map(o=>o.id),[objects]);
   const [state,setState]=b.useState(()=>{try{const raw=JSON.parse(localStorage.getItem(key));const pendingLocal=(raw?.groups||[]).flatMap(g=>Array.isArray(g.members)?g.members.filter(id=>typeof id==='string'&&id.startsWith('local-')):[]);return nxCleanWorkspace(raw,[...ids,...pendingLocal])}catch{return nxCleanWorkspace(null,ids)}});
   const [open,setOpen]=b.useState(()=>state.groups.find(group=>group.members.includes(fileFocus))?.id||null),[selected,setSelected]=b.useState(fileFocus||'proj');
@@ -533,27 +866,51 @@ function AU(){
   const [notice,setNotice]=b.useState('Drag one tile onto another to create a node'),[undo,setUndo]=b.useState(null),[mode,setMode]=b.useState('map');
   const root=b.useRef(null),current=b.useRef(state),gesture=b.useRef(null),touches=b.useRef(new Map()),frame=b.useRef(null),pending=b.useRef(null),suppress=b.useRef(0);
   current.current=state;
-  const groupNodes=state.groups.map((g,index)=>({id:g.id,type:'task',label:'Node '+(index+1),Icon:Dt,members:g.members}));
-  const all=[...objects,...groupNodes],byId=new Map(all.map(o=>[o.id,o]));
-  const members=new Set(state.groups.flatMap(g=>g.members));
-  const opened=state.groups.find(g=>g.id===open);
-  const graphObjects=objects;
+  const replayRef=b.useRef(replay);replayRef.current=replay;
+  const historicalGroups=replay?(typeof nxGraphHistoryAt==='function'?nxGraphHistoryAt(graphHistory,viewAt):null):state.groups;
+  const historyUnknown=replay&&historicalGroups===null&&!!graphHistory?.baseline?.groups?.length;
+  const displayedGroups=replay?(historicalGroups||[]):state.groups;
+  const activeIds=new Set(objects.filter(o=>world!=='esafe-demo'||o.type!=='document'||activeCatalog.some(file=>file.id===o.id)).map(o=>o.id));
+  const effectiveGroups=displayedGroups.map(group=>({...group,members:group.members.filter(id=>activeIds.has(id))})).filter(group=>group.members.length);
+  const replayFocusOwner=effectiveGroups.find(group=>group.members.includes(fileFocus))?.id||null;
+  b.useEffect(()=>{if(replay)setOpen(replayFocusOwner)},[replay,fileFocus,replayFocusOwner]);
+  const groupNodes=effectiveGroups.map(group=>({id:group.id,type:'task',label:'Node '+(displayedGroups.findIndex(g=>g.id===group.id)+1),Icon:Dt,members:group.members}));
+  const archiveNode=world==='esafe-demo'?{id:'nexus-archive',type:'task',label:'Archive',Icon:NxArchiveTileIcon,archive:true,count:archivedCatalog.length}:null;
+  const graphObjects=[...objects.filter(o=>activeIds.has(o.id)),...(archiveNode?[archiveNode]:[])];
+  const all=[...graphObjects,...groupNodes],byId=new Map([...objects,...groupNodes,...(archiveNode?[archiveNode]:[])].map(o=>[o.id,o]));
+  const members=new Set(effectiveGroups.flatMap(group=>group.members));
+  const opened=effectiveGroups.find(group=>group.id===open);
   const visible=all.filter(o=>!members.has(o.id)||opened?.members.includes(o.id));
-  const edges=nxGroupEdges(graphObjects,state.groups,open);
-  const positions=EU([...graphObjects.filter(o=>o.type!=='document'),...groupNodes].filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
-  const chronologicalFiles=nxTimeSpaceSequence(catalog).filter(o=>!members.has(o.id));
+  const edges=nxGroupEdges(graphObjects,effectiveGroups,open);
+  const activeEdges=replay?edges.filter(edge=>edge.source===selected||edge.target===selected):[];
+  const connectedActive=new Set([selected,...activeEdges.flatMap(edge=>[edge.source,edge.target])]);
+  const positions=EU([...graphObjects.filter(o=>world!=='esafe-demo'||o.type!=='document'),...groupNodes].filter(o=>!members.has(o.id)),'proj',edges,state.pinned,false,drag);
+  const chronologicalFiles=nxTimeSpaceSequence(activeCatalog).filter(file=>!members.has(file.id));
   chronologicalFiles.forEach((file,index)=>positions.set(file.id,{x:400,y:-240+index*165}));
+  if(archiveNode){const screenX=Math.min(68,Math.max(44,size.w-44)),screenY=Math.min(170,Math.max(90,size.h-110));positions.set(archiveNode.id,{x:(screenX-size.w/2-pan.x)/zoom,y:(screenY-size.h/2-pan.y)/zoom})}
   if(opened){const center=positions.get(opened.id)||{x:0,y:0};nxPlaceMembers(center,opened.members,positions).forEach((point,id)=>positions.set(id,point))}
   if(drag&&state.pinned[drag])positions.set(drag,state.pinned[drag]);
+  const catalogRef=b.useRef(catalog);catalogRef.current=catalog;
+  b.useEffect(()=>{
+    if(world!=='esafe-demo')return;
+    const refresh=()=>{try{setLifeRules(nxFileLifecycleRead(world));if(typeof nxGraphHistoryRead==='function')setGraphHistory(nxGraphHistoryRead(world));setLifeNow(Date.now())}catch(error){setFileError('Could not read file availability: '+error.message)}};
+    const changed=event=>{if(event.detail?.world===world)refresh()},storage=event=>{if(event.key===null||event.key===nxFileLifecycleKey(world)||event.key==='nosmo.graph-history:v1:'+world)refresh()},visibleAgain=()=>{if(!document.hidden)refresh()};
+    window.addEventListener('nexus:file-lifecycle-updated',changed);window.addEventListener('nexus:graph-history-updated',changed);window.addEventListener('focus',refresh);window.addEventListener('storage',storage);document.addEventListener('visibilitychange',visibleAgain);
+    try{if(typeof nxGraphHistoryEnsure==='function')setGraphHistory(nxGraphHistoryEnsure(world,current.current.groups,new Date().toISOString()))}catch(error){setFileError('Connections saved, but history is unavailable: '+error.message)}
+    refresh();
+    return()=>{window.removeEventListener('nexus:file-lifecycle-updated',changed);window.removeEventListener('nexus:graph-history-updated',changed);window.removeEventListener('focus',refresh);window.removeEventListener('storage',storage);document.removeEventListener('visibilitychange',visibleAgain)};
+  },[world]);
+  b.useEffect(()=>{if(world!=='esafe-demo'||replay)return;const next=nxFileLifecycleNext(catalog,lifeNow);if(next===null)return;const timer=setTimeout(()=>setLifeNow(Date.now()),Math.min(2147483647,Math.max(0,next-Date.now()+1)));return()=>clearTimeout(timer)},[world,lifeRules,rawCatalog,lifeNow,replay]);
+  b.useEffect(()=>{if(!catalog.some(file=>file.id===fileFocus&&file.archived))return;setFileFocus(null);setSelected('nexus-archive');const url=new URL(window.location.href);if(url.searchParams.get('file')===fileFocus){url.searchParams.delete('file');window.history.replaceState(null,'',url)}},[catalog,fileFocus]);
   b.useLayoutEffect(()=>{const el=root.current;if(!el)return;const resize=()=>setSize({w:el.clientWidth,h:el.clientHeight});resize();const obs=new ResizeObserver(resize);obs.observe(el);return()=>obs.disconnect()},[mode]);
-  b.useEffect(()=>{if(world!=='esafe-demo')return;let live=true;const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('nosmo-project-files'):null;
-    const refresh=()=>{if(!window.indexedDB)return;nxLocalFilesList(world).then(list=>{if(live){setDeviceFiles(list);setFileError('')}}).catch(e=>live&&setFileError(e.message))};
+  b.useLayoutEffect(()=>{if(world!=='esafe-demo')return;let live=true;const channel=typeof BroadcastChannel==='function'?new BroadcastChannel('nosmo-project-files'):null;
+    const refresh=()=>{if(!window.indexedDB)return;nxLocalFilesList(world).then(list=>{if(live){setDeviceFiles(list);setLifeNow(Date.now());setFileError('')}}).catch(e=>live&&setFileError(e.message))};
     const updated=e=>{if(e.detail?.world!==world)return;refresh();channel?.postMessage({world})};if(channel)channel.onmessage=e=>{if(e.data?.world===world)refresh()};
     const legacyChange=e=>{if(e.target.id!=='nexusFileInput')return;e.stopImmediatePropagation();const list=Array.from(e.target.files||[]);e.target.value='';if(list.length)addFiles(list).then(()=>openTimeSpace()).catch(e=>setFileError(e.message))};
     const pickerClick=e=>{if(!e.target.closest('[data-nexus-action="file-loader"],[data-nexus-file-action="upload"]'))return;e.preventDefault();e.stopImmediatePropagation();document.querySelectorAll('.nexus-shell-panel.open').forEach(n=>n.classList.remove('open'));document.getElementById('nexusShellScrim')?.classList.remove('open');document.getElementById('nexusFileInput')?.click()};
     const drop=e=>{if(!e.dataTransfer?.files?.length)return;e.preventDefault();e.stopImmediatePropagation();addFiles(Array.from(e.dataTransfer.files)).then(()=>openTimeSpace()).catch(e=>setFileError(e.message))};
     const over=e=>{if(Array.from(e.dataTransfer?.types||[]).includes('Files'))e.preventDefault()};
-    const currentFile=e=>{if(e.detail?.world!==world)return;setFileFocus(e.detail.fileId);setSelected(e.detail.fileId);const url=new URL(window.location.href);url.searchParams.set('file',e.detail.fileId);window.history.replaceState(null,'',url);setOpen(current.current.groups.find(g=>g.members.includes(e.detail.fileId))?.id||null)};
+    const currentFile=e=>{if(e.detail?.world!==world)return;setGraphClock({mode:e.detail.mode==='replay'?'replay':'live',at:Number.isFinite(e.detail.at)?e.detail.at:null});if(e.detail.mode!=='replay')setLifeNow(Date.now());if(typeof e.detail.fileId!=='string')return;setFileFocus(e.detail.fileId);setSelected(e.detail.fileId);const url=new URL(window.location.href);url.searchParams.set('file',e.detail.fileId);window.history.replaceState(null,'',url);setOpen(current.current.groups.find(g=>g.members.includes(e.detail.fileId))?.id||null)};
     window.addEventListener('nexus:local-files-updated',updated);window.addEventListener('focus',refresh);window.addEventListener('nexus:timespace-current-file',currentFile);document.addEventListener('change',legacyChange,true);document.addEventListener('click',pickerClick,true);document.addEventListener('drop',drop,true);document.addEventListener('dragover',over,true);refresh();
     return()=>{live=false;channel?.close();window.removeEventListener('nexus:local-files-updated',updated);window.removeEventListener('focus',refresh);window.removeEventListener('nexus:timespace-current-file',currentFile);document.removeEventListener('change',legacyChange,true);document.removeEventListener('click',pickerClick,true);document.removeEventListener('drop',drop,true);document.removeEventListener('dragover',over,true)}
   },[world]);
@@ -563,32 +920,35 @@ function AU(){
   b.useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[]);
   b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:groups-change'))},[state.groups,open]);
   const persist=(next,previous=null,message='Saved on this device')=>{
+    if(replayRef.current){setNotice('Choose Live to edit connections.');return false}
     try{localStorage.setItem(key,JSON.stringify(next))}catch{setNotice('Could not save. Change cancelled — device storage unavailable.');return false}
-    if(previous)setUndo(previous);current.current=next;setState(next);setNotice(message);return true;
+    if(previous)setUndo(previous);current.current=next;setState(next);setNotice(message);try{if(typeof nxGraphHistoryRecord==='function')setGraphHistory(nxGraphHistoryRecord(world,next.groups,new Date().toISOString()))}catch(error){setNotice(message+' · Connection history could not be saved: '+error.message)}return true;
   };
   const fit=()=>{const pts=[...positions.values()];if(!pts.length)return;const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);const left=Math.min(...xs)-100,right=Math.max(...xs)+100,top=Math.min(...ys)-130,bottom=Math.max(...ys)+130;const z=Math.min(.95,Math.max(.3,Math.min(size.w/(right-left),(size.h-100)/(bottom-top))));setZoom(z);setPan({x:-(left+right)/2*z,y:-(top+bottom)/2*z})};
-  const addFiles=async list=>{const added=await nxLocalFilesAdd(world,list);setDeviceFiles(await nxLocalFilesList(world));if(added.length){setFileFocus(added[added.length-1].id);setNotice(added.length+' file(s) added and ordered automatically')}return added};
+  const addFiles=async list=>{const added=await nxLocalFilesAdd(world,list);setDeviceFiles(await nxLocalFilesList(world));setLifeNow(Date.now());if(added.length){setFileFocus(added[added.length-1].id);setNotice(added.length+' file(s) added and ordered automatically')}return added};
   const removeFile=async id=>{await nxLocalFilesTrash(world,[id]);setDeviceFiles(await nxLocalFilesList(world))};
   const restoreFile=async id=>{await nxLocalFilesRestore(world,[id]);setDeviceFiles(await nxLocalFilesList(world))};
-  const openLibrary=(id=null)=>{setTimeSpace(false);setLibraryFile(id);setLibrary(true);const url=new URL(window.location.href);url.searchParams.delete('view');url.searchParams.set('files','all');window.history.replaceState(null,'',url)};
-  const closeLibrary=()=>{setLibrary(false);const url=new URL(window.location.href);url.searchParams.delete('files');window.history.replaceState(null,'',url)};
+  const openLibrary=(id=null,scope='active',asOf=null)=>{setLibraryAt(asOf);setGraphClock({mode:'live',at:null});setLifeNow(Date.now());setTimeSpace(false);setLibraryScope(scope);setLibraryFile(id);setLibrary(true);const url=new URL(window.location.href);url.searchParams.delete('view');url.searchParams.set('files','all');window.history.replaceState(null,'',url)};
+  const closeLibrary=()=>{setLibrary(false);setLibraryAt(null);setLifeNow(Date.now());const url=new URL(window.location.href);url.searchParams.delete('files');window.history.replaceState(null,'',url)};
   const openTimeSpace=()=>{setLibrary(false);setTimeSpace(true);const url=new URL(window.location.href);url.searchParams.delete('files');url.searchParams.set('view','timespace');window.history.replaceState(null,'',url)};
-  const closeTimeSpace=()=>{setTimeSpace(false);const url=new URL(window.location.href);url.searchParams.delete('view');window.history.replaceState(null,'',url)};
-  const revealFile=id=>{setFileFocus(id);setSelected(id);setOpen(state.groups.find(g=>g.members.includes(id))?.id||null);setTimeSpace(false);closeLibrary();const point=positions.get(id);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom});const url=new URL(window.location.href);url.searchParams.set('file',id);url.searchParams.delete('view');window.history.replaceState(null,'',url);setNotice('File shown in tree · drag it onto another tile to connect')};
-  const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj'){setOpen(null);if(world==='esafe-demo')openLibrary()}else if(o.fileUrl||o.local)openLibrary(o.id)};
+  const closeTimeSpace=()=>{setGraphClock({mode:'live',at:null});setLifeNow(Date.now());setTimeSpace(false);const url=new URL(window.location.href);url.searchParams.delete('view');window.history.replaceState(null,'',url)};
+  const setDeactivation=async(id,iso)=>{const next=nxFileLifecycleSet(world,id,iso);setLifeRules(next);setLifeNow(Date.now());if(iso===null){setFileFocus(id);setSelected(id)}return next};
+  const revealFile=id=>{if(catalogRef.current.find(file=>file.id===id)?.archived){openLibrary(id,'archived');return}setFileFocus(id);setSelected(id);setOpen(state.groups.find(g=>g.members.includes(id))?.id||null);setTimeSpace(false);closeLibrary();const point=positions.get(id);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom});const url=new URL(window.location.href);url.searchParams.set('file',id);url.searchParams.delete('view');window.history.replaceState(null,'',url);setNotice('File shown in tree · drag it onto another tile to connect')};
+  const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.archive){openLibrary(null,'archived',replay?viewAt:null);return}if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj'){setOpen(null);if(world==='esafe-demo')openLibrary()}else if(o.fileUrl||o.local)openLibrary(o.id)};
   const startPinch=()=>{const [a,c]=[...touches.current.values()];if(!a||!c)return;const r=root.current.getBoundingClientRect(),mid={x:(a.x+c.x)/2-r.left,y:(a.y+c.y)/2-r.top};const previous=gesture.current?.before;if(previous){current.current=previous;setState(previous)}gesture.current={mode:'pinch',distance:Math.max(1,Math.hypot(a.x-c.x,a.y-c.y)),zoom,world:{x:(mid.x-size.w/2-pan.x)/zoom,y:(mid.y-size.h/2-pan.y)/zoom}};setDrag(null);setHover(null)};
   const down=e=>{
-    if(e.target.closest('[data-control]')||e.button>0)return;
+    if(e.target.closest('[data-control]')||e.button>0||e.target.closest('[data-node-id="nexus-archive"]'))return;
     if(e.pointerType==='touch')touches.current.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(touches.current.size>1){startPinch();try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}return}
     const id=e.target.closest('[data-node-id]')?.dataset.nodeId;
+    if(id==='nexus-archive')return;
     const face=id?e.target.closest('[data-node-id]')?.querySelector('[data-tile-face]')?.getBoundingClientRect():null;
-    gesture.current={offset:face?{x:e.clientX-face.left-face.width/2,y:e.clientY-face.top-face.height/2}:{x:0,y:0},mode:id&&id!=='proj'?'node':'pan',id,pointer:e.pointerId,x:e.clientX,y:e.clientY,point:positions.get(id),zoom,pan,before:current.current,moved:false,target:null};
+    gesture.current={offset:face?{x:e.clientX-face.left-face.width/2,y:e.clientY-face.top-face.height/2}:{x:0,y:0},mode:id&&id!=='proj'&&!replay?'node':'pan',id,pointer:e.pointerId,x:e.clientX,y:e.clientY,point:positions.get(id),zoom,pan,before:current.current,moved:false,target:null};
   };
   const targetAt=(e,id,offset)=>{
     // Hit-test the visible icon, not its transparent translated wrapper or label.
     let best=null,distance=Infinity;
-    root.current.querySelectorAll('[data-node-id]').forEach(el=>{const target=el.dataset.nodeId;if(target===id||target==='proj'||getComputedStyle(el).display==='none')return;
+    root.current.querySelectorAll('[data-node-id]').forEach(el=>{const target=el.dataset.nodeId;if(target===id||target==='proj'||target==='nexus-archive'||getComputedStyle(el).display==='none')return;
       if(state.groups.find(g=>g.id===target)?.members.includes(id))return;
       const tile=el.querySelector('[data-tile-face]'),r=tile?.getBoundingClientRect();if(!r)return;
       const dx=e.clientX-offset.x-(r.left+r.width/2),dy=e.clientY-offset.y-(r.top+r.height/2);
@@ -622,20 +982,21 @@ function AU(){
     }}
     gesture.current=null;setDrag(null);setHover(null);try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{}
   };
-  const ungroup=()=>{if(!opened)return;const points=Object.fromEntries(opened.members.map(id=>[id,positions.get(id)]));if(persist(nxUngroup(state,opened.id,points,ids),state,'Node separated · tiles remain in project'))setOpen(null)};
-  const reset=()=>{if(persist(nxCleanWorkspace(null,ids),state,'Demo reset · each tile connected only to project')){setOpen(null);setSelected('proj');setPan({x:0,y:0})}};
+  const ungroup=()=>{if(replay||!opened)return;const points=Object.fromEntries(opened.members.map(id=>[id,positions.get(id)]));if(persist(nxUngroup(state,opened.id,points,ids),state,'Node separated · tiles remain in project'))setOpen(null)};
+  const reset=()=>{if(replay)return;if(persist(nxCleanWorkspace(null,ids),state,'Demo reset · each tile connected only to project')){setOpen(null);setSelected('proj');setPan({x:0,y:0})}};
   if(mode==='workflow')return s.jsxs('div',{className:'relative h-[100dvh] overflow-hidden',children:[s.jsx('button',{'data-control':true,className:'nx-back-map',onClick:()=>setMode('map'),children:'Back to map'}),s.jsx(CU,{})]});
-  return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,style:{'--nx-zoom':zoom},onDragStart:e=>e.preventDefault(),className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
+  return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,'data-replay':replay?'true':undefined,'data-graph-gesture':gesture.current?.moved?'true':undefined,style:{'--nx-zoom':zoom},onDragStart:e=>e.preventDefault(),className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
     timeSpace&&world==='esafe-demo'&&s.jsx(NexusTimeSpace,{files:catalog,onClose:closeTimeSpace,onReveal:revealFile,onOpenFiles:()=>openLibrary(),onAddFiles:addFiles,initialFile:fileFocus,world}),
-    library&&world==='esafe-demo'&&s.jsx(NexusProjectFiles,{files:catalog,initialFile:libraryFile,onClose:closeLibrary,onReveal:revealFile,onAddFiles:addFiles,onRemoveFile:removeFile,onRestoreFile:restoreFile},libraryFile||'all'),
+    library&&world==='esafe-demo'&&s.jsx(NexusProjectFiles,{files:libraryAt!==null?catalog.filter(available):catalog,initialFile:libraryFile,onClose:closeLibrary,onReveal:revealFile,onAddFiles:libraryAt===null?addFiles:undefined,onRemoveFile:libraryAt===null?removeFile:undefined,onRestoreFile:libraryAt===null?restoreFile:undefined,initialStatus:libraryScope,asOf:libraryAt,onSetDeactivation:libraryAt===null?setDeactivation:undefined},(libraryFile||'all')+'|'+libraryScope),
     s.jsxs('div',{'data-control':true,className:'nx-project-access',children:[s.jsx('button',{'aria-label':'Switch project',onClick:()=>document.getElementById('nexusTopProject')?.click(),children:world==='esafe-demo'?'e-SAFE Catania ▾':'Riverside ▾'}),world==='esafe-demo'&&s.jsx('button',{'data-catania-file-count':catalog.length,onClick:()=>openLibrary(),children:catalog.length+' project files'}),world==='esafe-demo'&&s.jsx('button',{onClick:openTimeSpace,children:'TimeSpace'})]}),
-    s.jsxs('div',{'data-control':true,className:'nx-map-toolbar',children:[s.jsx('button',{onClick:fit,children:'Fit map'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z*1.15)),children:'+'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z/1.15)),children:'−'}),s.jsx('button',{onClick:reset,children:'Reset demo'}),s.jsx('button',{onClick:()=>setMode('workflow'),children:'Workflow'}),s.jsx('span',{children:objects.length+' objects · '+edges.length+' links'})]}),
-    s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:fileError|| (hover?'Release to create a shared node':notice)}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),s.jsx('button',{onClick:reset,'aria-label':'Reset demo',title:'Reset demo (undoable)',children:'↺'}),undo&&s.jsx('button',{onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{onClick:ungroup,children:'Ungroup'})]}),
-    s.jsxs('div',{className:'absolute left-0 top-0 h-0 w-0 origin-top-left',style:{transform:`translate(${size.w/2+pan.x}px,${size.h/2+pan.y}px) scale(${zoom})`},children:[
-      s.jsx('svg',{className:'pointer-events-none absolute left-0 top-0 overflow-visible',children:edges.map(edge=>{const a=positions.get(edge.source),c=positions.get(edge.target);return a&&c?s.jsx('line',{'data-connection-id':edge.source+'|'+edge.target,x1:a.x,y1:a.y,x2:c.x,y2:c.y,stroke:'currentColor',className:'text-primary',strokeWidth:edge.source==='proj'?1:2,opacity:edge.source==='proj'?.22:.65},edge.source+'|'+edge.target):null})}),
-      ...visible.map(o=>{const point=positions.get(o.id)||{x:0,y:0},target=hover===o.id,active=selected===o.id,theme=gc[o.type]||gc.task;return s.jsx('div',{'data-node':true,'data-node-id':o.id,'data-group-members':o.members?.join(','),'data-timespace-match':timeFilter?.active?String(o.type!=='document'&&!o.members||timeFilter.fileIds.includes(o.id)||o.members?.some(id=>timeFilter.fileIds.includes(id))):undefined,'data-drop-target':target?'true':undefined,className:'absolute left-0 top-0 nx-map-node',style:{transform:`translate(${point.x}px,${point.y}px)`,zIndex:drag===o.id?40:target?30:20},children:s.jsxs('button',{type:'button',onClick:()=>click(o),'aria-label':o.members?o.label+', '+o.members.length+' items. '+(open===o.id?'Collapse':'Expand'):o.type+': '+o.label,'aria-expanded':o.members?open===o.id:undefined,className:'group flex w-[138px] -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center gap-2 rounded-2xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-primary',children:[
-        s.jsxs('span',{'data-tile-face':true,className:`nx-tile-face relative flex items-center justify-center rounded-2xl border-2 bg-card ${theme.centerBorder} ${o.members?'nx-group-face':''} ${active?'nx-tile-selected':''}`,children:[o.members?s.jsx('span',{className:'nx-group-mosaic',children:o.members.slice(0,4).map(id=>{const member=byId.get(id);return s.jsx('span',{className:(gc[member?.type]||gc.task).chip,children:s.jsx(member?.Icon||Dt,{className:'h-5 w-5'})},id)})}):s.jsx('span',{className:`flex h-10 w-10 items-center justify-center rounded-xl ${theme.chip}`,children:s.jsx(o.Icon,{className:'h-5 w-5'})}),o.members&&s.jsx('span',{className:'nx-group-count',children:o.members.length})]}),
-        s.jsx('span',{className:'line-clamp-2 max-w-[138px] text-center text-[11px] font-semibold leading-tight',children:o.label}),s.jsx('span',{className:'rounded-full border border-border bg-background/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] text-muted-foreground',children:o.members?'NODE · '+(open===o.id?'CLOSE':'OPEN'):o.type})]})},o.id)})]})]});
+    s.jsxs('div',{'data-control':true,className:'nx-map-toolbar',children:[s.jsx('button',{onClick:fit,children:'Fit map'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z*1.15)),children:'+'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z/1.15)),children:'−'}),s.jsx('button',{onClick:reset,disabled:replay,children:'Reset demo'}),s.jsx('button',{onClick:()=>setMode('workflow'),children:'Workflow'}),s.jsx('span',{children:objects.length+' objects · '+edges.length+' links'})]}),
+    s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:fileError|| (historyUnknown?'Connection history is unknown before this snapshot · source chronology only':replay?'TimeSpace replay · choose LIVE to edit connections':hover?'Release to create a shared node':notice)}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),s.jsx('button',{onClick:reset,disabled:replay,'aria-label':'Reset demo',title:'Reset demo (undoable)',children:'↺'}),undo&&s.jsx('button',{disabled:replay,onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{disabled:replay,onClick:ungroup,children:'Ungroup'})]}),
+    s.jsxs('div',{className:'nx-graph-world absolute left-0 top-0 h-0 w-0 origin-top-left','data-graph-camera':true,style:{transform:`translate(${size.w/2+pan.x}px,${size.h/2+pan.y}px) scale(${zoom})`,transition:gesture.current?'none':'transform 650ms cubic-bezier(.22,.72,.2,1)'},children:[
+      s.jsx('svg',{className:'pointer-events-none absolute left-0 top-0 overflow-visible',children:edges.map(edge=>{const a=positions.get(edge.source),c=positions.get(edge.target);return a&&c?s.jsx('line',{'data-connection-id':edge.source+'|'+edge.target,'data-timespace-active':replay&&(edge.source===selected||edge.target===selected)?'true':undefined,x1:a.x,y1:a.y,x2:c.x,y2:c.y,stroke:'currentColor',className:'text-primary'+(replay&&(edge.source===selected||edge.target===selected)?' nx-timespace-active-edge':''),strokeWidth:edge.source==='proj'?1:2,opacity:edge.source==='proj'?.22:.65},edge.source+'|'+edge.target):null})}),
+      typeof NexusGraphMotion==='function'&&s.jsx(NexusGraphMotion,{positions,visibleNodes:visible,edges,byId,replayKey:viewAt,activeId:selected,dragging:!!drag}),
+      ...visible.map(o=>{const point=positions.get(o.id)||{x:0,y:0},target=hover===o.id,active=selected===o.id,theme=gc[o.type]||gc.task;return s.jsx('div',{'data-node':true,'data-node-id':o.id,'data-archive-tile':o.archive?'true':undefined,'data-timespace-active':replay&&connectedActive.has(o.id)?'true':undefined,'data-group-members':o.members?.join(','),'data-timespace-match':timeFilter?.active?String(o.type!=='document'&&!o.members||timeFilter.fileIds.includes(o.id)||o.members?.some(id=>timeFilter.fileIds.includes(id))):undefined,'data-drop-target':target?'true':undefined,className:'absolute left-0 top-0 nx-map-node',style:{transform:`translate(${point.x}px,${point.y}px)`,zIndex:drag===o.id?40:target?30:20},children:s.jsxs('button',{type:'button',onClick:()=>click(o),'aria-label':o.archive?'Archive, '+o.count+' files':o.members?o.label+', '+o.members.length+' items. '+(open===o.id?'Collapse':'Expand'):o.type+': '+o.label,'aria-expanded':o.members?open===o.id:undefined,className:'group flex w-[138px] -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center gap-2 rounded-2xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-primary',children:[
+        s.jsxs('span',{'data-tile-face':true,className:`nx-tile-face relative flex items-center justify-center rounded-2xl border-2 bg-card ${theme.centerBorder} ${o.members?'nx-group-face':''} ${active?'nx-tile-selected':''}`,children:[o.members?s.jsx('span',{className:'nx-group-mosaic',children:o.members.slice(0,4).map(id=>{const member=byId.get(id);return s.jsx('span',{className:(gc[member?.type]||gc.task).chip,children:s.jsx(member?.Icon||Dt,{className:'h-5 w-5'})},id)})}):s.jsx('span',{className:`flex h-10 w-10 items-center justify-center rounded-xl ${theme.chip}`,children:s.jsx(o.Icon,{className:'h-5 w-5'})}),(o.members||o.archive)&&s.jsx('span',{className:'nx-group-count',children:o.archive?o.count:o.members.length})]}),
+        s.jsx('span',{className:'line-clamp-2 max-w-[138px] text-center text-[11px] font-semibold leading-tight',children:o.label}),s.jsx('span',{className:'rounded-full border border-border bg-background/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] text-muted-foreground',children:o.archive?'ARCHIVE · '+o.count:o.members?'NODE · '+(open===o.id?'CLOSE':'OPEN'):o.type})]})},o.id)})]})]});
 }
 
 /* NEXUS TILE GROUPS END */function Vw(){return s.jsxs("div",{className:"relative min-h-[100dvh]",children:[s.jsx("style",{children:`

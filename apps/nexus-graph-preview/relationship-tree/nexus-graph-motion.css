@@ -1,0 +1,31 @@
+/* World-coordinate motion; the graph projection remains the source of truth. */
+#root .nx-map-node{transition:transform 650ms cubic-bezier(.22,.72,.2,1)}
+#root [data-group-dragging] .nx-map-node{transition:none!important}
+#root [data-replay=true]:not([data-graph-gesture=true]) .nx-graph-world{transition:transform 650ms cubic-bezier(.22,.72,.2,1)}
+#root [data-graph-gesture=true] .nx-map-node,#root [data-graph-gesture=true] [data-graph-camera]{transition:none!important}
+#root .nx-tile-selected{animation:nx-current-pulse 900ms ease-out}
+.nx-graph-motion{position:absolute;left:0;top:0;width:0;height:0;z-index:35;pointer-events:none!important}
+.nx-motion-routes{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.nx-motion-route{fill:none;stroke:#078fa3;stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;animation:nx-route-draw 800ms ease-out forwards;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #2ed0dc66)}
+.nx-motion-route.nx-motion-archive{stroke:#bb7a28;stroke-width:4}
+.nx-motion-route.nx-motion-disconnect{stroke:#bc7353;animation:nx-route-erase 800ms ease-out forwards}
+.nx-motion-route.nx-motion-focus{stroke:#04aebf;stroke-width:4}
+.nx-motion-ghost{position:absolute;left:0;top:0;width:138px;height:128px;pointer-events:none;will-change:transform,opacity;animation:nx-tile-migrate 760ms cubic-bezier(.22,.72,.2,1) forwards}
+.nx-motion-ghost.nx-motion-arrive{animation-name:nx-tile-arrive}
+.nx-motion-tile{position:absolute;left:0;top:0;width:138px;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:8px;align-items:center;color:#174c5a}
+.nx-motion-icon{display:grid;place-items:center;width:88px;height:88px;flex-shrink:0;border:2px solid #139dad;border-radius:16px;background:#e3f3f7;box-shadow:0 0 0 5px #42d7d92e,0 8px 20px #12425030;color:#087f95}
+.nx-motion-icon svg{width:34px;height:34px;overflow:hidden}
+.nx-motion-icon img{max-width:62px;max-height:62px;object-fit:contain}
+.nx-motion-tile strong{font:600 11px/1.2 system-ui;max-width:138px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:center;text-shadow:0 1px 4px #fff}
+@keyframes nx-route-draw{0%{stroke-dashoffset:1;opacity:.15}15%{opacity:.9}75%{stroke-dashoffset:0;opacity:.8}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes nx-route-erase{0%{stroke-dashoffset:0;opacity:.8}30%{opacity:.8}100%{stroke-dashoffset:-1;opacity:0}}
+@keyframes nx-tile-migrate{0%{transform:translate(var(--nx-from-x),var(--nx-from-y)) scale(1);opacity:1}72%{opacity:.9}100%{transform:translate(var(--nx-to-x),var(--nx-to-y)) scale(.18);opacity:0}}
+@keyframes nx-tile-arrive{0%{transform:translate(var(--nx-from-x),var(--nx-from-y)) scale(.18);opacity:.1}25%{opacity:.95}80%{transform:translate(var(--nx-to-x),var(--nx-to-y)) scale(1);opacity:.9}100%{transform:translate(var(--nx-to-x),var(--nx-to-y)) scale(1);opacity:0}}
+@keyframes nx-node-arrival{0%,80%{opacity:0}100%{opacity:1}}
+@keyframes nx-current-pulse{0%{box-shadow:0 0 0 0 #0fb6c970}55%{box-shadow:0 0 0 12px #0fb6c920}100%{box-shadow:0 0 0 0 #0fb6c900}}
+@media(prefers-reduced-motion:reduce){#root .nx-map-node,#root [data-graph-camera],#root .nx-graph-world{transition:none!important}#root .nx-tile-selected,.nx-motion-route,.nx-motion-ghost{animation:none!important}.nx-graph-motion{display:none!important}}
+/* Only the current route runs continuously; changed routes draw/erase once. */
+#root [data-node-id][data-timespace-active=true] [data-tile-face]{border-color:#08a8b8;box-shadow:0 0 0 5px #05b7c329,0 0 18px #13bbc32e}
+#root line[data-timespace-active=true]{stroke:#099fac;stroke-width:2.5;opacity:.95;stroke-dasharray:7 5;animation:nx-active-route 1.2s linear infinite}
+@keyframes nx-active-route{to{stroke-dashoffset:-24}}
+@media(prefers-reduced-motion:reduce){#root line[data-timespace-active=true]{animation:none}}

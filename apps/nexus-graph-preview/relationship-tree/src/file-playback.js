@@ -59,3 +59,23 @@ function nxGooglePreviewUrl(file) {
     return 'https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(url.href);
   }catch{return null}
 }
+// The slider also exposes actual expiry and recorded connection changes; transport still steps files.
+function nxTimeSpaceCheckpoints(files,history) {
+  const points=nxTimeSpaceSequence(files).map((file,index)=>({key:'file:'+file.id,kind:'file',fileId:file.id,at:nxFileMoment(file).timestamp,order:index}));
+  for(const file of files){
+    const events=Array.isArray(file.lifecycleEvents)?file.lifecycleEvents:[];
+    if(!events.length){const at=nxFilePlaybackAddedAt(file.deactivateAt);if(at!==null)points.push({key:'deactivation:'+file.id,kind:'deactivation',fileId:file.id,at,order:points.length});continue}
+    for(const [index,event] of events.entries()){
+      const recorded=nxFilePlaybackAddedAt(event.at),deadline=nxFilePlaybackAddedAt(event.deactivateAt),previous=events[index-1],priorDeadline=nxFilePlaybackAddedAt(previous?.deactivateAt);
+      if(recorded===null)continue;
+      if(priorDeadline!==null&&priorDeadline<=recorded&&(deadline===null||deadline>recorded))points.push({key:'reactivation:'+file.id+':'+index,kind:'reactivation',fileId:file.id,at:recorded,order:points.length});
+      if(deadline===null)continue;
+      const at=Math.max(recorded,deadline),nextChange=nxFilePlaybackAddedAt(events[index+1]?.at);
+      if(nextChange!==null&&nextChange<=at)continue;
+      points.push({key:'deactivation:'+file.id+':'+index,kind:'deactivation',fileId:file.id,at,order:points.length});
+    }
+  }
+  const changes=[...(history?.baseline?.groups?.length?[{...history.baseline,baseline:true}]:[]),...(history?.events||[])];
+  for(const [index,event] of changes.entries()){const at=nxFilePlaybackAddedAt(event.at);if(at!==null)points.push({key:'connections:'+index+':'+event.at,kind:'connections',at,baseline:!!event.baseline,order:points.length})}
+  return points.sort((a,b)=>(a.at??Infinity)-(b.at??Infinity)||a.order-b.order);
+}

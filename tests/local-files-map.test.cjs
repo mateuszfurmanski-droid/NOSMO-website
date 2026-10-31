@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
 const {IDBFactory}=require('fake-indexeddb');
 const sourceRoot='apps/nexus-graph-preview/relationship-tree/src/';
-const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','timespace-model.js','timespace-view.js','timespace-player.js','relationship-map.js'];
+const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','timespace-model.js','timespace-view.js','timespace-player.js','graph-history.js','file-lifecycle.js','graph-motion.js','relationship-map.js'];
 const appSource=sourceNames.map(name=>fs.readFileSync(sourceRoot+name,'utf8')).join('\n');
 const makeFile=(name,content='saved bytes',type='application/pdf')=>new File([content],name,{type,lastModified:Date.UTC(2020,4,20)});
 async function mapHarness({beforeMount=null,uuid=null}={}) {
@@ -67,7 +67,9 @@ test('local group memberships survive asynchronous hydration and remount; player
   await h.click(h.node('nx-group-device').querySelector('button'));assert.ok(h.node(file.id));assert.ok(h.node('d-firecerts'));assert.equal(h.w.localStorage.getItem(groupKey),before);
   await h.remount();assert.equal(h.count(),107);assert.ok(h.node('nx-group-device'));assert.equal(h.node(file.id),null);assert.equal(h.w.localStorage.getItem(groupKey),before);
   await h.act(()=>h.w.dispatchEvent(new h.w.CustomEvent('nexus:open-timespace')));assert.ok(h.w.document.querySelector('#nexusTimeSpace'));
-  await h.act(()=>h.w.dispatchEvent(new h.w.CustomEvent('nexus:timespace-current-file',{detail:{world:'esafe-demo',fileId:file.id}})));
+  await h.act(()=>h.w.dispatchEvent(new h.w.CustomEvent('nexus:timespace-current-file',{detail:{world:'esafe-demo',fileId:file.id,at:Date.now(),mode:'live',kind:'file'}})));
+  // The file's birth predates the first observed connection snapshot; assert its live group after returning from replay.
+  await h.click('[aria-label="Return to live tree"]');
   assert.ok(h.w.document.querySelector('#nexusTimeSpace'));assert.equal(h.w.document.querySelector('#nexusProjectFiles'),null);assert.ok(h.node(file.id));assert.ok(h.node(file.id).querySelector('.nx-tile-selected'));assert.equal(h.node('nx-group-device').querySelector('button').getAttribute('aria-expanded'),'true');assert.equal(h.w.localStorage.getItem(groupKey),before);
  }finally{await h.close()}
 });

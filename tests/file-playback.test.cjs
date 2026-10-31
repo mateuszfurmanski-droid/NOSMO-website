@@ -77,3 +77,39 @@ test('local, private, credentialed, off-origin and unsupported files are never p
  assert.equal(context.nxGooglePreviewUrl({...base,fileUrl,mimeType:'image/png'}),null);
  assert.equal(context.nxGooglePreviewUrl(null),null);
 });
+
+test('observed lifecycle keeps past expiry and reactivation checkpoints after the current rule is cleared',()=>{
+ const file={id:'observed',recordId:'observed',name:'Observed.pdf',addedAt:'2026-10-31T10:00:00Z',deactivateAt:null,lifecycleEvents:[
+  {id:'observed',at:'2026-10-31T10:15:00Z',deactivateAt:'2026-10-31T10:30:00Z'},
+  {id:'observed',at:'2026-10-31T10:45:00Z',deactivateAt:null}
+ ]};
+ const before=JSON.stringify(file),points=plain(context.nxTimeSpaceCheckpoints([file],null));
+ assert.deepEqual(points.map(point=>[point.kind,point.fileId,point.at]),[
+  ['file','observed',Date.parse(file.addedAt)],
+  ['deactivation','observed',Date.parse('2026-10-31T10:30:00Z')],
+  ['reactivation','observed',Date.parse('2026-10-31T10:45:00Z')]
+ ]);
+ assert.equal(JSON.stringify(file),before);assert.equal(new Set(points.map(point=>point.key)).size,points.length);
+});
+
+test('cancelling or replacing a future rule before its deadline removes the expiry that never occurred',()=>{
+ const base={id:'planned',recordId:'planned',name:'Planned.pdf',addedAt:'2026-10-31T10:00:00Z'};
+ const first={id:'planned',at:'2026-10-31T10:15:00Z',deactivateAt:'2026-10-31T12:00:00Z'};
+ const cancelled={...base,deactivateAt:null,lifecycleEvents:[first,{id:'planned',at:'2026-10-31T11:00:00Z',deactivateAt:null}]};
+ const cancelledPoints=plain(context.nxTimeSpaceCheckpoints([cancelled],null));
+ assert.deepEqual(cancelledPoints.map(point=>point.kind),['file']);
+ const replaced={...base,deactivateAt:'2026-10-31T13:00:00Z',lifecycleEvents:[first,{id:'planned',at:'2026-10-31T11:00:00Z',deactivateAt:'2026-10-31T13:00:00Z'}]};
+ const points=plain(context.nxTimeSpaceCheckpoints([replaced],null));
+ assert.deepEqual(points.map(point=>[point.kind,point.at]),[['file',Date.parse(base.addedAt)],['deactivation',Date.parse('2026-10-31T13:00:00Z')]]);
+ assert.ok(points.every(point=>point.at!==Date.parse(first.deactivateAt)));assert.ok(points.every(point=>point.kind!=='reactivation'));
+});
+
+test('setting a past deadline archives at the actual observed operation time without rewriting earlier history',()=>{
+ const file={id:'late-rule',recordId:'late-rule',name:'Late rule.pdf',addedAt:'2026-10-31T10:00:00Z',deactivateAt:'2026-10-31T09:00:00Z',lifecycleEvents:[{id:'late-rule',at:'2026-10-31T11:00:00Z',deactivateAt:'2026-10-31T09:00:00Z'}]};
+ const points=plain(context.nxTimeSpaceCheckpoints([file],null));
+ assert.deepEqual(points.map(point=>[point.kind,point.at]),[['file',Date.parse(file.addedAt)],['deactivation',Date.parse(file.lifecycleEvents[0].at)]]);
+ assert.ok(points.every(point=>point.at!==Date.parse(file.deactivateAt)));
+ const recovered={...file,deactivateAt:null,lifecycleEvents:[...file.lifecycleEvents,{id:file.id,at:'2026-10-31T11:15:00Z',deactivateAt:null}]};
+ const again=plain(context.nxTimeSpaceCheckpoints([recovered],null));
+ assert.deepEqual(again.map(point=>[point.kind,point.at]),[['file',Date.parse(file.addedAt)],['deactivation',Date.parse(file.lifecycleEvents[0].at)],['reactivation',Date.parse('2026-10-31T11:15:00Z')]]);
+});

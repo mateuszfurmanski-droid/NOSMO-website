@@ -92,3 +92,9 @@ body:has(:is(#nexusProjectFiles,#nexusTimeSpaceCatalog)) #root,body:has(:is(#nex
  .nx-ts-years button{flex-basis:75px;min-height:54px!important}.nx-ts-year small{font-size:10px}
  .nx-ts-location-row select{width:100%}
 }
+
+.nx-file-lifetime{margin-top:10px;border:1px solid #a0c1cd;border-radius:9px;background:#e7f1f5;padding:7px 10px}
+.nx-file-lifetime summary{cursor:pointer;font-size:12px;font-weight:700;min-height:30px;line-height:30px}
+.nx-file-lifetime label{display:grid;gap:5px;font-size:12px;max-width:330px}.nx-file-lifetime input{width:100%;font-size:13px!important}
+.nx-file-lifetime-status{color:#4b6875;font-size:11px!important}.nx-project-file-list [data-file-archived=true]{border-left:3px solid #bb8e48;padding-left:10px}
+#nexusProjectFiles>#nexusFilePreview{flex-shrink:1;min-height:150px;margin-top:8px}#nexusProjectFiles>#nexusFilePreview header small{color:#7dd2ec}
