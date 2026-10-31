@@ -116,3 +116,11 @@ Explorer history snapshots now retain route, search, status, current page and se
 Keyboard handling preserves input controls and adds Alt+Left/Right/Up, Ctrl/Cmd+F, Enter, visible-page arrow/Home/End selection and Shift+F10/menu-key actions. Context menus are bounded, focus their actions, dismiss on outside pointer/Escape, and return focus on Escape. More hit regions are kept at 28×32 regardless of icon/content view style. Empty folder tables are omitted when only files are present.
 
 Validation: 172 tests pass; four new history/context/keyboard integration regressions plus desktop/mobile browser hit-region/navigation checks. File bytes, IDs, source dates, lifecycle and observed connection history are preserved.
+
+## Follow-up: compact phone Explorer — 2026-10-31
+
+At widths up to 650px, Explorer now opens with a 50px title bar, compact folder navigation, a persistent search field and three directory tabs. The file count is a small badge; duplicate headings and empty file counts are removed. The existing status, sorting, import, eight-view selector, grouping and Folder options controls move into a scrollable File tools sheet without duplicate controls or lost settings. Escape closes the sheet before the Explorer, Ctrl/Cmd+F returns to search, and closing the sheet restores its trigger focus. Initial mobile focus goes to the dialog instead of emphasizing Close.
+
+The bottom dock becomes 68px while browsing files on a phone; other map/player surfaces retain their existing dock. Details folder rows are compact and keep the file count visible. Desktop controls stay expanded. The root Details view shows all eight folders at 390×650 and six at 320×568, with no horizontal overflow in either viewport. Browser checks cover the tools/view menus, Folder options, nested MEP→Research navigation, file context actions and embedded Google preview.
+
+Validation: 174 tests pass, including two new compact-sheet interaction/focus regressions. Browser module syntax, reproducible bundle generation and whitespace checks pass. Existing file IDs, bytes, source dates, immutable addition times and folder preferences are preserved.

@@ -43,3 +43,13 @@ html[data-nexus-unified-dock=true] #nexusFilePreview{height:25dvh;min-height:100
    overlay still animates arrivals, departures, Archive travel and link changes. */
 html:is([data-nexus-file-layout="topics"],[data-nexus-file-layout="explorer"]) #root .nx-map-node,
 html:is([data-nexus-file-layout="topics"],[data-nexus-file-layout="explorer"]) #root [data-graph-camera]{transition:none!important}
+/* File browsing on a phone leaves most of the screen for the directory. */
+@media(max-width:650px){
+ html[data-nexus-unified-dock=true]:has(:is(#nexusFileExplorer,#nexusProjectFiles)){--nx-unified-dock-height:calc(68px + env(safe-area-inset-bottom,0px));--nexus-bottom-dock-h:68px!important}
+ body:has(:is(#nexusFileExplorer,#nexusProjectFiles)) .nx-unified-dock{padding-top:4px}
+ body:has(:is(#nexusFileExplorer,#nexusProjectFiles)) .nx-unified-dock-row{gap:5px;padding:0 3px}
+ body:has(:is(#nexusFileExplorer,#nexusProjectFiles)) .nx-unified-dock .nx-dock-tile{flex-basis:66px;width:66px;height:54px;min-height:44px;padding:5px 3px 7px;gap:4px;border-radius:10px;font-size:9px}
+ body:has(:is(#nexusFileExplorer,#nexusProjectFiles)) .nx-dock-tile svg{width:20px;height:20px}
+ body:has(:is(#nexusFileExplorer,#nexusProjectFiles)) .nx-unified-dock .nx-dock-brand{width:29px;height:23px}
+ body:has(:is(#nexusFileExplorer,#nexusProjectFiles)) .nx-dock-tile small{font-size:10px;bottom:0}
+}

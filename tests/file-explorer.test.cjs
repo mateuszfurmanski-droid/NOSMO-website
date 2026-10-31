@@ -18,8 +18,9 @@ test('imports retain directory hierarchy and keep separate batches separate; vir
  assert.deepEqual(plain(ctx.nxExplorerItems(files,'imports').folders.map(f=>f.id)),['two','one']);
  const one=ctx.nxExplorerItems(files,'imports',['one']);assert.deepEqual(plain(one.folders.map(f=>f.id)),['Electrical']);assert.deepEqual(plain(one.files.map(f=>f.id)),['b']);assert.deepEqual(plain(ctx.nxExplorerItems(files,'imports',['one','Electrical','Level 1']).files.map(f=>f.id)),['a']);assert.deepEqual(plain(ctx.nxExplorerDirectory(files[2])),[]);
 });
-async function harness({files=fixtures(),initialFile=null,asOf=null,before=null,addFiles=null,folderMode="topics"}={}){
+async function harness({files=fixtures(),initialFile=null,asOf=null,before=null,addFiles=null,folderMode="topics",viewportWidth=1024}={}){
  const dom=new JSDOM('<html data-nexus-file-layout="explorer"><body><button id="origin">Open files</button><div id="mount"></div></body></html>',{url:'https://example.test/?world=esafe-demo'}),w=dom.window;
+ Object.defineProperty(w,'innerWidth',{value:viewportWidth,configurable:true});
  global.window=w;global.document=w.document;global.navigator=w.navigator;global.IS_REACT_ACT_ENVIRONMENT=true;
  const React=require('react'),{createRoot}=require('react-dom/client'),ReactDOM=require('react-dom'),jsx=require('react/jsx-runtime');const calls=[];
  const ctx={window:w,document:w.document,localStorage:w.localStorage,URL,CustomEvent:w.CustomEvent,b:React,s:jsx,ko:ReactDOM,nxImportFolderMode:()=>folderMode};vm.createContext(ctx);vm.runInContext(sources,ctx);ctx.NexusFilePreview=props=>jsx.jsx('section',{id:'nexusFilePreview','data-preview-id':props.file.id,children:jsx.jsx('button',{'aria-label':'Close embedded preview',onClick:props.onClose,children:props.file.name})});
@@ -169,5 +170,22 @@ test('keyboard navigation selects files, opens previews, focuses search and navi
   const first=h.w.document.querySelector('[aria-label="Select file: Electrical plan A.pdf"]');await h.act(()=>first.focus());await key(first,'ArrowDown');assert.equal(h.w.document.activeElement.getAttribute('aria-label'),'Select file: Electrical plan B.pdf');await key(h.w.document.activeElement,'Enter');assert.equal(h.w.document.querySelector('#nexusFilePreview').dataset.previewId,'b');
   await key(h.w.document.activeElement,'F10',{shiftKey:true});assert.ok(h.w.document.querySelector('[aria-label="File actions"]'));await key(h.w.document.activeElement,'ArrowDown');assert.equal(h.w.document.activeElement.textContent,'File details / lifetime');await key(h.w.document.activeElement,'Escape');assert.equal(h.w.document.querySelector('[aria-label="File actions"]'),null);assert.ok(h.w.document.querySelector('#nexusFilePreview'));
   await key(h.w.document.querySelector('#nexusFileExplorer'),'ArrowLeft',{altKey:true});assert.equal(h.w.document.querySelectorAll('[data-explorer-file]').length,0);await key(h.w.document.querySelector('#nexusFileExplorer'),'ArrowRight',{altKey:true});assert.equal(h.w.document.querySelectorAll('[data-explorer-file]').length,2);await key(h.w.document.querySelector('#nexusFileExplorer'),'ArrowUp',{altKey:true});assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/Electrical/);
+ }finally{await h.dispose()}
+});
+
+test('compact Explorer focuses the dialog, opens one tools sheet and restores the trigger without closing files',async()=>{
+ const h=await harness({viewportWidth:390});try{
+  assert.equal(h.w.document.activeElement.id,'nexusFileExplorer');const root=h.w.document.querySelector('#nexusFileExplorer'),trigger=h.w.document.querySelector('[aria-label="Open file tools"]');assert.equal(trigger.getAttribute('aria-expanded'),'false');assert.equal(root.hasAttribute('data-tools-open'),false);
+  await h.click('[aria-label="Open file tools"]');assert.equal(root.dataset.toolsOpen,'true');assert.equal(h.w.document.activeElement.getAttribute('aria-label'),'Close file tools');assert.equal(h.w.document.querySelectorAll('[aria-label="Sort explorer files"]').length,1);assert.equal(h.w.document.querySelectorAll('[aria-label="Group explorer files"]').length,1);
+  await h.act(()=>root.dispatchEvent(new h.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true})));assert.equal(root.hasAttribute('data-tools-open'),false);assert.equal(h.w.document.activeElement,trigger);assert.equal(h.calls.includes('close'),false);
+  await h.click('[aria-label="Open file tools"]');await h.act(()=>root.dispatchEvent(new h.w.KeyboardEvent('keydown',{key:'f',ctrlKey:true,bubbles:true,cancelable:true})));assert.equal(root.hasAttribute('data-tools-open'),false);assert.equal(h.w.document.activeElement.getAttribute('aria-label'),'Search files in all folders');
+ }finally{await h.dispose()}
+});
+
+test('compact tools preserve selected preview and view options, close on directory navigation, and keep counts concise',async()=>{
+ const h=await harness({viewportWidth:320,initialFile:'a'});try{
+  await h.click('.nx-explorer-inspector button');assert.equal(h.w.document.querySelector('#nexusFilePreview').dataset.previewId,'a');await h.click('[aria-label="Open file tools"]');await h.act(()=>[...h.w.document.querySelectorAll('[role="menuitemradio"]')].find(n=>n.textContent.includes('List')).click());await h.click('[aria-label="Close file tools"]');
+  assert.equal(h.w.document.querySelector('#nexusFileExplorer').dataset.explorerLayout,'list');assert.equal(h.w.document.querySelector('#nexusFilePreview').dataset.previewId,'a');
+  await h.click('[aria-label="Folder path"] button');assert.equal(h.w.document.querySelector('.nx-explorer-folder-heading [role="status"]').textContent,'5 folders');await h.click('[aria-label="Open file tools"]');await h.click('[data-explorer-folder="electrical"]');assert.equal(h.w.document.querySelector('#nexusFileExplorer').hasAttribute('data-tools-open'),false);assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/Electrical/);
  }finally{await h.dispose()}
 });

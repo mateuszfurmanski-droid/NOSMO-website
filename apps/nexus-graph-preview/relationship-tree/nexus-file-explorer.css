@@ -101,3 +101,57 @@ body:has(#nexusFileExplorer) #nexusTimeSpaceDock{visibility:hidden!important;poi
 /* Override every layout's main-action dimensions for the separate More action. */
 #nexusFileExplorer[data-explorer-layout] :is(.nx-explorer-folder-items,.nx-explorer-file-items) button.nx-explorer-more[data-explorer-more][aria-haspopup=menu]{width:28px;min-width:28px;min-height:32px;height:32px;padding:0;position:absolute;right:2px;top:5px;display:grid;place-items:center;flex:none;gap:0;border-radius:6px}
 @media(max-width:650px){#nexusFileExplorer .nx-explorer-toolbar>button{flex:0 0 36px;width:36px;min-width:36px;padding:5px}.nx-explorer-toolbar nav{flex-basis:calc(100% - 129px)}}
+/* Desktop keeps its familiar controls; the phone starts with files, not controls. */
+.nx-explorer-mobile-count,.nx-explorer-tools-heading,.nx-explorer-tools-done,.nx-explorer-tools-scrim{display:none}
+#nexusFileExplorer .nx-explorer-mobile-tools{display:none}
+.nx-explorer-tools{display:contents}
+#nexusFileExplorer:focus{outline:none}
+@media(max-width:650px){
+ #nexusFileExplorer{top:4px;left:4px;right:4px;bottom:calc(var(--nx-unified-dock-height,68px) + 4px);border-radius:11px;box-shadow:0 4px 24px #10354b30}
+ #nexusFileExplorer .nx-explorer-header{min-height:50px;padding:6px 10px;gap:6px;background:#f2fafd}
+ .nx-explorer-header>div{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+ .nx-explorer-header small,.nx-explorer-header p{display:none}
+ #nexusFileExplorer .nx-explorer-header h2{font-size:17px;letter-spacing:-.02em;margin:0;white-space:nowrap}
+ .nx-explorer-mobile-count{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:2px 6px;border-radius:5px;background:#dceef5;color:#527381;font-size:11px;font-weight:600}
+ #nexusFileExplorer .nx-explorer-header>button{flex:0 0 38px;width:38px;min-width:38px;height:38px;min-height:38px;padding:5px;border:0;background:transparent;border-radius:7px;font-size:23px}
+ #nexusFileExplorer .nx-explorer-header>.nx-explorer-mobile-tools{display:grid;place-items:center;font-size:13px}
+ #nexusFileExplorer .nx-explorer-header>button:hover,#nexusFileExplorer .nx-explorer-header>.nx-explorer-mobile-tools[aria-expanded=true]{background:#dceef5}
+ .nx-explorer-toolbar{display:grid;grid-template-columns:32px 32px 32px minmax(0,1fr);gap:4px;padding:5px 8px 7px;background:#f2fafd;border-bottom:1px solid #d4e5ed}
+ #nexusFileExplorer .nx-explorer-toolbar>button{width:32px;min-width:32px;height:34px;min-height:34px;padding:2px;border:0;background:transparent;font-size:18px}
+ .nx-explorer-toolbar nav{grid-column:4;min-height:34px;width:100%;border-radius:6px;padding:0 5px;scrollbar-width:none;background:#e6f2f7}
+ #nexusFileExplorer .nx-explorer-toolbar nav button{font-size:12px;min-height:32px;padding:3px 4px}
+ .nx-explorer-toolbar input{grid-column:1/-1;width:100%;min-height:36px;height:36px;padding:6px 10px;border:1px solid #c3dce6;border-radius:7px;font-size:13px;background:white;margin-top:2px}
+ .nx-explorer-workspace>aside{padding:3px 8px;gap:3px;background:#eef7fa;border-bottom:1px solid #d7e7ed}
+ #nexusFileExplorer aside>button{min-height:32px;padding:4px 9px;gap:6px;border-radius:6px;font-size:12px;font-weight:600}
+ #nexusFileExplorer aside>button svg{width:17px;height:17px}
+ .nx-explorer-content{padding:8px 9px 14px;scrollbar-gutter:auto}
+ .nx-explorer-folder-heading{display:flex;flex-direction:row;align-items:center;margin:0 0 7px;min-height:22px}
+ .nx-explorer-folder-heading h3{display:none}
+ .nx-explorer-folder-heading>span{font-size:11px;color:#607f8c}
+ .nx-explorer-folder-table thead{display:none}
+ #nexusFileExplorer .nx-explorer-folder-table td{padding:5px 5px;vertical-align:middle}
+ #nexusFileExplorer .nx-explorer-folder-table td:first-child{width:80%}
+ #nexusFileExplorer .nx-explorer-folder-table td:nth-child(3){display:table-cell;width:20%;font-size:11px;color:#67818e;white-space:nowrap}
+ #nexusFileExplorer .nx-explorer-folder-table td button:not(.nx-explorer-more){min-height:32px;font-size:12px;gap:8px}
+ .nx-explorer-folder-table td svg{width:24px;height:24px}
+ .nx-explorer-table th{top:-8px}
+ #nexusFileExplorer .nx-explorer-tools{display:none}
+ #nexusFileExplorer[data-tools-open=true] .nx-explorer-tools{display:flex;flex-direction:column;position:absolute;inset:54px 7px auto;z-index:12;max-height:calc(100% - 64px);overflow-y:auto;border:1px solid #8fb9ca;border-radius:12px;background:#f4fbfe;padding:12px;box-shadow:0 12px 35px #12354f44;overscroll-behavior:contain}
+ .nx-explorer-tools-scrim{display:block;position:absolute;inset:0;z-index:11;background:#123b542b}
+ .nx-explorer-tools-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:15px}
+ #nexusFileExplorer .nx-explorer-tools-heading button{min-height:34px;height:34px;min-width:34px;padding:3px;text-align:center;font-size:22px;border:0;background:transparent}
+ #nexusFileExplorer .nx-explorer-tools .nx-explorer-statusbar{display:flex;padding:0 0 10px;gap:8px;background:transparent;border-bottom:1px solid #d0e4ec}
+ .nx-explorer-tools .nx-explorer-statusbar label{flex:1;display:grid;gap:4px;min-width:0}
+ .nx-explorer-tools .nx-explorer-statusbar label>span{display:block;font-size:11px}
+ .nx-explorer-tools .nx-explorer-statusbar select{width:100%;max-width:none;min-height:38px;font-size:12px;padding:6px}
+ .nx-explorer-tools .nx-explorer-import{width:100%;margin:3px 0 0}
+ #nexusFileExplorer .nx-explorer-tools .nx-explorer-import button{min-height:38px;font-size:12px}
+ .nx-explorer-tools .nx-explorer-view-controls{display:flex;position:static;padding:10px 0;background:transparent;gap:8px;border-bottom:1px solid #d0e4ec}
+ .nx-explorer-tools .nx-explorer-view-controls label{display:grid;gap:4px;flex:1;width:100%}
+ .nx-explorer-tools .nx-explorer-view-controls label>span{display:block;font-size:11px}
+ .nx-explorer-tools .nx-explorer-view-controls select{max-width:none;min-height:38px;padding:5px;width:100%}
+ .nx-explorer-tools .nx-explorer-view-controls>small{display:block;margin-left:0;font-size:11px}
+ #nexusFileExplorer .nx-explorer-tools-done{display:block;min-height:38px;text-align:center;background:#d9eef7;border-color:#a2cbdc;font-weight:600;margin-top:10px}
+ .nx-explorer-tools .nx-explorer-view-menu [role=menu]{position:static;max-height:220px;width:100%;box-shadow:none;margin:5px 0 0}
+ .nx-explorer-tools .nx-explorer-view-menu[open]{flex:1 1 100%}
+}
