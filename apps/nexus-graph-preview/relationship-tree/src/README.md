@@ -68,3 +68,59 @@ Validation: 112 tests pass, including actual React compact/preview state, deadli
 Live verification: compact83px retains slider/date/time/Previous/Play/Next, preview and state survive reopening, source availability follows replay, Live restores106files, oneArchive receives expiredfile andReactivate returnsit. Actualarrivalanimation760ms with3routes wasobserved inbrowserDOM/CSS. Browsernative datetime-local requiredonInputandreadingvisiblecontrolvalue atsave; regressionadded. Final113tests pass; futuredeadlinebrowserrecheck followsr2deployment.
 
 Final live deadline check passed: native date saved, automatic Archive after5seconds, oneArchive+fileabsent afterreload, Reactivate returnedfile. Actualdragcreatedtwo-fileNode andUndo restoredliveworkspace; bothchangesrecorded. Connectioncheckpointsnowfocuschangedfiles/groupsratherthanarbitrarylatestfile. Finalvalidation116tests.
+
+
+## Continued chronological playback — 2026-10-31
+
+Play/Pause now follows the complete chronological slider: individual files, effective deactivation, reactivation and recorded connection changes. It continues through changes after the last file, pauses at the final checkpoint and restarts from the first checkpoint when Play is pressed again there. Previous/Next remain single-file navigation and pause playback. LIVE switches back to replay when Play starts. Compact layout and the open file preview remain mounted while non-file events play, so archive and relationship animations receive their actual recorded times.
+
+Validation: three added React integration checks cover compact playback through expiry and connections, preview identity, pause/resume, archive/recovery after the last file, end/restart behavior and LIVE timer replacement. This does not create missing historical imports or server-side scheduling.
+
+
+## One navigation row — 2026-10-31
+
+The four supplied prompt screenshots are compared in `docs/NEXUS_SCREENSHOT_PROMPTS_2026-10-31.md`. `navigation-dock.js` now owns the native `cU` dock; the existing build helper regenerates both marked graph and navigation blocks. Old top menu/time-chip and addon tile injection are skipped on this shell. The original panels, connector status and access visibility decisions are retained. Profile controls move into System; Files expands upwards with Project files and Cloud sources alongside it. Main navigation has no Docs or separate Cloud tile, and TimeSpace replaces the old TIME/calendar entry. Horizontal scrolling and labelled scroll buttons expose overflow and retain the position per world.
+
+Ask Nexus uses the brain-and-N mark and searches actual current-project source/device metadata, with results revealing the existing graph or Archive entry. It does not invoke the old canned Halifax chat response or claim to be a connected generative AI service. Opening a shell panel temporarily hides the mounted TimeSpace rather than discarding its state.
+
+Validation: 124 tests pass, including five added navigation regressions. Desktop and 390px/850px browser checks cover Files-to-Cloud, System, actual Catania search/reveal, scroll access to offscreen tiles and compact TimeSpace file navigation. Original upload times for legacy sources, physical Android hardware and shared/server persistence retain the previously documented limits.
+
+## Responsive external file folders — 2026-10-31
+
+The modern shell flags `data-nexus-file-layout="topics"`. Automatic category/batch folders are derived from active files and exclude explicit manual group memberships. `nxViewportGraphLayout` reserves the core circle and selects external grid rows/columns for the current safe area; `nxFitViewportGraph` fits every visible tile including the single Archive without a minimum zoom. `nxConstrainViewportCamera` keeps manual navigation inside those bounds. Expanded folders, imports, lifecycle changes and ResizeObserver updates trigger fitting, with header/TimeSpace/nav space reserved. Archive identity remains constant but its position is now responsive, superseding the earlier inverse-camera fixed anchor.
+
+Files offers per-project category/batch import choice and a directory picker. IndexedDB stores batch identity, label, relative path and folder choice atomically with the original metadata/Blob. Legacy flat shells remain compatible. A repeating LIVE clock update does not reopen the selected file's folder over a user-opened category. Layout reflow places tiles directly into their nonoverlapping slots; lifecycle migration ghosts and animated connection routes remain enabled.
+
+Validation: 151 tests, including 27 new geometry/folder/import/live regressions; desktop, portrait390×820 and landscape850×390 browser checks. Source/device metadata limitations and external connector status are unchanged.
+
+## Explorer directory browser — 2026-10-31
+
+`file-explorer.js` supersedes automatic map-folder expansion on the modern shell. The graph keeps one virtual Files hub, one Archive and the existing core circle (11defaulttiles), with at most the explicitly focused file exposed individually. Core trade tiles open the matching virtual directory; manual groups remain editable. `NexusProjectFiles` routes modern calls to Explorer and retains `NexusProjectFileDetails` for legacy catalogs and selected-file lifetime actions.
+
+Pure helpers derive trade/topic/import paths without modifying IDs, source records, addedAt, Blobs or history. Trade metadata takes precedence over labelled filename/title suggestions; multiple hints use Multidiscipline and unclear files use Unassigned. Per-world local overrides are reversible and fail without altering the prior assignment. Explorer provides breadcrumbs, history/Up, status, search, sorting, 25-row pages, inline preview, and directory/batch import. Its source Archive and device-file views share the existing lifecycle and ingestion services. Historical snapshots disable correction and lifetime editing.
+
+Validation: 162tests pass, including eleven Explorer/map regressions; ES-module syntax and reproducible-build checks. Browser checks: 390px/850px layouts, retained11tilemap, MEP→Research→file navigation, embedded preview and mobile width measurement. The original filenames/titles do not contain enough trade information to confidently assign every source, so Unassigned remains visible. No PDF-content classifier, remote file move or shared-account organization backend is claimed.
+
+## Folder view modes and options — 2026-10-31
+
+`explorer-views.js` owns pure per-world/per-folder presentation preferences and the shared folder/file renderers. It provides eight Windows-style modes (extra-large/large/medium/small icons, list, details, tiles, content), natural name/type/size/date sorting, direction and grouping. Sorting/grouping precede pagination; displayed group counts are page-local. Directory paths, file IDs/bytes, source dates, lifecycle and connection history remain unchanged.
+
+Folder options persist single/double folder activation, extension visibility, details-pane visibility and per-folder view memory, with apply-all/default restoration. Keyboard Enter activation remains available in double-click mode; Escape closes the options/menu before closing the Explorer, and focus returns to the opening button. Read corruption and failed writes preserve safe prior settings. These settings are device-local, not shared-account synchronization.
+
+Validation: 168 tests pass, including six new React presentation/option regressions. ES-module syntax and reproducible-build checks plus desktop/mobile browser QA accompany the existing private Site update.
+
+## Forward history, item menus and keyboard navigation — 2026-10-31
+
+Explorer history snapshots now retain route, search, status, current page and selection for Back/Forward. Explicit navigation clears Forward. Shared renderers expose separate More buttons and native contextmenu handlers for folders and files across all eight layouts. No nested item buttons or destructive actions are added. The menu reuses preview/details/map reveal and virtual directory navigation; snapshot restrictions remain enforced.
+
+Keyboard handling preserves input controls and adds Alt+Left/Right/Up, Ctrl/Cmd+F, Enter, visible-page arrow/Home/End selection and Shift+F10/menu-key actions. Context menus are bounded, focus their actions, dismiss on outside pointer/Escape, and return focus on Escape. More hit regions are kept at 28×32 regardless of icon/content view style. Empty folder tables are omitted when only files are present.
+
+Validation: 172 tests pass; four new history/context/keyboard integration regressions plus desktop/mobile browser hit-region/navigation checks. File bytes, IDs, source dates, lifecycle and observed connection history are preserved.
+
+## Follow-up: compact phone Explorer — 2026-10-31
+
+At widths up to 650px, Explorer now opens with a 50px title bar, compact folder navigation, a persistent search field and three directory tabs. The file count is a small badge; duplicate headings and empty file counts are removed. The existing status, sorting, import, eight-view selector, grouping and Folder options controls move into a scrollable File tools sheet without duplicate controls or lost settings. Escape closes the sheet before the Explorer, Ctrl/Cmd+F returns to search, and closing the sheet restores its trigger focus. Initial mobile focus goes to the dialog instead of emphasizing Close.
+
+The bottom dock becomes 68px while browsing files on a phone; other map/player surfaces retain their existing dock. Details folder rows are compact and keep the file count visible. Desktop controls stay expanded. The root Details view shows all eight folders at 390×650 and six at 320×568, with no horizontal overflow in either viewport. Browser checks cover the tools/view menus, Folder options, nested MEP→Research navigation, file context actions and embedded Google preview.
+
+Validation: 174 tests pass, including two new compact-sheet interaction/focus regressions. Browser module syntax, reproducible bundle generation and whitespace checks pass. Existing file IDs, bytes, source dates, immutable addition times and folder preferences are preserved.

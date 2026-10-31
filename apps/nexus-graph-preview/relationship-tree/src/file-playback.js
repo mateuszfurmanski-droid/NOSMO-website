@@ -59,7 +59,7 @@ function nxGooglePreviewUrl(file) {
     return 'https://docs.google.com/gview?embedded=true&url='+encodeURIComponent(url.href);
   }catch{return null}
 }
-// The slider also exposes actual expiry and recorded connection changes; transport still steps files.
+// Slider and Play follow actual expiry and recorded changes; file arrows still step files.
 function nxTimeSpaceCheckpoints(files,history) {
   const points=nxTimeSpaceSequence(files).map((file,index)=>({key:'file:'+file.id,kind:'file',fileId:file.id,at:nxFileMoment(file).timestamp,order:index}));
   for(const file of files){

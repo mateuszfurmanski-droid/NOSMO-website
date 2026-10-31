@@ -1,0 +1,157 @@
+/* Nexus directory browser: a stable reading size, independent of map zoom. */
+#nexusFileExplorer{position:fixed;z-index:2147483200;top:12px;bottom:calc(var(--nx-unified-dock-height,104px) + 12px);left:max(12px,calc((100vw - 1160px)/2));right:max(12px,calc((100vw - 1160px)/2));display:flex;flex-direction:column;min-height:0;overflow:hidden;box-sizing:border-box;border:1px solid #43889b;border-radius:18px;background:#eff8fb;color:#163e50;box-shadow:0 12px 80px #041e4266;font:13px/1.45 Inter,system-ui,sans-serif;isolation:isolate}
+#nexusFileExplorer *{box-sizing:border-box}
+#nexusFileExplorer :is(button,select,input){font:inherit;color:inherit}
+#nexusFileExplorer button{min-height:38px;border:1px solid #b8d2dc;background:#f5fcff;border-radius:8px;padding:7px 11px;cursor:pointer;text-align:left}
+#nexusFileExplorer :is(button,input,select):focus-visible{outline:3px solid #087d9c;outline-offset:2px}
+#nexusFileExplorer button:hover{background:#e1f3f8;border-color:#56a5bb}
+#nexusFileExplorer button:disabled{opacity:.45;cursor:default}
+#nexusFileExplorer .nx-explorer-header{display:flex;flex:none;align-items:center;justify-content:space-between;padding:17px 20px 12px;border-bottom:1px solid #c9e1e8;background:linear-gradient(110deg,#e1f2f7,#f8fdff)}
+.nx-explorer-header small{font-size:10px;letter-spacing:.13em;color:#387084}.nx-explorer-header h2{margin:3px 0 2px;font-size:23px;font-weight:650;letter-spacing:-.03em}.nx-explorer-header p{margin:0;color:#527888;font-size:12px}
+#nexusFileExplorer .nx-explorer-header>button{font-size:24px;min-width:40px;line-height:1;text-align:center}
+.nx-explorer-toolbar{display:flex;flex:none;align-items:center;gap:7px;padding:10px 15px;border-bottom:1px solid #c9e1e8;background:#f7fcfe;min-width:0}
+#nexusFileExplorer .nx-explorer-toolbar>button{font-size:18px;min-width:38px;text-align:center}
+.nx-explorer-toolbar nav{flex:1;min-width:0;display:flex;align-items:center;overflow:auto;white-space:nowrap;background:#eaf5f8;border-radius:7px;padding:0 5px;scrollbar-width:thin}
+#nexusFileExplorer .nx-explorer-toolbar nav button{border:0;background:transparent;padding:5px;font-weight:550;font-size:12px}
+.nx-explorer-toolbar input{min-width:0;width:230px;border:1px solid #b8d2dc;border-radius:8px;min-height:38px;padding:7px 10px;background:white}
+.nx-explorer-statusbar{display:flex;flex:none;align-items:center;flex-wrap:wrap;gap:10px;padding:8px 15px;border-bottom:1px solid #d5e6eb;background:#f5fbfd}
+.nx-explorer-statusbar label{display:flex;align-items:center;gap:6px;font-size:11px;color:#527585}.nx-explorer-statusbar select{background:white;border:1px solid #c4dbe3;border-radius:6px;min-height:34px;padding:4px;max-width:150px}
+.nx-explorer-import{margin-left:auto;display:flex;gap:6px}.nx-explorer-note{margin:0;padding:8px 15px;background:#e7f3f5;font-size:12px}
+.nx-explorer-workspace{flex:1;display:grid;grid-template-columns:195px minmax(0,1fr);min-height:0;overflow:hidden}
+.nx-explorer-workspace>aside{border-right:1px solid #c9e1e8;background:#e6f2f7;padding:18px 12px;overflow:auto}.nx-explorer-workspace>aside>small{display:block;color:#5b8191;font-size:10px;letter-spacing:.11em;margin:0 8px 10px}
+#nexusFileExplorer aside>button{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:7px;min-height:45px;background:transparent;border-color:transparent;font-weight:600}
+#nexusFileExplorer aside>button[aria-pressed=true]{background:#cce9f0;border-color:#a5d4e0;color:#0a6580}
+.nx-explorer-workspace>aside p{color:#688694;font-size:11px;margin:22px 8px 0;line-height:1.6}
+.nx-explorer-content{overflow:auto;min-width:0;padding:18px 20px 24px;scrollbar-gutter:stable;background:#f5fbfd;overscroll-behavior:contain}
+.nx-explorer-folder-heading{display:flex;align-items:baseline;gap:10px;justify-content:space-between;margin:0 0 15px}.nx-explorer-folder-heading h3{font-size:18px;font-weight:650;margin:0}.nx-explorer-folder-heading>span{font-size:11px;color:#668592;white-space:nowrap}
+.nx-explorer-folders{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:9px;margin-bottom:18px}
+#nexusFileExplorer .nx-explorer-folders>button{display:flex;align-items:center;gap:12px;min-height:76px;padding:12px;background:#fff;border-color:#cee0e7}
+.nx-explorer-folders svg{flex:none;color:#1686a0;background:#e8f6fa;border-radius:9px;padding:5px;width:43px;height:43px}
+.nx-explorer-folders button>span:nth-of-type(1){flex:1;min-width:0;display:grid;gap:4px}.nx-explorer-folders strong{font-weight:600;overflow-wrap:anywhere}.nx-explorer-folders small{color:#6b8693;font-size:11px}.nx-explorer-folders button>span:last-child{color:#5c8798;font-size:20px}
+.nx-explorer-table-wrap{max-width:100%;overflow-x:auto}.nx-explorer-table{width:100%;border-collapse:collapse;table-layout:fixed;text-align:left;font-size:12px}.nx-explorer-table th{color:#698794;font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:8px;border-bottom:1px solid #bed9e3;position:sticky;top:-18px;background:#f5fbfd;z-index:1}
+.nx-explorer-table th:first-child{width:45%}.nx-explorer-table th:nth-child(2){width:24%}.nx-explorer-table th:nth-child(3){width:22%}.nx-explorer-table th:last-child{width:9%}.nx-explorer-table td{padding:8px;border-bottom:1px solid #deebef;vertical-align:top;overflow-wrap:anywhere}.nx-explorer-table td small{display:block;color:#6c8794;font-size:10px;margin-top:3px}
+#nexusFileExplorer .nx-explorer-table td button{border:0;background:none;padding:2px 0;min-height:32px;width:100%;font-weight:550;overflow-wrap:anywhere;line-height:1.5}
+.nx-explorer-table tr[data-selected=true]{background:#dbf0f7}.nx-explorer-table tbody tr:hover{background:#eaf5f9}
+.nx-explorer-pagination{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:15px 0;font-size:11px;color:#648392}
+.nx-explorer-inspector{display:grid;gap:10px;margin-top:15px;padding:15px;border:1px solid #abd2df;border-radius:10px;background:#e7f4f9;overflow-wrap:anywhere}.nx-explorer-inspector>div{display:flex;gap:8px;flex-wrap:wrap}.nx-explorer-inspector label{display:flex;align-items:center;gap:10px}.nx-explorer-inspector select{border:1px solid #abcbd7;border-radius:6px;background:white;min-height:38px;padding:5px;max-width:calc(100% - 50px)}.nx-explorer-inspector small{color:#607e8d;font-size:11px}
+#nexusFileExplorer #nexusFilePreview{position:relative;width:100%;margin-top:12px;height:300px;max-height:48dvh;min-height:170px}
+body:has(#nexusFileExplorer) #nexusTimeSpaceDock{visibility:hidden!important;pointer-events:none!important}
+@media(max-width:650px){#nexusFileExplorer{top:7px;left:6px;right:6px;bottom:calc(var(--nx-unified-dock-height,104px) + 7px);border-radius:12px}.nx-explorer-workspace{display:flex;flex-direction:column}.nx-explorer-workspace>aside{flex:none;display:flex;gap:4px;overflow-x:auto;padding:7px 10px;border-right:0;border-bottom:1px solid #c9e1e8}.nx-explorer-workspace>aside>small,.nx-explorer-workspace>aside p{display:none}#nexusFileExplorer aside>button{width:auto;min-height:40px;margin:0;padding:6px 10px;font-size:12px;flex:none}#nexusFileExplorer aside>button svg{width:20px;height:20px}.nx-explorer-content{padding:14px 12px;flex:1}.nx-explorer-toolbar{flex-wrap:wrap;padding:8px 10px}.nx-explorer-toolbar nav{flex-basis:calc(100% - 100px)}.nx-explorer-toolbar input{width:100%}.nx-explorer-statusbar{padding:7px 10px;gap:8px}.nx-explorer-statusbar label>span{display:none}.nx-explorer-import{margin-left:0;width:100%}#nexusFileExplorer .nx-explorer-import button{flex:1;text-align:center;font-size:12px}.nx-explorer-folder-heading{align-items:start;flex-direction:column;gap:4px}.nx-explorer-folders{grid-template-columns:1fr;gap:7px}#nexusFileExplorer .nx-explorer-folders>button{min-height:64px;padding:9px}.nx-explorer-table th:nth-child(2),.nx-explorer-table td:nth-child(2),.nx-explorer-table th:last-child,.nx-explorer-table td:last-child{display:none}.nx-explorer-table th:first-child{width:65%}.nx-explorer-table th:nth-child(3){width:35%}.nx-explorer-pagination{flex-wrap:wrap}.nx-explorer-table th{top:-14px}.nx-explorer-header h2{font-size:20px}#nexusFileExplorer .nx-explorer-header{padding:12px 14px}}
+@media(max-height:500px){#nexusFileExplorer .nx-explorer-header{padding:8px 15px}.nx-explorer-header p,.nx-explorer-header small{display:none}.nx-explorer-header h2{font-size:18px}.nx-explorer-toolbar{padding:5px 10px}.nx-explorer-statusbar{padding:4px 10px}.nx-explorer-content{padding-top:10px}.nx-explorer-workspace>aside{padding-top:10px}}
+/* Folder presentation modes: shared selection, paths and file actions. */
+.nx-explorer-view-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:none;padding:7px 15px;border-bottom:1px solid #c9e1e8;background:#edf7fb;position:relative;z-index:5}
+.nx-explorer-view-controls label{display:flex;align-items:center;gap:6px;font-size:11px}.nx-explorer-view-controls select{min-height:34px;padding:4px;border:1px solid #bfd8e1;border-radius:6px;background:white;max-width:125px}.nx-explorer-view-controls>small{margin-left:auto;color:#658694;font-size:11px}
+#nexusFileExplorer .nx-explorer-view-controls>button{min-height:34px;font-size:12px;padding:5px 9px}
+.nx-explorer-view-menu{position:relative}.nx-explorer-view-menu summary{display:block;cursor:pointer;list-style:none;border:1px solid #a2c9d6;border-radius:7px;padding:6px 12px;background:#f9feff;min-height:34px;font-weight:600;font-size:12px}.nx-explorer-view-menu summary::-webkit-details-marker{display:none}.nx-explorer-view-menu[open] summary{background:#d9eff7}
+.nx-explorer-view-menu [role=menu]{position:absolute;top:calc(100% + 4px);left:0;width:215px;max-height:min(310px,30dvh);overflow:auto;padding:5px;background:#f8fdff;border:1px solid #87bacb;border-radius:9px;box-shadow:0 8px 24px #07304735;z-index:10}
+#nexusFileExplorer .nx-explorer-view-menu button{display:flex;align-items:center;gap:10px;width:100%;min-height:34px;font-size:12px;border-color:transparent;background:transparent}
+#nexusFileExplorer .nx-explorer-view-menu button[aria-checked=true]{background:#d1eaf4;color:#075f7e;font-weight:650}
+.nx-explorer-file-icon{display:inline-block;position:relative;width:40px;height:48px;flex:none;color:#2a83a5}.nx-explorer-file-icon svg{display:block;width:100%;height:100%}.nx-explorer-file-icon b{position:absolute;bottom:10%;left:3%;right:3%;background:currentColor;text-align:center;border-radius:3px;font:700 9px/1.6 Inter,system-ui;color:#fff;background:#2a83a5}.nx-explorer-file-icon.nx-kind-pdf{color:#c45858}.nx-explorer-file-icon.nx-kind-pdf b{background:#b44848}.nx-explorer-file-icon.nx-kind-spreadsheet{color:#328572}.nx-explorer-file-icon.nx-kind-spreadsheet b{background:#328572}.nx-explorer-file-icon.nx-kind-image{color:#9e66b2}.nx-explorer-file-icon.nx-kind-image b{background:#9e66b2}
+#nexusFileExplorer .nx-explorer-table td button{display:flex;align-items:center;gap:9px}
+.nx-explorer-table .nx-explorer-file-icon{width:25px;height:31px}.nx-explorer-table .nx-explorer-file-icon b{font-size:6px}.nx-explorer-table th:first-child{width:40%}.nx-explorer-table th:nth-child(2){width:22%}.nx-explorer-table th:nth-child(3){width:20%}.nx-explorer-table th:nth-child(4){width:9%}.nx-explorer-table th:nth-child(5){width:9%}
+#nexusFileExplorer .nx-explorer-table th button{border:0;background:transparent;padding:2px 0;min-height:26px;font:inherit;text-transform:inherit;letter-spacing:inherit}
+.nx-explorer-folder-table-wrap{margin-bottom:15px}.nx-explorer-folder-table th:first-child{width:60%}.nx-explorer-folder-table th:nth-child(2){width:20%}.nx-explorer-folder-table th:nth-child(3){width:20%}.nx-explorer-folder-table td svg{width:28px;height:28px;flex:none;color:#1686a0}.nx-explorer-folder-table .nx-explorer-item-name small{display:none}
+.nx-explorer-group-label{color:#28728a;font-size:12px;font-weight:650;margin:16px 0 9px;padding:8px 2px;border-bottom:1px solid #bad9e4}.nx-explorer-table .nx-explorer-group-label th{position:static;background:#eaf5fa;font-size:11px;padding:9px 6px;text-transform:none;letter-spacing:0}
+.nx-explorer-item-name{min-width:0;overflow-wrap:anywhere}.nx-explorer-item-name strong{display:block;font-weight:550;line-height:1.45}.nx-explorer-item-name small{display:block;font-size:11px;color:#6a8794;margin-top:3px}
+.nx-explorer-file-items,.nx-explorer-folder-items{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));margin-bottom:14px}
+#nexusFileExplorer .nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,#nexusFileExplorer .nx-explorer-folder-items>div>button{display:flex;align-items:center;gap:12px;width:100%;min-width:0;min-height:72px;padding:10px;text-align:left;background:transparent;border:1px solid transparent;border-radius:6px}
+#nexusFileExplorer .nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child:hover,#nexusFileExplorer .nx-explorer-folder-items>div>button:hover{background:#e3f3fa;border-color:#aed2e0}
+#nexusFileExplorer :is([data-explorer-file],[data-explorer-folder])[data-selected=true]{background:#d5ecf6;border-radius:6px}
+#nexusFileExplorer .nx-explorer-folder-items .nx-explorer-item-name{flex:1}.nx-explorer-folder-items svg{flex:none;width:42px;height:42px;color:#1686a0;padding:4px;background:transparent}
+.nx-explorer-file-items .nx-explorer-content-meta{display:none}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:repeat(auto-fill,minmax(var(--nx-item-width),1fr));gap:12px}
+#nexusFileExplorer[data-explorer-layout=extra-large]{--nx-item-width:170px;--nx-item-icon:112px}
+#nexusFileExplorer[data-explorer-layout=large]{--nx-item-width:135px;--nx-item-icon:80px}
+#nexusFileExplorer[data-explorer-layout=medium]{--nx-item-width:108px;--nx-item-icon:48px}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) :is(.nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,.nx-explorer-folder-items>div>button){flex-direction:column;justify-content:start;text-align:center;gap:8px;padding:12px 8px;min-height:0}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) :is(.nx-explorer-file-icon,.nx-explorer-folder-items svg){width:var(--nx-item-icon);height:calc(var(--nx-item-icon)*1.15);max-width:100%;padding:0}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large]) .nx-explorer-file-icon b{font-size:16px}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium]) .nx-explorer-item-name{width:100%;font-size:12px}
+#nexusFileExplorer:is([data-explorer-layout=extra-large],[data-explorer-layout=large],[data-explorer-layout=medium],[data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-file-items .nx-explorer-item-name small{display:none}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:3px}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,.nx-explorer-folder-items>div>button){min-height:36px;padding:5px;gap:7px}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) :is(.nx-explorer-file-icon,.nx-explorer-folder-items svg){width:22px;height:27px;padding:0}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-file-icon b{font-size:6px}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-item-name strong{font-size:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#nexusFileExplorer:is([data-explorer-layout=small],[data-explorer-layout=list]) .nx-explorer-folder-items .nx-explorer-item-name small{display:none}
+#nexusFileExplorer[data-explorer-layout=list] :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:1fr}
+#nexusFileExplorer[data-explorer-layout=content] :is(.nx-explorer-file-items,.nx-explorer-folder-items){grid-template-columns:1fr;gap:0}
+#nexusFileExplorer[data-explorer-layout=content] :is(.nx-explorer-file-items>.nx-explorer-item-with-menu>button:first-child,.nx-explorer-folder-items>div>button){border-bottom:1px solid #cfE3eb;border-radius:0;min-height:86px}
+#nexusFileExplorer[data-explorer-layout=content] .nx-explorer-file-items .nx-explorer-content-meta{display:block}
+#nexusFileExplorer[data-explorer-layout=content] .nx-explorer-file-icon{width:51px;height:62px}
+.nx-explorer-selection-actions{position:sticky;bottom:-15px;background:#e0f0f7;border:1px solid #9ec6d7;padding:9px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;box-shadow:0 -3px 14px #1a527519}.nx-explorer-selection-actions strong{flex:1;min-width:120px;font-size:12px;overflow-wrap:anywhere}
+.nx-explorer-options-scrim{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:12px;background:#153f5d55}
+.nx-explorer-options{width:min(440px,100%);max-height:100%;overflow:auto;border:1px solid #4b8fa7;border-radius:12px;background:#f4fbfe;padding:16px;box-shadow:0 10px 50px #001d4466}
+.nx-explorer-options header{display:flex;align-items:center;justify-content:space-between;gap:10px}.nx-explorer-options h3{margin:0;font-size:18px}.nx-explorer-options p{color:#5d7c8a;font-size:12px;margin:12px 0 16px}.nx-explorer-options>label{display:flex;align-items:center;gap:10px;padding:9px 0;font-size:12px}.nx-explorer-options select{min-height:38px;padding:5px;border:1px solid #b7d3df;border-radius:6px;background:white}.nx-explorer-options input[type=checkbox]{width:18px;height:18px;flex:none;accent-color:#117e9e}.nx-explorer-options-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;border-top:1px solid #cadfe8;padding-top:12px}
+@media(max-width:650px){.nx-explorer-view-controls{padding:6px 10px;gap:6px}.nx-explorer-view-controls label>span{display:none}.nx-explorer-view-controls>small{display:none}.nx-explorer-view-controls select{max-width:95px}.nx-explorer-table th:nth-child(5),.nx-explorer-table td:nth-child(5){display:none}.nx-explorer-table th:first-child{width:66%}.nx-explorer-table th:nth-child(3){width:34%}.nx-explorer-folder-table th:first-child{width:75%}.nx-explorer-folder-table th:nth-child(3){width:25%}#nexusFileExplorer[data-explorer-layout=extra-large]{--nx-item-width:140px;--nx-item-icon:90px}#nexusFileExplorer[data-explorer-layout=large]{--nx-item-width:125px;--nx-item-icon:68px}}
+@media(max-height:500px){.nx-explorer-view-controls{padding-top:3px;padding-bottom:3px}.nx-explorer-view-controls>small{display:none}.nx-explorer-view-menu [role=menu]{max-height:22dvh}.nx-explorer-options{padding:12px}}
+/* Context actions remain explicit on touch and keyboard, without nested buttons. */
+.nx-explorer-item-with-menu,.nx-explorer-folder-items>[data-explorer-folder]{position:relative;min-width:0}
+.nx-explorer-name-cell{position:relative;padding-right:33px!important}
+#nexusFileExplorer button.nx-explorer-more{position:absolute;right:2px;top:5px;width:28px;min-width:28px;min-height:32px;height:32px;padding:0;border:1px solid transparent;background:transparent;display:grid;place-items:center;font-size:21px;font-weight:600;line-height:1;text-align:center;color:#538194;z-index:2}
+#nexusFileExplorer button.nx-explorer-more:hover,#nexusFileExplorer button.nx-explorer-more:focus-visible{background:#d5edf7;border-color:#a1c8d8}
+#nexusFileExplorer .nx-explorer-table td button.nx-explorer-more{width:28px;min-height:32px;top:calc(50% - 16px);right:1px;padding:0;text-align:center;display:grid;font-size:21px}
+#nexusFileExplorer:is([data-explorer-layout=list],[data-explorer-layout=small],[data-explorer-layout=tiles],[data-explorer-layout=content]) .nx-explorer-item-with-menu>button:first-child,
+#nexusFileExplorer:is([data-explorer-layout=list],[data-explorer-layout=small],[data-explorer-layout=tiles],[data-explorer-layout=content]) .nx-explorer-folder-items>[data-explorer-folder]>button:first-child{padding-right:32px}
+#nexusFileExplorer .nx-explorer-context-menu{position:absolute;z-index:15;width:min(232px,calc(100% - 16px));max-height:calc(100% - 16px);overflow:auto;padding:6px;border:1px solid #82b3c5;border-radius:10px;background:#f5fcff;box-shadow:0 8px 35px #082c4b44}
+.nx-explorer-context-menu>strong{display:block;padding:8px 9px 10px;color:#4c7587;font-size:11px;overflow-wrap:anywhere;border-bottom:1px solid #cbE1e9;margin-bottom:4px}
+#nexusFileExplorer .nx-explorer-context-menu>button{display:block;width:100%;min-height:38px;padding:8px 10px;border:0;border-radius:6px;background:transparent;font-size:12px}
+#nexusFileExplorer .nx-explorer-context-menu>button:hover,#nexusFileExplorer .nx-explorer-context-menu>button:focus-visible{background:#d9eef7;color:#085d7a}
+@media(max-width:650px){.nx-explorer-toolbar nav{flex-basis:calc(100% - 142px)}}
+/* Override every layout's main-action dimensions for the separate More action. */
+#nexusFileExplorer[data-explorer-layout] :is(.nx-explorer-folder-items,.nx-explorer-file-items) button.nx-explorer-more[data-explorer-more][aria-haspopup=menu]{width:28px;min-width:28px;min-height:32px;height:32px;padding:0;position:absolute;right:2px;top:5px;display:grid;place-items:center;flex:none;gap:0;border-radius:6px}
+@media(max-width:650px){#nexusFileExplorer .nx-explorer-toolbar>button{flex:0 0 36px;width:36px;min-width:36px;padding:5px}.nx-explorer-toolbar nav{flex-basis:calc(100% - 129px)}}
+/* Desktop keeps its familiar controls; the phone starts with files, not controls. */
+.nx-explorer-mobile-count,.nx-explorer-tools-heading,.nx-explorer-tools-done,.nx-explorer-tools-scrim{display:none}
+#nexusFileExplorer .nx-explorer-mobile-tools{display:none}
+.nx-explorer-tools{display:contents}
+#nexusFileExplorer:focus{outline:none}
+@media(max-width:650px){
+ #nexusFileExplorer{top:4px;left:4px;right:4px;bottom:calc(var(--nx-unified-dock-height,68px) + 4px);border-radius:11px;box-shadow:0 4px 24px #10354b30}
+ #nexusFileExplorer .nx-explorer-header{min-height:50px;padding:6px 10px;gap:6px;background:#f2fafd}
+ .nx-explorer-header>div{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+ .nx-explorer-header small,.nx-explorer-header p{display:none}
+ #nexusFileExplorer .nx-explorer-header h2{font-size:17px;letter-spacing:-.02em;margin:0;white-space:nowrap}
+ .nx-explorer-mobile-count{display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:2px 6px;border-radius:5px;background:#dceef5;color:#527381;font-size:11px;font-weight:600}
+ #nexusFileExplorer .nx-explorer-header>button{flex:0 0 38px;width:38px;min-width:38px;height:38px;min-height:38px;padding:5px;border:0;background:transparent;border-radius:7px;font-size:23px}
+ #nexusFileExplorer .nx-explorer-header>.nx-explorer-mobile-tools{display:grid;place-items:center;font-size:13px}
+ #nexusFileExplorer .nx-explorer-header>button:hover,#nexusFileExplorer .nx-explorer-header>.nx-explorer-mobile-tools[aria-expanded=true]{background:#dceef5}
+ .nx-explorer-toolbar{display:grid;grid-template-columns:32px 32px 32px minmax(0,1fr);gap:4px;padding:5px 8px 7px;background:#f2fafd;border-bottom:1px solid #d4e5ed}
+ #nexusFileExplorer .nx-explorer-toolbar>button{width:32px;min-width:32px;height:34px;min-height:34px;padding:2px;border:0;background:transparent;font-size:18px}
+ .nx-explorer-toolbar nav{grid-column:4;min-height:34px;width:100%;border-radius:6px;padding:0 5px;scrollbar-width:none;background:#e6f2f7}
+ #nexusFileExplorer .nx-explorer-toolbar nav button{font-size:12px;min-height:32px;padding:3px 4px}
+ .nx-explorer-toolbar input{grid-column:1/-1;width:100%;min-height:36px;height:36px;padding:6px 10px;border:1px solid #c3dce6;border-radius:7px;font-size:13px;background:white;margin-top:2px}
+ .nx-explorer-workspace>aside{padding:3px 8px;gap:3px;background:#eef7fa;border-bottom:1px solid #d7e7ed}
+ #nexusFileExplorer aside>button{min-height:32px;padding:4px 9px;gap:6px;border-radius:6px;font-size:12px;font-weight:600}
+ #nexusFileExplorer aside>button svg{width:17px;height:17px}
+ .nx-explorer-content{padding:8px 9px 14px;scrollbar-gutter:auto}
+ .nx-explorer-folder-heading{display:flex;flex-direction:row;align-items:center;margin:0 0 7px;min-height:22px}
+ .nx-explorer-folder-heading h3{display:none}
+ .nx-explorer-folder-heading>span{font-size:11px;color:#607f8c}
+ .nx-explorer-folder-table thead{display:none}
+ #nexusFileExplorer .nx-explorer-folder-table td{padding:5px 5px;vertical-align:middle}
+ #nexusFileExplorer .nx-explorer-folder-table td:first-child{width:80%}
+ #nexusFileExplorer .nx-explorer-folder-table td:nth-child(3){display:table-cell;width:20%;font-size:11px;color:#67818e;white-space:nowrap}
+ #nexusFileExplorer .nx-explorer-folder-table td button:not(.nx-explorer-more){min-height:32px;font-size:12px;gap:8px}
+ .nx-explorer-folder-table td svg{width:24px;height:24px}
+ .nx-explorer-table th{top:-8px}
+ #nexusFileExplorer .nx-explorer-tools{display:none}
+ #nexusFileExplorer[data-tools-open=true] .nx-explorer-tools{display:flex;flex-direction:column;position:absolute;inset:54px 7px auto;z-index:12;max-height:calc(100% - 64px);overflow-y:auto;border:1px solid #8fb9ca;border-radius:12px;background:#f4fbfe;padding:12px;box-shadow:0 12px 35px #12354f44;overscroll-behavior:contain}
+ .nx-explorer-tools-scrim{display:block;position:absolute;inset:0;z-index:11;background:#123b542b}
+ .nx-explorer-tools-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:15px}
+ #nexusFileExplorer .nx-explorer-tools-heading button{min-height:34px;height:34px;min-width:34px;padding:3px;text-align:center;font-size:22px;border:0;background:transparent}
+ #nexusFileExplorer .nx-explorer-tools .nx-explorer-statusbar{display:flex;padding:0 0 10px;gap:8px;background:transparent;border-bottom:1px solid #d0e4ec}
+ .nx-explorer-tools .nx-explorer-statusbar label{flex:1;display:grid;gap:4px;min-width:0}
+ .nx-explorer-tools .nx-explorer-statusbar label>span{display:block;font-size:11px}
+ .nx-explorer-tools .nx-explorer-statusbar select{width:100%;max-width:none;min-height:38px;font-size:12px;padding:6px}
+ .nx-explorer-tools .nx-explorer-import{width:100%;margin:3px 0 0}
+ #nexusFileExplorer .nx-explorer-tools .nx-explorer-import button{min-height:38px;font-size:12px}
+ .nx-explorer-tools .nx-explorer-view-controls{display:flex;position:static;padding:10px 0;background:transparent;gap:8px;border-bottom:1px solid #d0e4ec}
+ .nx-explorer-tools .nx-explorer-view-controls label{display:grid;gap:4px;flex:1;width:100%}
+ .nx-explorer-tools .nx-explorer-view-controls label>span{display:block;font-size:11px}
+ .nx-explorer-tools .nx-explorer-view-controls select{max-width:none;min-height:38px;padding:5px;width:100%}
+ .nx-explorer-tools .nx-explorer-view-controls>small{display:block;margin-left:0;font-size:11px}
+ #nexusFileExplorer .nx-explorer-tools-done{display:block;min-height:38px;text-align:center;background:#d9eef7;border-color:#a2cbdc;font-weight:600;margin-top:10px}
+ .nx-explorer-tools .nx-explorer-view-menu [role=menu]{position:static;max-height:220px;width:100%;box-shadow:none;margin:5px 0 0}
+ .nx-explorer-tools .nx-explorer-view-menu[open]{flex:1 1 100%}
+}
