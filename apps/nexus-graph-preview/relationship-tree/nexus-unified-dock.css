@@ -41,5 +41,5 @@ html[data-nexus-unified-dock=true] #nexusFilePreview{height:25dvh;min-height:100
 }
 /* Reflow uses final collision-free slots immediately. The dedicated migration
    overlay still animates arrivals, departures, Archive travel and link changes. */
-html[data-nexus-file-layout="topics"] #root .nx-map-node,
-html[data-nexus-file-layout="topics"] #root [data-graph-camera]{transition:none!important}
+html:is([data-nexus-file-layout="topics"],[data-nexus-file-layout="explorer"]) #root .nx-map-node,
+html:is([data-nexus-file-layout="topics"],[data-nexus-file-layout="explorer"]) #root [data-graph-camera]{transition:none!important}

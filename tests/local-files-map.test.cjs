@@ -5,12 +5,12 @@ const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
 const {IDBFactory}=require('fake-indexeddb');
 const sourceRoot='apps/nexus-graph-preview/relationship-tree/src/';
-const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','timespace-model.js','timespace-view.js','timespace-player.js','graph-history.js','file-lifecycle.js','graph-motion.js','relationship-map.js'];
+const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','file-explorer.js','timespace-model.js','timespace-view.js','timespace-player.js','graph-history.js','file-lifecycle.js','graph-motion.js','relationship-map.js'];
 const appSource=sourceNames.map(name=>fs.readFileSync(sourceRoot+name,'utf8')).join('\n');
 const makeFile=(name,content='saved bytes',type='application/pdf')=>new File([content],name,{type,lastModified:Date.UTC(2020,4,20)});
-async function mapHarness({beforeMount=null,uuid=null,thematic=false}={}) {
+async function mapHarness({beforeMount=null,uuid=null,thematic=false,explorer=false}={}) {
  const dom=new JSDOM('<button id="origin">Origin</button><input id="nexusFileInput" type="file" multiple><div id="mount"></div>',{url:'https://example.test/?world=esafe-demo'}),w=dom.window;
- if(thematic)w.document.documentElement.dataset.nexusFileLayout="topics";
+ if(thematic||explorer)w.document.documentElement.dataset.nexusFileLayout=explorer?"explorer":"topics";
  global.window=w;global.document=w.document;global.navigator=w.navigator;global.IS_REACT_ACT_ENVIRONMENT=true;
  const React=require('react'),ReactDOM=require('react-dom'),{createRoot}=require('react-dom/client'),jsx=require('react/jsx-runtime');
  const factory=new IDBFactory();Object.defineProperty(w,'indexedDB',{value:factory});w.__NEXUS_PROJECT_WORLD__='esafe-demo';
@@ -106,5 +106,15 @@ test('LIVE clock refresh does not force the player file folder back over a folde
   const source=Array.from(h.ctx.nxTimeSpaceSequence(h.ctx.nxEsafeCatalog(h.w.ESAFE_RECORDS))),file=source[0],other=source.find(f=>f.category!==file.category),folder='nx-auto-topic-'+encodeURIComponent(other.category);
   const event=()=>h.w.dispatchEvent(new h.w.CustomEvent('nexus:timespace-current-file',{detail:{world:'esafe-demo',fileId:file.id,mode:'live',kind:'live',at:Date.now()}}));
   await h.act(event);await h.click(h.node(folder).querySelector('button'));await h.act(event);assert.equal(h.node(folder).querySelector('button').getAttribute('aria-expanded'),'true');
+ }finally{await h.close()}
+});
+
+test('Explorer map has one Files hub and never spills folder contents onto the map; core trades route to their directory',async()=>{
+ const h=await mapHarness({explorer:true});try{
+  assert.equal(h.count(),106);assert.equal(h.docs().length,0);assert.equal(h.w.document.querySelectorAll('[data-auto-folder]').length,1);const mapCount=h.w.document.querySelectorAll('[data-node-id]').length;
+  await h.click(h.node('nx-auto-files').querySelector('button'));assert.ok(h.w.document.querySelector('#nexusFileExplorer'));assert.equal(h.docs().length,0);
+  const folder=h.w.document.querySelector('[data-explorer-folder]');await h.click(folder);const topic=h.w.document.querySelector('[data-explorer-folder]');if(topic)await h.click(topic);assert.equal(h.w.document.querySelectorAll('[data-node-id]').length,mapCount);assert.equal(h.docs().length,0);
+  await h.click('[aria-label="Close file explorer"]');await h.click(h.node('p-sitemgr').querySelector('button'));assert.match(h.w.document.querySelector('[aria-label="Folder path"]').textContent,/MEP/);await h.click('[aria-label="Close file explorer"]');
+  const first=h.ctx.nxTimeSpaceSequence(h.ctx.nxEsafeCatalog(h.w.ESAFE_RECORDS))[0];await h.act(()=>h.w.dispatchEvent(new h.w.CustomEvent('nexus:timespace-current-file',{detail:{world:'esafe-demo',fileId:first.id,mode:'live',at:Date.now()}})));assert.equal(h.docs().length,1);assert.equal(h.w.document.querySelectorAll('[data-auto-folder]').length,1);
  }finally{await h.close()}
 });

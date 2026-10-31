@@ -34,6 +34,7 @@ jobs:
           node --check apps/nexus-esafe-demo/files-ui.js
           node --check apps/nexus-graph-preview/relationship-tree/nexus-shell-v2.js
           node --check apps/nexus-graph-preview/assets/index-CWI-Glgh.js
+          node --input-type=module --check < apps/nexus-graph-preview/assets/index-CWI-Glgh.js
       - name: Validate demo dataset and Project World contract
         run: |
           node - <<'NODE'
