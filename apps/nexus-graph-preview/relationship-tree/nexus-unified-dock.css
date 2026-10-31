@@ -28,6 +28,18 @@ html[data-nexus-unified-dock=true] :is(#nexusProjectFiles,#nexusTimeSpaceCatalog
 .nx-dock-search-results{display:grid;gap:7px;max-height:32dvh;overflow:auto;margin:8px 0}.nx-dock-search-results button{justify-content:start;text-align:left;overflow-wrap:anywhere}.nx-dock-search-results svg{flex:0 0 22px}
 .nx-dock-notice{position:fixed;z-index:2147483301;bottom:calc(var(--nx-unified-dock-height) + 12px);left:12px;right:12px;max-width:500px;margin:auto;background:#102e43;color:#e1f7ff;border:1px solid #5ca3bd;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;font:13px system-ui}.nx-dock-notice button{margin-left:auto;min-width:44px;min-height:44px;background:#1b455b;border:1px solid #6393a7;color:white;border-radius:8px}
 .nx-system-access-profile{display:grid;gap:5px;padding:12px;font:12px system-ui}.nx-system-access-profile select{min-height:44px;border:1px solid #5993a7;border-radius:8px;padding:8px;background:#0e2b41;color:#d4f7ff}
+.nx-import-options{display:grid;gap:9px;margin-top:12px;padding-top:10px;border-top:1px solid #39718e}.nx-import-options label{display:grid;gap:6px}.nx-import-options select{box-sizing:border-box;width:100%;min-height:44px;border:1px solid #39718e;border-radius:8px;background:#12324a;color:#e0f7ff;padding:8px;font:12px system-ui}
+html[data-nexus-unified-dock=true] #nexusTimeSpaceDock{max-height:min(58dvh,calc(100dvh - var(--nx-unified-dock-height) - 24px))!important;overflow:auto;overscroll-behavior:contain}
+html[data-nexus-unified-dock=true] #nexusTimeSpace:not(.nx-pti-collapsed){max-height:45dvh;overflow-y:auto;flex-shrink:0}
+html[data-nexus-unified-dock=true] #nexusFilePreview{height:25dvh;min-height:100px}
 @keyframes nxDockRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:440px){.nx-unified-dock .nx-dock-tile{flex-basis:78px;width:78px}.nx-unified-dock-row{gap:7px;padding-left:2px;padding-right:2px}.nx-unified-dock .nx-dock-scroll{flex-basis:19px;min-width:19px}}
 @media(prefers-reduced-motion:reduce){.nx-dock-folder{animation:none}.nx-unified-dock-row{scroll-behavior:auto}}
+@media(max-height:500px){
+ html[data-nexus-unified-dock="true"] #nexusTimeSpaceDock{max-height:32dvh}
+ html[data-nexus-unified-dock="true"] #nexusTimeSpace.nx-timespace-player{min-height:0;max-height:32dvh;overflow-y:auto}
+}
+/* Reflow uses final collision-free slots immediately. The dedicated migration
+   overlay still animates arrivals, departures, Archive travel and link changes. */
+html[data-nexus-file-layout="topics"] #root .nx-map-node,
+html[data-nexus-file-layout="topics"] #root [data-graph-camera]{transition:none!important}

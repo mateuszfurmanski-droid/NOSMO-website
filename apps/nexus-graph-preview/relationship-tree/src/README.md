@@ -84,3 +84,11 @@ The four supplied prompt screenshots are compared in `docs/NEXUS_SCREENSHOT_PROM
 Ask Nexus uses the brain-and-N mark and searches actual current-project source/device metadata, with results revealing the existing graph or Archive entry. It does not invoke the old canned Halifax chat response or claim to be a connected generative AI service. Opening a shell panel temporarily hides the mounted TimeSpace rather than discarding its state.
 
 Validation: 124 tests pass, including five added navigation regressions. Desktop and 390px/850px browser checks cover Files-to-Cloud, System, actual Catania search/reveal, scroll access to offscreen tiles and compact TimeSpace file navigation. Original upload times for legacy sources, physical Android hardware and shared/server persistence retain the previously documented limits.
+
+## Responsive external file folders — 2026-10-31
+
+The modern shell flags `data-nexus-file-layout="topics"`. Automatic category/batch folders are derived from active files and exclude explicit manual group memberships. `nxViewportGraphLayout` reserves the core circle and selects external grid rows/columns for the current safe area; `nxFitViewportGraph` fits every visible tile including the single Archive without a minimum zoom. `nxConstrainViewportCamera` keeps manual navigation inside those bounds. Expanded folders, imports, lifecycle changes and ResizeObserver updates trigger fitting, with header/TimeSpace/nav space reserved. Archive identity remains constant but its position is now responsive, superseding the earlier inverse-camera fixed anchor.
+
+Files offers per-project category/batch import choice and a directory picker. IndexedDB stores batch identity, label, relative path and folder choice atomically with the original metadata/Blob. Legacy flat shells remain compatible. A repeating LIVE clock update does not reopen the selected file's folder over a user-opened category. Layout reflow places tiles directly into their nonoverlapping slots; lifecycle migration ghosts and animated connection routes remain enabled.
+
+Validation: 151 tests, including 27 new geometry/folder/import/live regressions; desktop, portrait390×820 and landscape850×390 browser checks. Source/device metadata limitations and external connector status are unchanged.

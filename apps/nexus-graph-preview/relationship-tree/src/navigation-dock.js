@@ -31,6 +31,7 @@ function NexusDockAssistant({world,onClose,onAction}){
 function cU({selected,selectedLinks,onOpenWorkflow}){
   const world=window.__NEXUS_PROJECT_WORLD__||'dev',key='nosmo.unified-dock:v1:'+world;
   const [folder,setFolder]=b.useState(null),[anchor,setAnchor]=b.useState(8),[notice,setNotice]=b.useState(''),[overflow,setOverflow]=b.useState({left:false,right:false});
+  const [importMode,setImportMode]=b.useState(()=>nxImportFolderMode(world));
   const [profile,setProfile]=b.useState(()=>{try{const value=new URLSearchParams(window.location.search).get('accessProfile')||localStorage.getItem(Dw);return Aw(value)?value:'manager'}catch{return'manager'}});
   const visibleApps=b.useMemo(()=>new Set(YB(KB[profile],oU).visibleApps),[profile]);
   const row=b.useRef(null),popup=b.useRef(null),origin=b.useRef(null),ready=b.useRef(false);
@@ -44,6 +45,7 @@ function cU({selected,selectedLinks,onOpenWorkflow}){
   const openPanel=id=>{setFolder(null);if(!nxDockOpenPanel(id))setNotice('This panel is still loading. Please try again.')};
   const action=id=>{
     setNotice('');
+    if(id==='add-files'||id==='import-folder'){setFolder(null);nxDockClosePanels();document.getElementById(id==='add-files'?'nexusFileInput':'nexusFolderInput')?.click();return}
     if(id==='project-files'){setFolder(null);nxDockClosePanels();if(world==='esafe-demo')nxDockSignal('nexus:open-project-files');else openPanel('nexusFilesPanel');return}
     if(id==='time'){setFolder(null);nxDockClosePanels();if(world==='esafe-demo')nxDockSignal('nexus:open-timespace');else document.getElementById('nexusTopTime')?.click();return}
     if(id==='cloud')return openPanel('nexusCloudPanel');
@@ -67,6 +69,7 @@ function cU({selected,selectedLinks,onOpenWorkflow}){
     notice&&s.jsxs('div',{className:'nx-dock-notice',role:'status',children:[notice,s.jsx('button',{onClick:()=>setNotice(''),'aria-label':'Dismiss navigation message',children:'×'})]}),
     folder&&ko.createPortal(s.jsxs('section',{id:'nexusDockFolder',ref:popup,role:'dialog','aria-label':folder==='ask'?'Ask Nexus':folder==='files'?'Files and cloud':'Project tools',className:'nx-dock-folder',style:{left:anchor},onKeyDown:popupKeys,children:[s.jsxs('header',{children:[s.jsx('strong',{children:folder==='ask'?'Ask Nexus':folder==='files'?'Files':'Tools'}),s.jsx('button',{type:'button',onClick:close,'aria-label':'Close navigation folder',children:'×'})]}),
       folder==='files'&&s.jsxs('div',{className:'nx-dock-folder-grid',children:[s.jsxs('button',{onClick:()=>action('project-files'),children:[s.jsx(NxDockIcon,{kind:'files'}),s.jsx('span',{children:'Project files'})]}),s.jsxs('button',{onClick:()=>action('cloud'),children:[s.jsx(NxDockIcon,{kind:'cloud'}),s.jsx('span',{children:'Cloud sources'})]})]}),
+      folder==='files'&&s.jsxs('div',{className:'nx-import-options',children:[s.jsxs('label',{children:[s.jsx('span',{children:'Arrange new imports'}),s.jsxs('select',{'aria-label':'Arrange imported files',value:importMode,onChange:e=>{const value=e.target.value;try{localStorage.setItem('nosmo.import-folder-mode:v1:'+world,value);setImportMode(value);setNotice('')}catch{setNotice('Import preference could not be saved.')}},children:[s.jsx('option',{value:'topics',children:'Separate folders by category'}),s.jsx('option',{value:'batch',children:'Keep each import in one folder'})]})]}),s.jsxs('div',{className:'nx-dock-folder-grid',children:[s.jsx('button',{onClick:()=>action('add-files'),children:'Add files'}),s.jsx('button',{onClick:()=>action('import-folder'),children:'Import folder'})]})]}),
       folder==='tools'&&s.jsx('div',{className:'nx-dock-folder-grid',children:toolItems.map(item=>item.href&&item.status!=='disconnected'?s.jsx('a',{href:item.href,children:item.label},item.label):s.jsx('button',{disabled:true,title:item.label+' — not connected',children:item.label+' · not connected'},item.label))}),
       folder==='ask'&&s.jsx(NexusDockAssistant,{world,onClose:close,onAction:action})]}),document.body),
     document.getElementById('nexusSystemAccessProfile')&&ko.createPortal(s.jsxs('label',{className:'nx-system-access-profile',children:[s.jsx('span',{children:'Demo access profile'}),s.jsx('select',{'aria-label':'Access test profile',value:profile,onChange:e=>{const value=e.target.value;if(!Aw(value))return;setProfile(value);try{localStorage.setItem(Dw,value)}catch{}},children:['manager','joiner','electrician'].map(value=>s.jsx('option',{value,children:value},value))})]}),document.getElementById('nexusSystemAccessProfile'))

@@ -74,3 +74,12 @@ test('an aborted IndexedDB write is reported as failure and never publishes an a
  await assert.rejects(ctx.nxLocalFilesAdd('esafe-demo',[file('not saved.pdf')]));assert.equal(events.length,0);assert.equal((await ctx.nxLocalFilesList('esafe-demo')).length,0);
  const unavailable=service(undefined,{indexedDB:undefined});await assert.rejects(unavailable.ctx.nxLocalFilesAdd('esafe-demo',[file('no storage.pdf')]),/unavailable/);assert.equal(unavailable.events.length,0);
 });
+
+test('each imported batch preserves folder choice, directory paths and bytes across reload; new batches remain distinct',async()=>{
+ const {ctx,factory}=service(),first=file('survey.pdf','survey content'),second=file('model.ifc','model content');
+ Object.defineProperty(first,'webkitRelativePath',{value:'Tender/Survey/survey.pdf'});Object.defineProperty(second,'webkitRelativePath',{value:'Tender/BIM/model.ifc'});
+ const added=await ctx.nxLocalFilesAdd('esafe-demo',[first,second],{folderMode:'batch'});
+ assert.equal(added[0].importBatchId,added[1].importBatchId);assert.equal(added[0].importLabel,'Tender');assert.equal(added[1].relativePath,'Tender/BIM/model.ifc');assert.ok(added.every(f=>f.folderMode==='batch'));
+ const next=await ctx.nxLocalFilesAdd('esafe-demo',[file('other.pdf')],{folderMode:'topics'});assert.notEqual(next[0].importBatchId,added[0].importBatchId);assert.equal(next[0].folderMode,'topics');
+ const reopened=service(factory),listed=await reopened.ctx.nxLocalFilesList('esafe-demo');assert.deepEqual(plain(listed),plain([...added,...next]));assert.equal(await(await reopened.ctx.nxLocalFileBlob('esafe-demo',added[1].id)).text(),'model content');
+});

@@ -8,8 +8,9 @@ const sourceRoot='apps/nexus-graph-preview/relationship-tree/src/';
 const sourceNames=['tile-groups.js','local-files.js','file-playback.js','project-files.js','timespace-model.js','timespace-view.js','timespace-player.js','graph-history.js','file-lifecycle.js','graph-motion.js','relationship-map.js'];
 const appSource=sourceNames.map(name=>fs.readFileSync(sourceRoot+name,'utf8')).join('\n');
 const makeFile=(name,content='saved bytes',type='application/pdf')=>new File([content],name,{type,lastModified:Date.UTC(2020,4,20)});
-async function mapHarness({beforeMount=null,uuid=null}={}) {
+async function mapHarness({beforeMount=null,uuid=null,thematic=false}={}) {
  const dom=new JSDOM('<button id="origin">Origin</button><input id="nexusFileInput" type="file" multiple><div id="mount"></div>',{url:'https://example.test/?world=esafe-demo'}),w=dom.window;
+ if(thematic)w.document.documentElement.dataset.nexusFileLayout="topics";
  global.window=w;global.document=w.document;global.navigator=w.navigator;global.IS_REACT_ACT_ENVIRONMENT=true;
  const React=require('react'),ReactDOM=require('react-dom'),{createRoot}=require('react-dom/client'),jsx=require('react/jsx-runtime');
  const factory=new IDBFactory();Object.defineProperty(w,'indexedDB',{value:factory});w.__NEXUS_PROJECT_WORLD__='esafe-demo';
@@ -31,16 +32,18 @@ async function mapHarness({beforeMount=null,uuid=null}={}) {
  const remount=async()=>{await act(()=>root.unmount());root=createRoot(w.document.getElementById('mount'));await render()};
  await render();return{w,ctx,React,act,click,count,node,docs,close,remount,seed};
 }
+function xOf(node){return Number(node.style.transform.match(/translate\((-?[\d.]+)px/)[1])}
+function readingOrder(a,b){return yOf(a)-yOf(b)||xOf(a)-xOf(b)}
 function yOf(node){const match=node.style.transform.match(/translate\([^,]+,\s*(-?[\d.]+)px\)/);assert.ok(match,'Node has an explicit y position');return Number(match[1])}
 
 test('actual local add updates catalog and complete graph automatically in chronological order; trash and restore update both',async()=>{
  const h=await mapHarness();try{
   assert.equal(h.count(),106);assert.equal(h.docs().length,106);
   const sources=h.ctx.nxEsafeCatalog(h.w.ESAFE_RECORDS),sequence=Array.from(h.ctx.nxTimeSpaceSequence(sources));
-  const initial=h.docs().slice().sort((a,b)=>yOf(a)-yOf(b));assert.deepEqual(initial.map(el=>el.dataset.nodeId),sequence.map(file=>file.id));assert.equal(new Set(initial.map(yOf)).size,106);
+  const initial=h.docs().slice().sort(readingOrder);assert.deepEqual(initial.map(el=>el.dataset.nodeId),sequence.map(file=>file.id));assert.equal(new Set(initial.map(n=>n.style.transform)).size,106);
   let added;await h.act(async()=>{added=await h.ctx.nxLocalFilesAdd('esafe-demo',[makeFile('Level_2_ventilation_inspection.pdf')])});
   const file=added[0];assert.equal(h.count(),107);assert.equal(h.docs().length,107);assert.ok(h.node(file.id));assert.equal(file.dateRaw,file.addedAt.slice(0,10));assert.equal(file.modifiedAt,'2020-05-20T00:00:00.000Z');assert.equal(file.kind,'PDF');assert.equal(file.suggestedLocation,'level-2');assert.equal(file.category,'Testing');
-  const ordered=Array.from(h.ctx.nxTimeSpaceSequence([...sources,file]));const positions=h.docs().slice().sort((a,b)=>yOf(a)-yOf(b));assert.deepEqual(positions.map(el=>el.dataset.nodeId),ordered.map(file=>file.id));assert.equal(new Set(positions.map(yOf)).size,107);
+  const ordered=Array.from(h.ctx.nxTimeSpaceSequence([...sources,file]));const positions=h.docs().slice().sort(readingOrder);assert.deepEqual(positions.map(el=>el.dataset.nodeId),ordered.map(file=>file.id));assert.equal(new Set(positions.map(n=>n.style.transform)).size,107);
   await h.remount();assert.equal(h.count(),107);assert.equal(h.docs().length,107);assert.ok(h.node(file.id));
   const reread=(await h.ctx.nxLocalFilesList('esafe-demo'))[0];assert.equal(reread.addedAt,file.addedAt);assert.equal(reread.suggestedLocation,'level-2');assert.equal(reread.kind,'PDF');assert.equal(await(await h.ctx.nxLocalFileBlob('esafe-demo',file.id)).text(),'saved bytes');
   await h.act(()=>h.ctx.nxLocalFilesTrash('esafe-demo',[file.id]));assert.equal(h.count(),106);assert.equal(h.docs().length,106);assert.equal(h.node(file.id),null);
@@ -80,7 +83,28 @@ test('files added in one batch keep their saved addition order when timestamps a
  const h=await mapHarness({uuid:()=>ids.shift()});try{
   let added;await h.act(async()=>{added=await h.ctx.nxLocalFilesAdd('esafe-demo',[makeFile('First in batch.pdf'),makeFile('Second in batch.pdf')])});
   assert.equal(added[0].addedAt,added[1].addedAt);assert.ok(added[0].additionOrder<added[1].additionOrder);
-  const localIds=new Set(added.map(file=>file.id));const lane=h.docs().filter(node=>localIds.has(node.dataset.nodeId)).sort((a,b)=>yOf(a)-yOf(b));
+  const localIds=new Set(added.map(file=>file.id));const lane=h.docs().filter(node=>localIds.has(node.dataset.nodeId)).sort(readingOrder);
   assert.deepEqual(lane.map(node=>node.dataset.nodeId),Array.from(added,file=>file.id));
+ }finally{await h.close()}
+});
+
+test('thematic folders collect all active files outside core, reveal only the expanded category, and rebuild after ingestion/trash/restore',async()=>{
+ const h=await mapHarness({thematic:true});try{
+  assert.equal(h.count(),106);assert.equal(h.docs().length,0);const folders=()=>[...h.w.document.querySelectorAll('[data-auto-folder="true"]')];
+  assert.ok(folders().length>1);const source=h.ctx.nxTimeSpaceSequence(h.ctx.nxEsafeCatalog(h.w.ESAFE_RECORDS)),category=source[0].category,id='nx-auto-topic-'+encodeURIComponent(category),members=source.filter(f=>f.category===category);
+  await h.click(h.node(id).querySelector('button'));assert.deepEqual(h.docs().sort(readingOrder).map(n=>n.dataset.nodeId),Array.from(members,f=>f.id));assert.equal(h.node(id).querySelector('button').getAttribute('aria-expanded'),'true');
+  await h.click(h.node(id).querySelector('button'));assert.equal(h.docs().length,0);
+  let added;await h.act(async()=>{added=await h.ctx.nxLocalFilesAdd('esafe-demo',[makeFile('survey.pdf'),makeFile('model.ifc')],{folderMode:'batch',label:'Tender package'})});
+  assert.equal(h.count(),108);const batch=folders().find(n=>n.querySelector('button').getAttribute('aria-label').startsWith('Tender package'));assert.ok(batch);await h.click(batch.querySelector('button'));assert.equal(h.docs().length,2);
+  await h.act(()=>h.ctx.nxLocalFilesTrash('esafe-demo',[added[0].id]));assert.equal(h.docs().length,1);await h.act(()=>h.ctx.nxLocalFilesRestore('esafe-demo',[added[0].id]));assert.equal(h.docs().length,2);
+  await h.remount();assert.equal(h.docs().length,0);assert.ok(folders().some(n=>n.dataset.nodeId===batch.dataset.nodeId));
+ }finally{await h.close()}
+});
+
+test('LIVE clock refresh does not force the player file folder back over a folder the user just opened',async()=>{
+ const h=await mapHarness({thematic:true});try{
+  const source=Array.from(h.ctx.nxTimeSpaceSequence(h.ctx.nxEsafeCatalog(h.w.ESAFE_RECORDS))),file=source[0],other=source.find(f=>f.category!==file.category),folder='nx-auto-topic-'+encodeURIComponent(other.category);
+  const event=()=>h.w.dispatchEvent(new h.w.CustomEvent('nexus:timespace-current-file',{detail:{world:'esafe-demo',fileId:file.id,mode:'live',kind:'live',at:Date.now()}}));
+  await h.act(event);await h.click(h.node(folder).querySelector('button'));await h.act(event);assert.equal(h.node(folder).querySelector('button').getAttribute('aria-expanded'),'true');
  }finally{await h.close()}
 });

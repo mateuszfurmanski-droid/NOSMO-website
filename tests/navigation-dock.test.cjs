@@ -11,6 +11,7 @@ async function harness({world='esafe-demo',localFiles=[],failLocal=false,profile
  const calls=[];w.addEventListener('nexus:open-project-files',e=>calls.push(e.type));w.addEventListener('nexus:open-timespace',e=>calls.push(e.type));w.addEventListener('nexus:navigation-reveal-file',e=>calls.push({...e.detail}));
  const ctx={window:w,document:w.document,localStorage:w.localStorage,URL,URLSearchParams,CustomEvent:w.CustomEvent,b:React,s:jsx,ko:ReactDOM,Dw:'access-demo',Aw:p=>['manager','joiner','electrician'].includes(p),KB:{manager:{},joiner:{restricted:true},electrician:{}},oU:'demo',YB:role=>({visibleApps:role.restricted?['project','documents','tools']:['project','documents','people','tasks','tools','trades','system']}),aU:{project:'project',documents:'documents',people:'people',tasks:'tasks',system:'system',trades:'trades'},jk:[{id:'tools',items:[{label:'DoorSuite',href:'/doorsuite',accessApp:'tools'},{label:'FabStation',status:'disconnected',accessApp:'tools'},{label:'Private tool',href:'/private',accessApp:'not-visible'}]}],ns:[{id:'riverside-plan',type:'document',label:'Riverside drawing'}]};
  vm.createContext(ctx);for(const name of ['data.js','files.js'])vm.runInContext(fs.readFileSync('apps/nexus-esafe-demo/'+name,'utf8'),ctx);
+ vm.runInContext(fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/local-files.js','utf8'),ctx);
  vm.runInContext(fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/project-files.js','utf8'),ctx);
  ctx.nxLocalFilesList=async()=>{if(failLocal)throw Error('unavailable');return localFiles};
  vm.runInContext(fs.readFileSync('apps/nexus-graph-preview/relationship-tree/src/navigation-dock.js','utf8'),ctx);
@@ -64,5 +65,14 @@ test('navigation scroll controls reveal overflow, retain this project position a
   await h.click('[aria-label="Scroll navigation right"]');assert.ok(row.scrollLeft>0);assert.equal(h.w.document.querySelector('[aria-label="Scroll navigation left"]').disabled,false);
   assert.equal(JSON.parse(h.w.localStorage.getItem('nosmo.unified-dock:v1:esafe-demo')).scrollLeft,row.scrollLeft);assert.equal(h.w.localStorage.getItem('nosmo.unified-dock:v1:dev'),null);
   await h.click('[data-nx-nav="files"]');await h.click('[aria-label="Scroll navigation right"]');assert.equal(h.w.document.getElementById('nexusDockFolder'),null);
+ }finally{await h.dispose()}
+});
+
+test('import arrangement is selectable, persists per project and both file/directory pickers are available',async()=>{
+ const h=await harness();try{
+  await h.click('[data-nx-nav="files"]');assert.equal(h.w.document.querySelector('[aria-label="Arrange imported files"]').value,'topics');
+  await h.change('[aria-label="Arrange imported files"]','batch');assert.equal(h.ctx.nxImportFolderMode('esafe-demo'),'batch');assert.equal(h.ctx.nxImportFolderMode('dev'),'topics');
+  assert.ok([...h.w.document.querySelectorAll('#nexusDockFolder button')].some(b=>b.textContent==='Import folder'));assert.ok([...h.w.document.querySelectorAll('#nexusDockFolder button')].some(b=>b.textContent==='Add files'));
+  await h.click('[data-nx-nav="files"]');await h.click('[data-nx-nav="files"]');assert.equal(h.w.document.querySelector('[aria-label="Arrange imported files"]').value,'batch');
  }finally{await h.dispose()}
 });

@@ -70,7 +70,8 @@ async function nxLocalFilesList(world) {
     tx.onabort=()=>reject(tx.error||new Error('Could not read device files.'));
   });
 }
-async function nxLocalFilesAdd(world,files) {
+function nxImportFolderMode(world){try{return localStorage.getItem('nosmo.import-folder-mode:v1:'+world)==='batch'?'batch':'topics'}catch{return'topics'}}
+async function nxLocalFilesAdd(world,files,options={}) {
   world=nxLocalFilesWorld(world);files=Array.from(files||[]);
   if(!files.length)return[];
   for(const file of files)if(!file||typeof file.name!=='string'||!file.name||!Number.isFinite(file.size)||file.size<0||typeof file.slice!=='function'||typeof file.arrayBuffer!=='function')throw new Error('Choose valid files to add to the project.');
@@ -80,11 +81,14 @@ async function nxLocalFilesAdd(world,files) {
     existing.onsuccess=()=>{
       try{
         let order=existing.result.reduce((max,record)=>Number.isFinite(record.additionOrder)?Math.max(max,record.additionOrder):max,-1)+1;
-        const addedAt=new Date().toISOString(),day=addedAt.slice(0,10);
+        const addedAt=new Date().toISOString(),day=addedAt.slice(0,10);let importBatchId=null;
+        const folderMode=options.folderMode==='batch'?'batch':'topics',relativeRoot=String(files[0]?.webkitRelativePath||'').split('/').filter(Boolean);
+        const importLabel=(typeof options.label==='string'&&options.label.trim()?options.label.trim():relativeRoot.length>1?relativeRoot[0]:'Import '+addedAt.slice(0,19).replace('T',' ')+' UTC').slice(0,100);
         for(const file of files){
           const id='local-'+crypto.randomUUID(),kind=nxLocalFileKind(file),mime=file.type||'application/octet-stream';
+          if(!importBatchId)importBatchId='import-'+id.slice(6);
           const modifiedAt=Number.isFinite(file.lastModified)&&file.lastModified>=0?new Date(file.lastModified).toISOString():null;
-          const record={world,id,recordId:id,name:file.name,title:file.name,size:file.size,mime,kind,date:day,dateRaw:day,datePrecision:'day',dateBasis:'added',addedAt,additionOrder:order++,modifiedAt,category:nxLocalFileTopic(file.name,kind),categoryBasis:'filename',suggestedLocation:nxLocalFileLocation(file.name),locationBasis:'filename',local:true,sourceUrl:null,fileUrl:null,blob:file.slice(0,file.size,mime)};
+          const record={world,id,recordId:id,name:file.name,title:file.name,size:file.size,mime,kind,date:day,dateRaw:day,datePrecision:'day',dateBasis:'added',addedAt,additionOrder:order++,modifiedAt,importBatchId,importLabel,folderMode,relativePath:String(file.webkitRelativePath||''),category:nxLocalFileTopic(file.name,kind),categoryBasis:'filename',suggestedLocation:nxLocalFileLocation(file.name),locationBasis:'filename',local:true,sourceUrl:null,fileUrl:null,blob:file.slice(0,file.size,mime)};
           store.add(record);output.push(nxLocalFilesMetadata(record));
         }
       }catch(error){failure=error;tx.abort()}
