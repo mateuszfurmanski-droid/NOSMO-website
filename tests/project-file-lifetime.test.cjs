@@ -127,3 +127,15 @@ test('immediate deactivation waits for a successful metadata commit before closi
   assert.equal(h.results().closed,1);assert.equal(h.props.files.find(file=>file.id==='active-a').archived,true);assert.equal(h.results().removed,0);
  }finally{await h.dispose()}
 });
+
+test('Set date persists the visible native datetime value even when the browser did not dispatch a React change event',async()=>{
+ const h=await harness();try{
+  const chosen='2099-11-12T13:14:15',input=h.row('active-a').querySelector('input[type=datetime-local]');
+  Object.getOwnPropertyDescriptor(h.w.HTMLInputElement.prototype,'value').set.call(input,chosen);
+  assert.equal(input.value,chosen);
+  await h.click(h.button('active-a','Set date'));
+  assert.deepEqual(h.calls,[{id:'active-a',iso:new Date(chosen).toISOString()}]);
+  assert.equal(h.row('active-a').querySelector('.nx-file-lifetime-status time').getAttribute('datetime'),new Date(chosen).toISOString());
+  assert.equal(h.el('[role=alert]'),null);
+ }finally{await h.dispose()}
+});

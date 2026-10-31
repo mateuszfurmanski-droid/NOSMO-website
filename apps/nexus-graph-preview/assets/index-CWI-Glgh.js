@@ -370,13 +370,14 @@ function nxFileLifetimeDateLabel(iso) {
 }
 function NexusFileLifetime({file,onSetDeactivation,busy,onError}) {
   const [value,setValue]=b.useState(()=>nxFileLifetimeInputValue(file.deactivateAt));
+  const dateControl=b.useRef(null);
   b.useEffect(()=>setValue(nxFileLifetimeInputValue(file.deactivateAt)),[file.deactivateAt]);
   const zone=new Intl.DateTimeFormat().resolvedOptions().timeZone||'local timezone';
-  const save=()=>{const iso=nxFileLifetimeInputIso(value);if(!iso){onError('Choose a valid local date and time for '+file.name+'.');return}onSetDeactivation(file.id,iso)};
+  const save=()=>{const iso=nxFileLifetimeInputIso(dateControl.current?.value??value);if(!iso){onError('Choose a valid local date and time for '+file.name+'.');return}onSetDeactivation(file.id,iso)};
   return s.jsxs('details',{className:'nx-file-lifetime',children:[
     s.jsx('summary',{children:'File lifetime'}),
     s.jsx('p',{children:'Deactivation moves this file to Archive. Its original file stays available.'}),
-    s.jsxs('label',{children:[s.jsx('span',{children:'Date and time · '+zone+' (local)'}),s.jsx('input',{type:'datetime-local',step:1,value,disabled:busy,'aria-label':'Deactivation date and time for '+file.name,onChange:event=>setValue(event.target.value)})]}),
+    s.jsxs('label',{children:[s.jsx('span',{children:'Date and time · '+zone+' (local)'}),s.jsx('input',{ref:dateControl,type:'datetime-local',step:1,value,disabled:busy,'aria-label':'Deactivation date and time for '+file.name,onInput:event=>setValue(event.target.value),onChange:event=>setValue(event.target.value)})]}),
     s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{type:'button',disabled:busy,onClick:save,children:'Set date'}),!file.archived&&s.jsx('button',{type:'button',disabled:busy,onClick:()=>onSetDeactivation(file.id,new Date().toISOString()),children:'Deactivate now'}),(file.deactivateAt||file.archived)&&s.jsx('button',{type:'button',disabled:busy,onClick:()=>onSetDeactivation(file.id,null),children:file.archived?'Reactivate':'Remove deactivation date'})]})]});
 }
 function NexusFileAdditionTime({file}) {
