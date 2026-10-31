@@ -128,6 +128,7 @@
   };
 
   const buildTile=()=>{
+    if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
     if(document.getElementById('nexusSoftwareDockTile'))return;
     const parent=findDockParent();
     if(!parent)return;

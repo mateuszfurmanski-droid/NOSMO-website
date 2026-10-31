@@ -2,14 +2,14 @@
 (()=>{
   if(window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__)return;
   window.__NEXUS_PROJECT_TIME_ISOLATED_LOADER__=true;
-  const version='lifecycle-motion-r5-20261031';
+  const version='unified-dock-r1-20261031';
   const tuneVersion='project-time-thin-status-knob-20260817a';
-  const dockVersion='lifecycle-motion-r5-20261031';
-  const timeChipVersion='top-time-chip-20260817a';
+  const dockVersion='unified-dock-r1-20261031';
+  const timeChipVersion='unified-dock-r1-20261031';
   const compactTopVersion='compact-top-shell-20260817a';
-  const integrationsVersion='integrations-compact-tile-20260817a';
-  const cloudVersion='cloud-panel-20260817a';
-  const softwareVersion='software-connectors-20260817a';
+  const integrationsVersion='unified-dock-r1-20261031';
+  const cloudVersion='unified-dock-r1-20261031';
+  const softwareVersion='unified-dock-r1-20261031';
   const addonIconVersion='addon-dock-icons-svg-20260817a';
   const appendCss=(id,href)=>{
     if(document.getElementById(id))return;

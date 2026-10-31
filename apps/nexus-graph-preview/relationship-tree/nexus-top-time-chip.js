@@ -1,6 +1,7 @@
 // NEXUS_TOP_TIME_CHIP_ADDON_20260817
 // Add-only top time chip. Does not remove or restyle existing top tiles, bottom dock, graph, or Project Time instrument.
 (()=>{
+  if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
   if(window.__NEXUS_TOP_TIME_CHIP_ADDON__)return;
   window.__NEXUS_TOP_TIME_CHIP_ADDON__=true;
 

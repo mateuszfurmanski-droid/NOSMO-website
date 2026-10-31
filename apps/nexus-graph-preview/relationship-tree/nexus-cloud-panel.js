@@ -101,6 +101,7 @@
     return Array.from(groups.entries()).sort((a,b)=>b[1]-a[1])[0]?.[0]||controls[0].parentElement;
   };
   const buildTile=()=>{
+    if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
     if(document.getElementById('nexusCloudDockTile'))return;
     const parent=findDockParent();
     if(!parent)return;

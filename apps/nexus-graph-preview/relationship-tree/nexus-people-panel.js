@@ -10,6 +10,7 @@
   const initials=name=>String(name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()||'').join('')||'?';
 
   const installDockFit=()=>{
+    if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
     if(document.getElementById('nexusMobileDockFitStyle'))return;
     const style=document.createElement('style');
     style.id='nexusMobileDockFitStyle';
@@ -60,6 +61,7 @@
   };
 
   const fitBottomDock=()=>{
+    if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
     if(window.innerWidth>760)return;
     installDockFit();
     const dock=findBottomDock();

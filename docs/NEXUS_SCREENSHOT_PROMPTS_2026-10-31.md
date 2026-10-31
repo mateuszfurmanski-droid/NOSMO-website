@@ -1,0 +1,22 @@
+# Nexus screenshot requests — implementation comparison
+
+Source: Mateusz's four screenshots supplied on 31 October 2026. Continue the existing relationship map and multimedia console; no separate application.
+
+| Request | Implementation and evidence |
+| --- | --- |
+| Reuse the old multimedia player | Existing `nx-pti` console retained; file icon replaces VOL. |
+| Sort automatically on addition | Atomic device ingestion keeps immutable actual `addedAt` and stable same-time addition order. Player and vertical document positions use that sequence. |
+| File arrows visit individual chronological files | Previous/Next remain single-file actions. Play and the slider also visit recorded migration/lifecycle events. |
+| Google preview stays inside Nexus | Bounded viewer above the console; file icon toggles preview. Next replaces an open preview and keeps a closed preview closed. Public source fallback retained. Local device bytes are never sent to Google. |
+| Collapsible panel retains date, time, arrows and slider | Compact layout uses the same mounted player, preserves preview and selection and saves layout per project. |
+| Know addition hours | New device files retain actual UTC addition time including seconds. Original Nexus addition times for the 106 legacy remote source files are unknown; publication dates never become invented upload hours. |
+| File deactivation and one Archive tile | Effective deadlines project files out of active nodes into one fixed Archive. Metadata and bytes remain recoverable; reactivation retains prior archive intervals. |
+| Animate arrivals, departures, archive moves and connection changes | Existing motion layer shows world-coordinate travel and animated routes, with active-node highlighting and recorded connection checkpoints. Reduced-motion preferences are respected. |
+| One scrollable bottom navigation bar | React owns one row. Legacy top menu/clock and separate addon tile insertion are disabled for this shell. Horizontal touch scrolling and labelled left/right controls expose overflow. |
+| TimeSpace replaces calendar; System contains menu | TimeSpace has one main tile. System opens the retained menu, with settings and the existing demo access-profile control. |
+| Files includes Docs and Cloud | No Docs or Cloud main tile. Files opens an upward folder containing Project files and Cloud sources side by side. The complete source/device catalog remains the file entry point. |
+| Brain + N, Ask Nexus tile | Dedicated SVG brand mark. Ask searches actual current-project source/device metadata and reveals the selected file in the existing tree, or its Archive entry when expired. No canned Halifax status response is used. This local search is not a connected generative AI service. |
+
+The shell still uses existing BIM/software, integrations, people, trades and source panels. External connectors and FabStation are not newly connected by these navigation changes. The public source catalog has 95 records / 106 files, not an invented operational employee/task database.
+
+Validation: existing timeline, graph, persistence, preview and archive integration suite plus five navigation regressions (one-row routing, Files/Cloud, real metadata search, error handling/world isolation, focus and access filtering, horizontal scrolling). Browser checks on the proposed code cover desktop, a 390px Catania frame and an 850px Riverside frame. Physical Android hardware and server/account synchronization remain unverified.

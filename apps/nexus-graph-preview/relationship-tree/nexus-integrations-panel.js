@@ -104,6 +104,7 @@
   };
 
   const buildTile=()=>{
+    if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
     if(document.getElementById('nexusIntegrationsDockTile'))return;
     const parent=findDockParent();
     if(!parent)return;

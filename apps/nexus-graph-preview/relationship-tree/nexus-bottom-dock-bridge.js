@@ -2,6 +2,7 @@
 // Wires the existing React bottom dock tiles to Nexus shell actions.
 // Add-on only: adds a TIME tile after TASKS and compacts the top shell to menu + clock chip.
 (()=>{
+  if(document.documentElement.dataset.nexusUnifiedDock==='true')return;
   if(window.__NEXUS_BOTTOM_DOCK_BRIDGE__)return;
   window.__NEXUS_BOTTOM_DOCK_BRIDGE__=true;
 

@@ -75,3 +75,12 @@ Final live deadline check passed: native date saved, automatic Archive after5sec
 Play/Pause now follows the complete chronological slider: individual files, effective deactivation, reactivation and recorded connection changes. It continues through changes after the last file, pauses at the final checkpoint and restarts from the first checkpoint when Play is pressed again there. Previous/Next remain single-file navigation and pause playback. LIVE switches back to replay when Play starts. Compact layout and the open file preview remain mounted while non-file events play, so archive and relationship animations receive their actual recorded times.
 
 Validation: three added React integration checks cover compact playback through expiry and connections, preview identity, pause/resume, archive/recovery after the last file, end/restart behavior and LIVE timer replacement. This does not create missing historical imports or server-side scheduling.
+
+
+## One navigation row — 2026-10-31
+
+The four supplied prompt screenshots are compared in `docs/NEXUS_SCREENSHOT_PROMPTS_2026-10-31.md`. `navigation-dock.js` now owns the native `cU` dock; the existing build helper regenerates both marked graph and navigation blocks. Old top menu/time-chip and addon tile injection are skipped on this shell. The original panels, connector status and access visibility decisions are retained. Profile controls move into System; Files expands upwards with Project files and Cloud sources alongside it. Main navigation has no Docs or separate Cloud tile, and TimeSpace replaces the old TIME/calendar entry. Horizontal scrolling and labelled scroll buttons expose overflow and retain the position per world.
+
+Ask Nexus uses the brain-and-N mark and searches actual current-project source/device metadata, with results revealing the existing graph or Archive entry. It does not invoke the old canned Halifax chat response or claim to be a connected generative AI service. Opening a shell panel temporarily hides the mounted TimeSpace rather than discarding its state.
+
+Validation: 124 tests pass, including five added navigation regressions. Desktop and 390px/850px browser checks cover Files-to-Cloud, System, actual Catania search/reveal, scroll access to offscreen tiles and compact TimeSpace file navigation. Original upload times for legacy sources, physical Android hardware and shared/server persistence retain the previously documented limits.
