@@ -106,7 +106,7 @@
   };
 
   const looksLikeBottomDockControl=control=>{
-    if(!control||control.closest('#nexusTopRail,#nexusProjectTimeIso,.nexus-shell-panel,.nexus-project-switcher,.nexus-people-panel'))return false;
+    if(!control||control.closest('#nexusTopRail,#nexusProjectTimeIso,#nexusProjectFiles,#nexusTimeSpace,.nexus-shell-panel,.nexus-project-switcher,.nexus-people-panel'))return false;
     if(control.dataset?.nexusInjectedTimeDock==='true')return true;
     const rect=control.getBoundingClientRect();
     const viewportH=window.innerHeight||document.documentElement.clientHeight||0;

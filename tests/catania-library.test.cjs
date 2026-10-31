@@ -79,7 +79,7 @@ async function mountCataniaMap({query='?world=esafe-demo',workspace=null}={}){
  const ctx={window:w,document:w.document,URL,URLSearchParams,localStorage:w.localStorage,b:React,s:jsx,ko:ReactDOM,ns:objects,Dt:()=>null,CU:()=>null,gc:{project:{},person:{},task:{},document:{}},crypto:require('node:crypto').webcrypto,
   CustomEvent:w.CustomEvent,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame:()=>1,cancelAnimationFrame(){},getComputedStyle:w.getComputedStyle,
   _w:z=>Math.max(.3,Math.min(1.3,z)),EU:(items,root,edges,pinned)=>new Map(items.map((o,index)=>[o.id,pinned[o.id]||{x:index*150,y:index%2*200}]))};
- vm.createContext(ctx);vm.runInContext(fs.readFileSync(sourceRoot+'src/tile-groups.js','utf8')+'\n'+catalogSource+'\n'+fs.readFileSync(sourceRoot+'src/relationship-map.js','utf8'),ctx);
+ vm.createContext(ctx);vm.runInContext(fs.readFileSync(sourceRoot+'src/tile-groups.js','utf8')+'\n'+catalogSource+'\n'+fs.readFileSync(sourceRoot+'src/timespace-model.js','utf8')+'\n'+fs.readFileSync(sourceRoot+'src/timespace-view.js','utf8')+'\n'+fs.readFileSync(sourceRoot+'src/relationship-map.js','utf8'),ctx);
  let root=createRoot(w.document.getElementById('mount'));
  const render=()=>React.act(()=>root.render(jsx.jsx(ctx.AU,{})));
  const click=el=>React.act(()=>el.click());

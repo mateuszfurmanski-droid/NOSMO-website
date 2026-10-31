@@ -24,5 +24,5 @@ test('phase buttons, slider, graph highlights, boundaries, play and clear are fu
 });
 test('saved phase survives reopen; corrupt phase falls back and worlds use separate keys',()=>{
  const a=timeline('dev',3);assert.equal(a.el('[data-phase-name]').textContent,'Construction');a.dom.window.close();
- const b=timeline('esafe-demo','broken');assert.equal(b.el('[data-phase-name]').textContent,'Survey');b.click('[data-phase="1"]');assert.equal(b.w.localStorage.getItem('nexus.demoPhase:dev'),null);b.dom.window.close();
+ const b=timeline('dev','broken');assert.equal(b.el('[data-phase-name]').textContent,'Survey');b.click('[data-phase="1"]');assert.equal(b.w.localStorage.getItem('nexus.demoPhase:esafe-demo'),null);b.dom.window.close();
 });

@@ -28,3 +28,15 @@ The deployed NOSMO registry endpoint `/api/projects/NEXUS_DEMO_PROJECT_001_eSAFE
 Touch corrections: drop detection follows the dragged tile centre regardless of where it was grabbed. Dragging a member out of a node detaches it and dissolves a singleton group, preserving visible positions and Undo.
 
 Validation: `node --test tests/relationship-tree-repair.test.cjs tests/tile-groups.test.cjs tests/tile-detach.test.cjs tests/catania-library.test.cjs` covers catalog counts, manifest hydration, links, filters, actual map/DOCS/catalog/reveal flows, grouped and ungrouped deep links, saved memberships, drag offsets, detach, cancellation and storage errors.
+
+## TimeSpace — 2026-10-31
+
+Catania's existing TIME entry, clock chip, menu Timeline and new TimeSpace button open the same view within the existing map. The 95 source records / 106 files are grouped chronologically across six publication years (18, 33, 11, 17, 9, 18 files). Year, topic and place filters combine, and Show in tree returns to the same persistent graph. Riverside retains its phase navigator.
+
+`data.js` now preserves `dateRaw` and `datePrecision`: 93 day-level records, one year-only record and one month-only record. Normalized January/first-of-month dates remain available for old consumers but are not shown as exact source facts. The view uses publication chronology, not a reconstructed works schedule. For example, Zenodo publishes D5.3 on 2026-03-20 while separately reporting an issued date in 2024; neither is an installation completion date.
+
+Only four records receive source-backed building scope: D5.1 survey (6260847), D2.2 real-pilot models (6497142), D5.4 production/delivery for the real pilot (19126519), and D5.3 real-pilot design (19126674). Evidence: their existing filenames and source descriptions at `https://zenodo.org/records/<record-id>`. D5.3 explicitly names Via Acquicella Porto 27/H. Remaining 102 files start with location unassigned; this includes research, communication and virtual-pilot material. Configured levels 0–4 come from the existing project structure, and no document is automatically assigned to a floor/room/model GUID.
+
+Location selections are explicit local annotations, stored independently at `nosmo.timespace:v1:esafe-demo`, with Undo and source-default restoration. They do not create or modify manual tile groups. Filters persist after reload. Storage failure rolls back the proposed change. There is no account/server synchronization or confirmed IFC/FabStation connection in this view.
+
+Validation adds `tests/timespace-model.test.cjs`, `tests/timespace-time-entry.test.cjs`, `tests/timespace-view.test.cjs` to the existing checks: 31 tests pass, including actual React view/map integration, YEAR × PLACE intersections, partial precision, pending early TIME clicks, modal exclusivity, location assignment/save/reload/undo, storage failure, existing graph memberships and legacy Riverside phases.

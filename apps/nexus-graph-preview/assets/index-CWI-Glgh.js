@@ -148,7 +148,7 @@ function nxEsafeCatalog(records) {
   return records.flatMap(record=>(Array.isArray(record.files)?record.files:[]).flatMap((file,index)=>{
     if(!file||typeof file==='string'||!file.name)return [];
     const fileUrl=safeUrl(file.url),sourceUrl=safeUrl(record.url);if(!fileUrl||!sourceUrl)return [];
-    return [{id:index===0&&aliases[record.id]?aliases[record.id]:'esafe-file-'+record.id+'-'+index,recordId:String(record.id),name:file.name,size:Number(file.size)||0,fileUrl,sourceUrl,title:record.title,date:record.date,category:record.category,core:!!record.core,doi:record.doi,kind:/\.(mp4|webm|mov)$/i.test(file.name)?'Video':'PDF'}];
+    return [{id:index===0&&aliases[record.id]?aliases[record.id]:'esafe-file-'+record.id+'-'+index,recordId:String(record.id),name:file.name,size:Number(file.size)||0,fileUrl,sourceUrl,title:record.title,date:record.date,dateRaw:record.dateRaw||record.date,datePrecision:record.datePrecision||'day',category:record.category,core:!!record.core,doi:record.doi,kind:/\.(mp4|webm|mov)$/i.test(file.name)?'Video':'PDF'}];
   }));
 }
 function nxFileSize(bytes){return bytes>=1048576?(bytes/1048576).toFixed(1)+' MB':Math.ceil(bytes/1024)+' KB'}
@@ -163,7 +163,105 @@ function NexusProjectFiles({files,onClose,onReveal,initialFile=null}) {
     s.jsx('p',{className:'nx-source-note',children:new Set(files.map(f=>f.recordId)).size+' source records · '+files.filter(f=>f.kind==='PDF').length+' PDF · '+files.filter(f=>f.kind==='Video').length+' videos. Files open from Zenodo; this catalog stores their names and links. Dates refer to source publication.'}),
     s.jsxs('div',{className:'nx-file-filters','aria-label':'Filter project files',children:[...['all','core','pdf','video'].map(value=>s.jsx('button',{'aria-pressed':filter===value,onClick:()=>setFilter(value),children:({all:'All '+files.length,core:'Core pilot '+files.filter(f=>f.core).length,pdf:'PDF '+files.filter(f=>f.kind==='PDF').length,video:'Video '+files.filter(f=>f.kind==='Video').length})[value]},value)),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Search project files'}),s.jsx('input',{'aria-label':'Search project files',type:'search',value:query,onChange:e=>setQuery(e.target.value),placeholder:'Find a file…'})]},'search')]}),
     s.jsx('p',{className:'nx-file-result-count',role:'status',children:shown.length+' of '+files.length+' files'}),
-    s.jsx('div',{className:'nx-project-file-list',children:shown.length?shown.map(file=>s.jsxs('article',{'data-file-id':file.id,children:[s.jsxs('div',{className:'nx-file-name',children:[s.jsx('span',{className:'nx-file-kind',children:file.kind}),s.jsx('strong',{children:file.name})]}),s.jsx('p',{children:file.title}),s.jsx('small',{children:[file.category,' · ',file.date,' · ',nxFileSize(file.size),file.core?' · CORE PILOT':'']}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id)):s.jsx('p',{children:'No matching files. Choose All to see the full catalog.'})})]}),document.body);
+    s.jsx('div',{className:'nx-project-file-list',children:shown.length?shown.map(file=>s.jsxs('article',{'data-file-id':file.id,children:[s.jsxs('div',{className:'nx-file-name',children:[s.jsx('span',{className:'nx-file-kind',children:file.kind}),s.jsx('strong',{children:file.name})]}),s.jsx('p',{children:file.title}),s.jsx('small',{children:[file.category,' · ',file.dateRaw||file.date,file.datePrecision==='year'?' (year only)':file.datePrecision==='month'?' (month only)':'',' · ',nxFileSize(file.size),file.core?' · CORE PILOT':'']}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id)):s.jsx('p',{children:'No matching files. Choose All to see the full catalog.'})})]}),document.body);
+}
+
+// TimeSpace is a read-only view of source chronology plus explicit file locations.
+// It never creates or rewrites the user's drag-created tile groups.
+const nxTimeSpaceLocations = [
+  {id:'unassigned',label:'Location unassigned'},
+  {id:'building',label:'Catania pilot building'},
+  ...Array.from({length:5},(_,level)=>({id:'level-'+level,label:'Level '+level}))
+];
+const nxTimeSpaceLocationIds = new Set(nxTimeSpaceLocations.map(location=>location.id));
+// Building scope only, never a floor: existing real-pilot survey/model/works documents.
+// https://zenodo.org/records/6260847 — D5.1 detailed survey of the real pilot.
+// https://zenodo.org/records/6497142 — D2.2 models of the real pilot.
+// https://zenodo.org/records/19126519 — D5.4 production of e-SAFE components.
+// https://zenodo.org/records/19126674 — D5.3 renovation works of the real pilot.
+// All other sources, including virtual-pilot records, require an explicit assignment.
+const nxTimeSpaceBuildingRecords = new Set(['6260847','6497142','19126519','19126674']);
+function nxTimeSpaceLocation(file,bindings) {
+  const id=file?.id;
+  if(bindings&&Object.prototype.hasOwnProperty.call(bindings,id)&&nxTimeSpaceLocationIds.has(bindings[id]))return bindings[id];
+  return nxTimeSpaceBuildingRecords.has(String(file?.recordId))?'building':'unassigned';
+}
+function nxTimeSpaceDateLabel(file) {
+  const raw=String(file?.dateRaw||file?.date||'');
+  const precision=file?.datePrecision||(raw.length===4?'year':raw.length===7?'month':'day');
+  if(precision==='year'&&/^\d{4}/.test(raw))return raw.slice(0,4)+' (year only)';
+  if(precision==='month'&&/^\d{4}-\d{2}/.test(raw))return raw.slice(0,7)+' (month only)';
+  return /^\d{4}-\d{2}-\d{2}$/.test(raw)?raw:'Date not available';
+}
+function nxTimeSpaceYear(file) {
+  const raw=String(file?.dateRaw||file?.date||'');
+  return /^\d{4}(?:$|-\d{2}(?:$|-\d{2}$))/.test(raw)?raw.slice(0,4):null;
+}
+function nxTimeSpaceYearStats(files) {
+  const years=new Map();
+  for(const file of Array.isArray(files)?files:[]) {
+    const year=nxTimeSpaceYear(file);if(!year)continue;
+    if(!years.has(year))years.set(year,{files:0,records:new Set()});
+    const stats=years.get(year);stats.files++;if(file?.recordId!=null)stats.records.add(String(file.recordId));
+  }
+  return [...years].sort(([a],[b])=>a.localeCompare(b)).map(([year,stats])=>({year,files:stats.files,records:stats.records.size}));
+}
+function nxTimeSpaceNormalize(raw,files) {
+  const all=Array.isArray(files)?files:[];
+  const knownFiles=new Set(all.map(file=>file.id));
+  const years=new Set(nxTimeSpaceYearStats(all).map(stats=>stats.year));
+  const topics=new Set(all.map(file=>file.category).filter(category=>typeof category==='string'&&category));
+  const bindings={};
+  const entries=raw?.bindings&&typeof raw.bindings==='object'&&!Array.isArray(raw.bindings)?Object.entries(raw.bindings):[];
+  for(const [id,location] of entries)if(knownFiles.has(id)&&nxTimeSpaceLocationIds.has(location)) {
+    Object.defineProperty(bindings,id,{value:location,enumerable:true,writable:true,configurable:true});
+  }
+  return {version:1,year:typeof raw?.year==='string'&&years.has(raw.year)?raw.year:'all',location:nxTimeSpaceLocationIds.has(raw?.location)?raw.location:'all',topic:topics.has(raw?.topic)?raw.topic:'all',bindings};
+}
+function nxTimeSpaceMatch(files,state) {
+  const all=Array.isArray(files)?files:[],safe=nxTimeSpaceNormalize(state,all);
+  return all.filter(file=>(safe.year==='all'||nxTimeSpaceYear(file)===safe.year)&&(safe.location==='all'||nxTimeSpaceLocation(file,safe.bindings)===safe.location)&&(safe.topic==='all'||file.category===safe.topic));
+}
+function nxTimeSpaceGroups(files) {
+  const records=new Map();
+  for(const file of Array.isArray(files)?files:[]) {
+    const recordId=String(file?.recordId??file?.id??'');if(!recordId)continue;
+    if(!records.has(recordId))records.set(recordId,{recordId,title:file.title||file.name||recordId,sourceUrl:file.sourceUrl||'',dateLabel:nxTimeSpaceDateLabel(file),files:[],sortDate:String(file.dateRaw||file.date||'9999'),seen:new Set()});
+    const record=records.get(recordId);
+    if(file.id!=null&&record.seen.has(file.id))continue;
+    if(file.id!=null)record.seen.add(file.id);
+    record.files.push(file);
+  }
+  return [...records.values()].sort((a,b)=>a.sortDate.localeCompare(b.sortDate)||a.recordId.localeCompare(b.recordId)).map(({sortDate,seen,...record})=>record);
+}
+
+// TimeSpace in the existing Nexus map. Dates are source publication dates.
+function NexusTimeSpace({files,onClose,onReveal,onOpenFiles}) {
+  const storageKey='nosmo.timespace:v1:esafe-demo';
+  const [state,setState]=b.useState(()=>{try{return nxTimeSpaceNormalize(JSON.parse(localStorage.getItem(storageKey)),files)}catch{return nxTimeSpaceNormalize(null,files)}});
+  const [error,setError]=b.useState(''),[undo,setUndo]=b.useState(null);
+  const closeButton=b.useRef(null),origin=b.useRef(null);
+  const years=nxTimeSpaceYearStats(files),shown=nxTimeSpaceMatch(files,state),groups=nxTimeSpaceGroups(shown);
+  const topics=[...new Set(files.map(f=>f.category))].sort();
+  const commit=(next,remember=false)=>{const clean=nxTimeSpaceNormalize(next,files);try{localStorage.setItem(storageKey,JSON.stringify(clean))}catch{setError('Could not save. Change cancelled — device storage unavailable.');return false}if(remember)setUndo(state);setState(clean);setError('');return true};
+  b.useEffect(()=>{origin.current=document.activeElement;closeButton.current?.focus();return()=>origin.current?.isConnected&&origin.current.focus()},[]);
+  b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:timespace-filter',{detail:{fileIds:shown.map(f=>f.id),active:state.year!=='all'||state.location!=='all'||state.topic!=='all',year:state.year,location:state.location,topic:state.topic}}))},[state]);
+  const assign=(record,value)=>{const bindings={...state.bindings};for(const file of record.files){if(value==='auto')delete bindings[file.id];else bindings[file.id]=value}commit({...state,bindings},true)};
+  const keydown=e=>{if(e.key==='Escape'){e.preventDefault();onClose()}if(e.key==='Tab'){const items=[...e.currentTarget.querySelectorAll('button,a,select,input,summary')].filter(n=>!n.disabled&&n.getClientRects().length);const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
+  const locationLabel=id=>nxTimeSpaceLocations.find(l=>l.id===id)?.label||'All locations';
+  const placeButton=place=>{const count=files.filter(f=>nxTimeSpaceLocation(f,state.bindings)===place.id).length;return s.jsxs('button',{'data-location':place.id,'aria-pressed':state.location===place.id,onClick:()=>commit({...state,location:place.id}),children:[s.jsx('span',{children:place.label}),s.jsx('strong',{children:count})]},place.id)};
+  return ko.createPortal(s.jsxs('section',{id:'nexusTimeSpace','data-control':true,role:'dialog','aria-modal':'true','aria-labelledby':'nx-timespace-title',onKeyDown:keydown,children:[
+    s.jsxs('header',{children:[s.jsxs('div',{children:[s.jsx('small',{children:'e-SAFE · CATANIA'}),s.jsx('h2',{id:'nx-timespace-title',children:'TimeSpace'})]}),s.jsx('button',{ref:closeButton,onClick:onClose,'aria-label':'Close TimeSpace',children:'×'})]}),
+    s.jsx('p',{className:'nx-ts-explanation',children:'Publication timeline · 2021–2026. Choose a year and place to find project documents. Work event dates and floor assignments are available only when recorded.'}),
+    s.jsxs('nav',{className:'nx-ts-years','aria-label':'Publication year',children:[s.jsxs('button',{'data-year':'all','aria-pressed':state.year==='all',onClick:()=>commit({...state,year:'all'}),children:[s.jsx('strong',{children:'All years'}),s.jsx('small',{children:files.length+' files'})]},'all'),...years.map(y=>s.jsxs('button',{'data-year':y.year,'aria-pressed':state.year===String(y.year),onClick:()=>commit({...state,year:String(y.year)}),children:[s.jsx('strong',{children:y.year}),s.jsx('small',{children:y.files+' files'})]},y.year))]}),
+    s.jsxs('div',{className:'nx-ts-layout',children:[
+      s.jsxs('aside',{className:'nx-ts-spaces','aria-label':'Project location',children:[s.jsx('h3',{children:'Project → place'}),s.jsxs('button',{'data-location':'all','aria-pressed':state.location==='all',onClick:()=>commit({...state,location:'all'}),children:[s.jsx('span',{children:'All project sources'}),s.jsx('strong',{children:files.length})]}),placeButton(nxTimeSpaceLocations.find(l=>l.id==='building')),s.jsx('p',{className:'nx-ts-address',children:'Via Acquicella Porto 27/H, Catania'}),s.jsxs('details',{children:[s.jsx('summary',{children:'Building levels'}),...nxTimeSpaceLocations.filter(l=>l.id.startsWith('level-')).map(placeButton),s.jsx('p',{children:'Levels 0–4 use the existing project structure. Document-to-floor links require an assignment.'})]}),placeButton(nxTimeSpaceLocations.find(l=>l.id==='unassigned')),s.jsx('p',{children:'Research and virtual-pilot sources stay unassigned unless a location is recorded.'})]}),
+      s.jsxs('div',{className:'nx-ts-content',children:[
+        s.jsxs('div',{className:'nx-ts-controls',children:[s.jsxs('label',{children:[s.jsx('span',{children:'Topic'}),s.jsx('select',{'aria-label':'TimeSpace topic',value:state.topic,onChange:e=>commit({...state,topic:e.target.value}),children:[s.jsx('option',{value:'all',children:'All topics'},'all'),...topics.map(topic=>s.jsx('option',{value:topic,children:topic},topic))]})]}),s.jsx('button',{onClick:()=>commit({...state,year:'all',location:'all',topic:'all'}),children:'Clear filters'}),s.jsx('button',{onClick:onOpenFiles,children:'Files · '+files.length}),undo&&s.jsx('button',{onClick:()=>{if(commit(undo))setUndo(null)},children:'Undo location'})]}),
+        error&&s.jsx('p',{role:'alert',className:'nx-ts-error',children:error}),
+        s.jsxs('p',{className:'nx-ts-summary',role:'status',children:[groups.length,' records · ',shown.length,' files · ',state.year==='all'?'all years':state.year,' · ',locationLabel(state.location)]}),
+        s.jsx('p',{className:'nx-ts-note',children:'Dates follow the source catalog; year/month-only dates keep their precision. Topics come from source titles. Location changes are saved on this device.'}),
+        s.jsx('div',{className:'nx-ts-events',children:groups.length?groups.map(record=>{const first=record.files[0],manual=record.files.some(file=>Object.prototype.hasOwnProperty.call(state.bindings,file.id)),places=new Set(record.files.map(file=>nxTimeSpaceLocation(file,state.bindings))),place=places.size===1?[...places][0]:'mixed';return s.jsxs('article',{'data-record-id':record.recordId,children:[s.jsxs('div',{className:'nx-ts-event-head',children:[s.jsx('time',{children:record.dateLabel}),s.jsx('small',{children:first.category+(first.core?' · CORE PILOT':'')})]}),s.jsx('h3',{children:record.title}),s.jsxs('div',{className:'nx-ts-location-row',children:[s.jsx('span',{children:(manual?'Manual location · ':'Source location · ')+(place==='mixed'?'Multiple locations':locationLabel(place))}),s.jsxs('label',{children:[s.jsx('span',{className:'sr-only',children:'Assign location'}),s.jsx('select',{'aria-label':'Location for source '+record.recordId,value:manual&&place!=='mixed'?place:'auto',onChange:e=>assign(record,e.target.value),children:[s.jsx('option',{value:'auto',children:'Use source location'},'auto'),...nxTimeSpaceLocations.map(p=>s.jsx('option',{value:p.id,children:p.label},p.id))]})]})]}),s.jsx('div',{className:'nx-ts-event-files',children:record.files.map(file=>s.jsxs('div',{'data-timespace-file':file.id,children:[s.jsx('strong',{children:file.name}),s.jsxs('div',{className:'nx-file-actions',children:[s.jsx('button',{onClick:()=>onReveal(file.id),'aria-label':'Show in tree: '+file.name,children:'Show in tree'}),s.jsx('a',{href:file.fileUrl,target:'_blank',rel:'noopener noreferrer',children:'Open file ↗'}),s.jsx('a',{href:file.sourceUrl,target:'_blank',rel:'noopener noreferrer',children:'Source ↗'})]})]},file.id))})]},record.recordId)}):s.jsx('p',{className:'nx-ts-empty',children:'No files in this year and place. Clear filters to see all project sources.'})})]})]})]}),document.body);
 }
 
 // Maintained source for the existing AU graph component in the deployed legacy bundle.
@@ -175,6 +273,7 @@ function AU(){
   const catalog=b.useMemo(()=>world==='esafe-demo'?nxEsafeCatalog(window.ESAFE_RECORDS||[]):[],[world]);
   const objects=b.useMemo(()=>world==='esafe-demo'?[...ns.filter(o=>esafe[o.id]&&esafe[o.id][1]!=='document').map(o=>({...o,label:esafe[o.id][0],type:esafe[o.id][1]})),...catalog.map(file=>({...file,label:file.name,type:'document',Icon:ns.find(o=>o.type==='document')?.Icon||Dt}))]:ns,[world,catalog]);
   const [library,setLibrary]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('files')==='all'),[libraryFile,setLibraryFile]=b.useState(null),[fileFocus,setFileFocus]=b.useState(()=>new URLSearchParams(window.location.search).get('file'));
+  const [timeSpace,setTimeSpace]=b.useState(()=>world==='esafe-demo'&&new URLSearchParams(window.location.search).get('view')==='timespace'),[timeFilter,setTimeFilter]=b.useState(null);
   const ids=b.useMemo(()=>objects.map(o=>o.id),[objects]);
   const [state,setState]=b.useState(()=>{try{return nxCleanWorkspace(JSON.parse(localStorage.getItem(key)),ids)}catch{return nxCleanWorkspace(null,ids)}});
   const [open,setOpen]=b.useState(()=>state.groups.find(group=>group.members.includes(fileFocus))?.id||null),[selected,setSelected]=b.useState(fileFocus||'proj');
@@ -194,7 +293,8 @@ function AU(){
   if(opened){const center=positions.get(opened.id)||{x:0,y:0};nxPlaceMembers(center,opened.members,positions).forEach((point,id)=>positions.set(id,point))}
   if(drag&&state.pinned[drag])positions.set(drag,state.pinned[drag]);
   b.useLayoutEffect(()=>{const el=root.current;if(!el)return;const resize=()=>setSize({w:el.clientWidth,h:el.clientHeight});resize();const obs=new ResizeObserver(resize);obs.observe(el);return()=>obs.disconnect()},[mode]);
-  b.useEffect(()=>{if(world!=='esafe-demo')return;window.__NEXUS_NATIVE_ESAFE__=true;document.title='NOSMO Nexus — e-SAFE Catania';const openFiles=()=>openLibrary();window.addEventListener('nexus:open-project-files',openFiles);return()=>window.removeEventListener('nexus:open-project-files',openFiles)},[world]);
+  b.useEffect(()=>{if(world!=='esafe-demo')return;window.__NEXUS_NATIVE_ESAFE__=true;document.title='NOSMO Nexus — e-SAFE Catania';const openFiles=()=>openLibrary(),openTime=()=>{window.__NEXUS_TIMESPACE_PENDING__=false;openTimeSpace()},filterTime=event=>setTimeFilter(event.detail);window.addEventListener('nexus:open-project-files',openFiles);window.addEventListener('nexus:open-timespace',openTime);window.addEventListener('nexus:timespace-filter',filterTime);if(window.__NEXUS_TIMESPACE_PENDING__)openTime();return()=>{window.removeEventListener('nexus:open-project-files',openFiles);window.removeEventListener('nexus:open-timespace',openTime);window.removeEventListener('nexus:timespace-filter',filterTime)}},[world]);
+  b.useEffect(()=>{if(world!=='esafe-demo')return;const sub=document.getElementById('nexusTopTimeSub');if(sub)sub.textContent=timeSpace?'ON':'OFF';window.dispatchEvent(new CustomEvent('nexus:project-time-change',{detail:{worldId:world,open:timeSpace,mode:'source',source:'publication-timespace'}}))},[timeSpace,world]);
   b.useEffect(()=>{if(!fileFocus)return;const point=positions.get(fileFocus);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom})},[fileFocus,open]);
   b.useEffect(()=>()=>{if(frame.current!==null)cancelAnimationFrame(frame.current)},[]);
   b.useEffect(()=>{window.dispatchEvent(new CustomEvent('nexus:groups-change'))},[state.groups,open]);
@@ -203,9 +303,11 @@ function AU(){
     if(previous)setUndo(previous);current.current=next;setState(next);setNotice(message);return true;
   };
   const fit=()=>{const pts=[...positions.values()];if(!pts.length)return;const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);const left=Math.min(...xs)-100,right=Math.max(...xs)+100,top=Math.min(...ys)-130,bottom=Math.max(...ys)+130;const z=Math.min(.95,Math.max(.3,Math.min(size.w/(right-left),(size.h-100)/(bottom-top))));setZoom(z);setPan({x:-(left+right)/2*z,y:-(top+bottom)/2*z})};
-  const openLibrary=(id=null)=>{setLibraryFile(id);setLibrary(true);const url=new URL(window.location.href);url.searchParams.set('files','all');window.history.replaceState(null,'',url)};
+  const openLibrary=(id=null)=>{setTimeSpace(false);setLibraryFile(id);setLibrary(true);const url=new URL(window.location.href);url.searchParams.delete('view');url.searchParams.set('files','all');window.history.replaceState(null,'',url)};
   const closeLibrary=()=>{setLibrary(false);const url=new URL(window.location.href);url.searchParams.delete('files');window.history.replaceState(null,'',url)};
-  const revealFile=id=>{setFileFocus(id);setSelected(id);setOpen(state.groups.find(g=>g.members.includes(id))?.id||null);closeLibrary();const point=positions.get(id);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom});const url=new URL(window.location.href);url.searchParams.set('file',id);window.history.replaceState(null,'',url);setNotice('File shown in tree · drag it onto another tile to connect')};
+  const openTimeSpace=()=>{setLibrary(false);setTimeSpace(true);const url=new URL(window.location.href);url.searchParams.delete('files');url.searchParams.set('view','timespace');window.history.replaceState(null,'',url)};
+  const closeTimeSpace=()=>{setTimeSpace(false);const url=new URL(window.location.href);url.searchParams.delete('view');window.history.replaceState(null,'',url)};
+  const revealFile=id=>{setFileFocus(id);setSelected(id);setOpen(state.groups.find(g=>g.members.includes(id))?.id||null);setTimeSpace(false);closeLibrary();const point=positions.get(id);if(point)setPan({x:-point.x*zoom,y:-point.y*zoom});const url=new URL(window.location.href);url.searchParams.set('file',id);url.searchParams.delete('view');window.history.replaceState(null,'',url);setNotice('File shown in tree · drag it onto another tile to connect')};
   const click=o=>{if(Date.now()<suppress.current)return;setSelected(o.id);if(o.members){setOpen(v=>v===o.id?null:o.id);setNotice(open===o.id?'Node collapsed':'Drag another tile here to add it')}else if(o.id==='proj'){setOpen(null);if(world==='esafe-demo')openLibrary()}else if(o.fileUrl)openLibrary(o.id)};
   const startPinch=()=>{const [a,c]=[...touches.current.values()];if(!a||!c)return;const r=root.current.getBoundingClientRect(),mid={x:(a.x+c.x)/2-r.left,y:(a.y+c.y)/2-r.top};const previous=gesture.current?.before;if(previous){current.current=previous;setState(previous)}gesture.current={mode:'pinch',distance:Math.max(1,Math.hypot(a.x-c.x,a.y-c.y)),zoom,world:{x:(mid.x-size.w/2-pan.x)/zoom,y:(mid.y-size.h/2-pan.y)/zoom}};setDrag(null);setHover(null)};
   const down=e=>{
@@ -257,13 +359,14 @@ function AU(){
   const reset=()=>{if(persist(nxCleanWorkspace(null,ids),state,'Demo reset · each tile connected only to project')){setOpen(null);setSelected('proj');setPan({x:0,y:0})}};
   if(mode==='workflow')return s.jsxs('div',{className:'relative h-[100dvh] overflow-hidden',children:[s.jsx('button',{'data-control':true,className:'nx-back-map',onClick:()=>setMode('map'),children:'Back to map'}),s.jsx(CU,{})]});
   return s.jsxs('div',{ref:root,'data-zoom':zoom.toFixed(3),'data-group-dragging':drag||undefined,style:{'--nx-zoom':zoom},onDragStart:e=>e.preventDefault(),className:'dark relative h-[100dvh] w-full touch-none overflow-hidden bg-background text-foreground select-none',onPointerDownCapture:down,onPointerMoveCapture:move,onPointerUpCapture:e=>finish(e),onPointerCancelCapture:e=>finish(e,true),onWheel:e=>{e.preventDefault();if(!gesture.current)setZoom(z=>_w(z*(e.deltaY>0?.92:1.08)))},children:[
+    timeSpace&&world==='esafe-demo'&&s.jsx(NexusTimeSpace,{files:catalog,onClose:closeTimeSpace,onReveal:revealFile,onOpenFiles:()=>openLibrary()}),
     library&&world==='esafe-demo'&&s.jsx(NexusProjectFiles,{files:catalog,initialFile:libraryFile,onClose:closeLibrary,onReveal:revealFile},libraryFile||'all'),
-    s.jsxs('div',{'data-control':true,className:'nx-project-access',children:[s.jsx('button',{'aria-label':'Switch project',onClick:()=>document.getElementById('nexusTopProject')?.click(),children:world==='esafe-demo'?'e-SAFE Catania ▾':'Riverside ▾'}),world==='esafe-demo'&&s.jsx('button',{'data-catania-file-count':catalog.length,onClick:()=>openLibrary(),children:catalog.length+' project files'})]}),
+    s.jsxs('div',{'data-control':true,className:'nx-project-access',children:[s.jsx('button',{'aria-label':'Switch project',onClick:()=>document.getElementById('nexusTopProject')?.click(),children:world==='esafe-demo'?'e-SAFE Catania ▾':'Riverside ▾'}),world==='esafe-demo'&&s.jsx('button',{'data-catania-file-count':catalog.length,onClick:()=>openLibrary(),children:catalog.length+' project files'}),world==='esafe-demo'&&s.jsx('button',{onClick:openTimeSpace,children:'TimeSpace'})]}),
     s.jsxs('div',{'data-control':true,className:'nx-map-toolbar',children:[s.jsx('button',{onClick:fit,children:'Fit map'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z*1.15)),children:'+'}),s.jsx('button',{onClick:()=>setZoom(z=>_w(z/1.15)),children:'−'}),s.jsx('button',{onClick:reset,children:'Reset demo'}),s.jsx('button',{onClick:()=>setMode('workflow'),children:'Workflow'}),s.jsx('span',{children:objects.length+' objects · '+edges.length+' links'})]}),
     s.jsxs('div',{'data-control':true,className:'nx-group-guide',children:[s.jsx('span',{role:'status','aria-live':'polite',children:hover?'Release to create a shared node':notice}),s.jsx('button',{onClick:fit,'aria-label':'Fit map',children:'⊡'}),s.jsx('button',{onClick:reset,'aria-label':'Reset demo',title:'Reset demo (undoable)',children:'↺'}),undo&&s.jsx('button',{onClick:()=>{if(persist(undo,null,'Last change undone')){setUndo(null);setOpen(null)}},children:'Undo'}),opened&&s.jsx('button',{onClick:ungroup,children:'Ungroup'})]}),
     s.jsxs('div',{className:'absolute left-0 top-0 h-0 w-0 origin-top-left',style:{transform:`translate(${size.w/2+pan.x}px,${size.h/2+pan.y}px) scale(${zoom})`},children:[
       s.jsx('svg',{className:'pointer-events-none absolute left-0 top-0 overflow-visible',children:edges.map(edge=>{const a=positions.get(edge.source),c=positions.get(edge.target);return a&&c?s.jsx('line',{'data-connection-id':edge.source+'|'+edge.target,x1:a.x,y1:a.y,x2:c.x,y2:c.y,stroke:'currentColor',className:'text-primary',strokeWidth:edge.source==='proj'?1:2,opacity:edge.source==='proj'?.22:.65},edge.source+'|'+edge.target):null})}),
-      ...visible.map(o=>{const point=positions.get(o.id)||{x:0,y:0},target=hover===o.id,active=selected===o.id,theme=gc[o.type]||gc.task;return s.jsx('div',{'data-node':true,'data-node-id':o.id,'data-group-members':o.members?.join(','),'data-drop-target':target?'true':undefined,className:'absolute left-0 top-0 nx-map-node',style:{transform:`translate(${point.x}px,${point.y}px)`,zIndex:drag===o.id?40:target?30:20},children:s.jsxs('button',{type:'button',onClick:()=>click(o),'aria-label':o.members?o.label+', '+o.members.length+' items. '+(open===o.id?'Collapse':'Expand'):o.type+': '+o.label,'aria-expanded':o.members?open===o.id:undefined,className:'group flex w-[138px] -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center gap-2 rounded-2xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-primary',children:[
+      ...visible.map(o=>{const point=positions.get(o.id)||{x:0,y:0},target=hover===o.id,active=selected===o.id,theme=gc[o.type]||gc.task;return s.jsx('div',{'data-node':true,'data-node-id':o.id,'data-group-members':o.members?.join(','),'data-timespace-match':timeFilter?.active?String(!o.fileUrl&&!o.members||timeFilter.fileIds.includes(o.id)||o.members?.some(id=>timeFilter.fileIds.includes(id))):undefined,'data-drop-target':target?'true':undefined,className:'absolute left-0 top-0 nx-map-node',style:{transform:`translate(${point.x}px,${point.y}px)`,zIndex:drag===o.id?40:target?30:20},children:s.jsxs('button',{type:'button',onClick:()=>click(o),'aria-label':o.members?o.label+', '+o.members.length+' items. '+(open===o.id?'Collapse':'Expand'):o.type+': '+o.label,'aria-expanded':o.members?open===o.id:undefined,className:'group flex w-[138px] -translate-x-1/2 -translate-y-1/2 cursor-grab flex-col items-center gap-2 rounded-2xl outline-none active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-primary',children:[
         s.jsxs('span',{'data-tile-face':true,className:`nx-tile-face relative flex items-center justify-center rounded-2xl border-2 bg-card ${theme.centerBorder} ${o.members?'nx-group-face':''} ${active?'nx-tile-selected':''}`,children:[o.members?s.jsx('span',{className:'nx-group-mosaic',children:o.members.slice(0,4).map(id=>{const member=byId.get(id);return s.jsx('span',{className:(gc[member?.type]||gc.task).chip,children:s.jsx(member?.Icon||Dt,{className:'h-5 w-5'})},id)})}):s.jsx('span',{className:`flex h-10 w-10 items-center justify-center rounded-xl ${theme.chip}`,children:s.jsx(o.Icon,{className:'h-5 w-5'})}),o.members&&s.jsx('span',{className:'nx-group-count',children:o.members.length})]}),
         s.jsx('span',{className:'line-clamp-2 max-w-[138px] text-center text-[11px] font-semibold leading-tight',children:o.label}),s.jsx('span',{className:'rounded-full border border-border bg-background/80 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[.12em] text-muted-foreground',children:o.members?'NODE · '+(open===o.id?'CLOSE':'OPEN'):o.type})]})},o.id)})]})]});
 }

@@ -3,6 +3,19 @@
   if(window.__NEXUS_PROJECT_TIME_INSTRUMENT_ISO__)return;
   window.__NEXUS_PROJECT_TIME_INSTRUMENT_ISO__=true;
   const world=window.__NEXUS_PROJECT_WORLD__==='esafe-demo'?'esafe-demo':'dev';
+  if(world==='esafe-demo'){
+    const bootTimeSpace=()=>{
+      const time=document.getElementById('nexusTopTime');
+      time?.addEventListener('click',event=>{
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.__NEXUS_TIMESPACE_PENDING__=true;
+        window.dispatchEvent(new CustomEvent('nexus:open-timespace'));
+      },true);
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootTimeSpace,{once:true});else bootTimeSpace();
+    return;
+  }
   const phases=[
     {name:'Survey',dev:['d-groundfloor','t-walkthrough'],esafe:['esafe-core-6260847','esafe-trade-survey']},
     {name:'Design + BIM',dev:['d-groundfloor','d-doorschedule'],esafe:['esafe-core-6497142','esafe-core-19126674','esafe-trade-bim']},
