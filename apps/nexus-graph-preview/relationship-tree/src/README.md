@@ -68,3 +68,10 @@ Validation: 112 tests pass, including actual React compact/preview state, deadli
 Live verification: compact83px retains slider/date/time/Previous/Play/Next, preview and state survive reopening, source availability follows replay, Live restores106files, oneArchive receives expiredfile andReactivate returnsit. Actualarrivalanimation760ms with3routes wasobserved inbrowserDOM/CSS. Browsernative datetime-local requiredonInputandreadingvisiblecontrolvalue atsave; regressionadded. Final113tests pass; futuredeadlinebrowserrecheck followsr2deployment.
 
 Final live deadline check passed: native date saved, automatic Archive after5seconds, oneArchive+fileabsent afterreload, Reactivate returnedfile. Actualdragcreatedtwo-fileNode andUndo restoredliveworkspace; bothchangesrecorded. Connectioncheckpointsnowfocuschangedfiles/groupsratherthanarbitrarylatestfile. Finalvalidation116tests.
+
+
+## Continued chronological playback — 2026-10-31
+
+Play/Pause now follows the complete chronological slider: individual files, effective deactivation, reactivation and recorded connection changes. It continues through changes after the last file, pauses at the final checkpoint and restarts from the first checkpoint when Play is pressed again there. Previous/Next remain single-file navigation and pause playback. LIVE switches back to replay when Play starts. Compact layout and the open file preview remain mounted while non-file events play, so archive and relationship animations receive their actual recorded times.
+
+Validation: three added React integration checks cover compact playback through expiry and connections, preview identity, pause/resume, archive/recovery after the last file, end/restart behavior and LIVE timer replacement. This does not create missing historical imports or server-side scheduling.

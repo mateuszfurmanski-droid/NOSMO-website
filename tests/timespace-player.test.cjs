@@ -107,8 +107,8 @@ test('playback advances once per tick, pauses immediately on the last file and c
  const files=[0,1,2].map(index=>({id:'f'+index,recordId:'r'+index,name:'File '+index+'.pdf',kind:'PDF',date:'2026-03-0'+(index+1),category:'Research',fileUrl:'https://zenodo.org/records/1/files/f'+index+'.pdf'}));
  const h=await harness({files});try{
   assert.equal(h.w.document.querySelector('[aria-label="Previous file"]').disabled,true);await h.click('[aria-label="Previous file"]');assert.equal(h.currentName(),files[0].name);
-  await h.click('[aria-label="Play files"]');assert.equal(h.timers.size,1);await h.tick();assert.equal(h.currentName(),files[1].name);
-  await h.tick();assert.equal(h.currentName(),files[2].name);assert.equal(h.timers.size,0);assert.ok(h.w.document.querySelector('[aria-label="Play files"]'));
+  await h.click('[aria-label="Play timeline"]');assert.equal(h.timers.size,1);await h.tick();assert.equal(h.currentName(),files[1].name);
+  await h.tick();assert.equal(h.currentName(),files[2].name);assert.equal(h.timers.size,0);assert.ok(h.w.document.querySelector('[aria-label="Play timeline"]'));
   await h.tick();assert.equal(h.currentName(),files[2].name);assert.equal(h.w.document.querySelector('[aria-label="Next file"]').disabled,true);
   await h.click('[aria-label="First file"]');assert.equal(h.currentName(),files[0].name);await h.click('[aria-label="Last file"]');assert.equal(h.currentName(),files[2].name);
  }finally{await h.dispose()}
@@ -279,6 +279,46 @@ function checkpointFixture(){
  const historySaved={version:1,baseline:{at:'2026-10-31T10:15:00Z',groups:[]},events:[{at:'2026-10-31T10:45:00Z',groups:[{id:'nx-group-recorded',members:['file-a','person-b']}]}]};
  return {files,historySaved};
 }
+
+test('automatic timeline playback visits expiry and connection changes in compact mode without remounting the file preview',async()=>{
+ const fixture=checkpointFixture(),h=await harness(fixture);try{
+  await h.click('[aria-label="Show file preview"]');const preview=h.w.document.querySelector('#nexusFilePreview iframe');
+  await h.click('[aria-label="Minimize TimeSpace"]');await h.click('[aria-label="Play timeline"]');
+  await h.tick();assert.equal(h.eventDetails.at(-1).kind,'deactivation');assert.equal(h.eventDetails.at(-1).at,Date.parse('2026-10-31T10:30:00Z'));
+  assert.equal(h.w.document.querySelector('#nexusFilePreview iframe'),preview);assert.equal(h.timers.size,1);
+  await h.tick();assert.equal(h.eventDetails.at(-1).kind,'connections');assert.equal(h.eventDetails.at(-1).at,Date.parse('2026-10-31T10:45:00Z'));
+  assert.equal(h.w.document.querySelector('#nexusFilePreview iframe'),preview);
+  await h.click('[aria-label="Pause timeline"]');const paused=h.eventDetails.length;assert.equal(h.timers.size,0);await h.tick();assert.equal(h.eventDetails.length,paused);
+  await h.click('[aria-label="Play timeline"]');await h.tick();assert.equal(h.currentName(),'file-b.pdf');assert.equal(h.eventDetails.at(-1).kind,'file');
+  await h.tick();assert.equal(h.currentName(),'file-c.pdf');assert.equal(h.timers.size,0);assert.ok(h.w.document.querySelector('[aria-label="Play timeline"]'));
+  assert.equal(h.w.document.getElementById('nexusTimeSpace').dataset.layout,'compact');
+ }finally{await h.dispose()}
+});
+
+test('playback continues after the final file through archive and recovery, then restarts from the first checkpoint',async()=>{
+ const file={...checkpointFixture().files[0],deactivateAt:null,lifecycleEvents:[
+  {id:'file-a',at:'2026-10-31T10:15:00Z',deactivateAt:'2026-10-31T10:30:00Z'},
+  {id:'file-a',at:'2026-10-31T10:45:00Z',deactivateAt:null}
+ ]};
+ const h=await harness({files:[file]});try{
+  await h.click('[aria-label="Play timeline"]');await h.tick();assert.equal(h.eventDetails.at(-1).kind,'deactivation');assert.equal(h.timers.size,1);
+  await h.tick();assert.equal(h.eventDetails.at(-1).kind,'reactivation');assert.equal(h.timers.size,0);
+  const count=h.eventDetails.length;await h.tick();assert.equal(h.eventDetails.length,count);
+  await h.click('[aria-label="Play timeline"]');assert.equal(h.eventDetails.at(-1).kind,'file');assert.equal(h.w.document.querySelector('[aria-label="Chronological timeline position"]').value,'0');
+  await h.tick();assert.equal(h.eventDetails.at(-1).kind,'deactivation');
+  await h.click('[aria-label="Next file"]');assert.equal(h.timers.size,1,'disabled file arrow cannot interrupt playback');
+  await h.click('[aria-label="Pause timeline"]');assert.equal(h.timers.size,0);
+ }finally{await h.dispose()}
+});
+
+test('Play leaves LIVE with one playback timer and file navigation cancels chronological playback',async()=>{
+ const h=await harness(checkpointFixture());try{
+  await h.click('[aria-label="Return to live tree"]');assert.equal(h.eventDetails.at(-1).mode,'live');assert.equal(h.timers.size,1);
+  await h.click('[aria-label="Play timeline"]');assert.equal(h.eventDetails.at(-1).mode,'replay');assert.equal(h.timers.size,1);
+  await h.tick();assert.equal(h.eventDetails.at(-1).kind,'deactivation');
+  await h.click('[aria-label="Next file"]');assert.equal(h.currentName(),'file-b.pdf');assert.equal(h.timers.size,0);
+ }finally{await h.dispose()}
+});
 
 test('timeline slider visits actual expiry and recorded connections while transport steps files only',async()=>{
  const fixture=checkpointFixture(),h=await harness(fixture);try{
